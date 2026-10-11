@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mazino</title>
+    <meta
+      name="description"
+      content="Pantalla gamer para unirse a Mazino por WhatsApp."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="arena" aria-label="Unirse a Mazino">
+      <div class="scanlines"></div>
+      <div class="grid"></div>
+      <div class="sparks" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+
+      <section class="join-panel">
+        <p class="tag">PLAYER ACCESS</p>
+        <h1>Mazino</h1>
+
+        <label class="player-field" for="playerName">
+          <span>Soy</span>
+          <input
+            id="playerName"
+            name="playerName"
+            type="text"
+            autocomplete="name"
+            maxlength="32"
+            placeholder="tu nick"
+            required
+          />
+        </label>
+
+        <button class="join-button" id="joinButton" type="button">
+          Unirme a Mazino
+        </button>
+
+        <p class="status" id="status" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
