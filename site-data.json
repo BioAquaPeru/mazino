@@ -9,11 +9,10 @@
     "logoUrl": "/assets/mazino-transparent.png",
     "membersTitle": "MIEMBROS DE MAZINO",
     "eliteTitle": "JEFITOS",
-    "eliteEnabled": false,
+    "eliteEnabled": true,
     "membersEnabled": true
   },
-  "elite": [],
-  "members": [
+  "elite": [
     {
       "id": "member_3c8328a3e554119e",
       "nick": "Urek-Mazino",
@@ -63,7 +62,9 @@
       "goldEffect": true,
       "license": "luna",
       "fogColor": "#fb37a9"
-    },
+    }
+  ],
+  "members": [
     {
       "id": "member_2e961ebd72ede9f6",
       "nick": "STEBAN45",
