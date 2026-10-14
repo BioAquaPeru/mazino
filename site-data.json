@@ -1,0 +1,18 @@
+{
+  "settings": {
+    "siteName": "MAZINO",
+    "heroPhrase": "",
+    "joinButtonText": "UNIRME A MAZINO",
+    "joinEnabled": true,
+    "whatsappNumber": "51928795151",
+    "whatsappTemplate": "Hola, quiero unirme a Mazino. Mi nick en R2Beat es: [NICK].",
+    "logoUrl": "/assets/mazino-transparent.png",
+    "membersTitle": "MIEMBROS DE MAZINO",
+    "eliteTitle": "ALTO MANDO",
+    "eliteEnabled": false,
+    "membersEnabled": false
+  },
+  "elite": [],
+  "members": [],
+  "totalMembers": 49
+}

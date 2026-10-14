@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es" data-static>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MAZINO</title>
+    <meta name="description" content="MAZINO, circulo oficial de R2Beat con acceso por WhatsApp." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css?v=18" />
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="hero" id="inicio">
+        <div class="hero-inner">
+          <section class="hero-copy" aria-labelledby="hero-title">
+            <p class="eyebrow">R2BEAT CIRCLE</p>
+            <h1 id="hero-title">MAZINO</h1>
+            <p class="hero-phrase" data-field="heroPhrase">Cargando identidad...</p>
+            <div class="hero-actions">
+              <button class="primary-action" type="button" data-join-open>
+                <span data-field="joinButtonText">UNIRME A MAZINO</span>
+              </button>
+            </div>
+          </section>
+
+          <section class="logo-stage" aria-label="Logo de MAZINO">
+            <div class="logo-frame">
+              <img data-logo src="./assets/mazino-transparent.png" alt="Mirada carmesi de MAZINO" />
+              <span class="eye-glow eye-left" aria-hidden="true"></span>
+              <span class="eye-glow eye-right" aria-hidden="true"></span>
+              <span class="eye-lid eye-left" aria-hidden="true"></span>
+              <span class="eye-lid eye-right" aria-hidden="true"></span>
+            </div>
+          </section>
+        </div>
+      </header>
+
+      <main data-public-content hidden>
+        <section class="section-block" aria-labelledby="elite-title" data-elite-section hidden>
+          <div class="section-head">
+            <div>
+              <h2 id="elite-title" class="command-title" data-field="eliteTitle">ALTO MANDO</h2>
+            </div>
+          </div>
+          <div class="elite-strip" data-elite></div>
+        </section>
+
+        <section class="section-block members-section" aria-labelledby="members-title" data-members-section hidden>
+          <div class="section-head compact-head">
+            <div>
+              <h2 id="members-title" data-field="membersTitle">MIEMBROS DE MAZINO</h2>
+              <p class="member-count" data-member-count role="status"></p>
+            </div>
+            <label class="search-box">
+              <span>Buscar</span>
+              <input type="search" data-member-search placeholder="Nick" autocomplete="off" />
+            </label>
+          </div>
+          <div class="member-grid" data-members></div>
+        </section>
+      </main>
+      <footer class="site-footer" data-footer hidden>
+        <strong>MAZINO CORP.</strong>
+        <p>&copy; <span data-year>2026</span> MAZINO CORP. Todos los derechos reservados.</p>
+      </footer>
+    </div>
+
+    <button class="floating-join" type="button" data-join-open hidden>
+      <span data-field="joinButtonText">UNIRME A MAZINO</span>
+    </button>
+
+    <dialog class="join-dialog" data-join-dialog>
+      <form method="dialog" class="join-card" data-join-form>
+        <button class="icon-button close-button" type="button" data-join-close aria-label="Cerrar">x</button>
+        <p class="section-kicker">SOLICITUD</p>
+        <h2>Unirme a MAZINO</h2>
+        <label>
+          <span>Nick de R2Beat</span>
+          <input name="nick" maxlength="40" placeholder="Tu nick" autocomplete="nickname" required />
+        </label>
+        <p class="form-status" data-join-status role="status"></p>
+        <button class="primary-action dialog-action" type="submit">Confirmar y abrir WhatsApp</button>
+      </form>
+    </dialog>
+
+    <script src="./member-badge.js?v=20" defer></script>
+    <script src="./app.js?v=20" defer></script>
+  </body>
+</html>
