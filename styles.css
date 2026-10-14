@@ -215,7 +215,6 @@ h3 {
 }
 
 .eye-glow,
-.eye-lid,
 .red-spark {
   position: absolute;
   pointer-events: none;
@@ -238,28 +237,6 @@ h3 {
 
 .eye-right {
   right: 13%;
-}
-
-.eye-lid {
-  width: 27%;
-  height: 10%;
-  top: 40.4%;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.95), rgba(8, 3, 3, 0.92));
-  border-radius: 0 0 60% 60%;
-  transform: scaleY(0);
-  transform-origin: top center;
-  animation: blink 7.8s infinite;
-  filter: blur(1px);
-}
-
-.eye-lid.eye-left {
-  left: 12.2%;
-  rotate: 4deg;
-}
-
-.eye-lid.eye-right {
-  right: 12.2%;
-  rotate: -4deg;
 }
 
 .red-spark {
@@ -827,20 +804,6 @@ button:disabled { cursor: wait; opacity: 0.6; }
   45% {
     opacity: 1;
     transform: scale(1.08);
-  }
-}
-
-@keyframes blink {
-  0%,
-  88%,
-  94%,
-  100% {
-    transform: scaleY(0);
-  }
-
-  90%,
-  92% {
-    transform: scaleY(1);
   }
 }
 
