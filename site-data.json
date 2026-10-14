@@ -485,26 +485,6 @@
       "fogColor": "#ff0000"
     },
     {
-      "id": "member_d4ba2e403f658b5b",
-      "nick": "Gabriel",
-      "level": 45,
-      "rank": "miembro",
-      "title": "",
-      "goldEffect": false,
-      "license": "luna",
-      "fogColor": "#ff0000"
-    },
-    {
-      "id": "member_4869d821a90dc414",
-      "nick": "StarGamer",
-      "level": 44,
-      "rank": "miembro",
-      "title": "",
-      "goldEffect": false,
-      "license": "luna",
-      "fogColor": "#ff0000"
-    },
-    {
       "id": "member_8fae85ed99721891",
       "nick": "Aztharot09",
       "level": 38,
@@ -525,5 +505,5 @@
       "fogColor": "#ff0000"
     }
   ],
-  "totalMembers": 51
+  "totalMembers": 49
 }

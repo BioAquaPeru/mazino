@@ -113,21 +113,23 @@ function drawMistFrame(timestamp) {
       // Keep smoke on the frame, leaving text and adjacent cards unobscured.
       context.beginPath();
       context.rect(0, 0, width, height);
-      context.roundRect(25, 25, width - 50, height - 50, 6);
+      const innerInset = scene.compact ? 17 : 25;
+      context.roundRect(innerInset, innerInset, width - innerInset * 2, height - innerInset * 2, 6);
       context.clip("evenodd");
       context.globalCompositeOperation = "lighter";
-      for (let i = 0; i < 56; i += 1) {
+      const count = scene.compact ? Math.min(28, Math.max(18, Math.round((width + height) / 16))) : 56;
+      for (let i = 0; i < count; i += 1) {
         const phase = i * 2.39996 + scene.phase;
-        const progress = (i / 56 + time / (25 + (i % 4) * 1.5) + scene.phase) % 1;
+        const progress = (i / count + time / (25 + (i % 4) * 1.5) + scene.phase) % 1;
         const point = mistPoint(progress, width, height);
         const swirl = Math.sin(time * 0.85 + phase);
-        const breadth = 26 + Math.sin(time * 0.6 + phase) * 5;
-        const length = 48 + (i % 5) * 7;
+        const breadth = (scene.compact ? 18 : 26) + Math.sin(time * 0.6 + phase) * (scene.compact ? 3 : 5);
+        const length = scene.compact ? 34 + (i % 5) * 4 : 48 + (i % 5) * 7;
         const pulse = 0.7 + Math.sin(time * 1.15 + progress * Math.PI * 4) * 0.2;
         context.save();
         context.translate(point.x - Math.sin(point.angle) * swirl * 3, point.y + Math.cos(point.angle) * swirl * 3);
         context.rotate(point.angle + swirl * 0.18);
-        context.globalAlpha = pulse * (0.38 + (i % 3) * 0.12);
+        context.globalAlpha = pulse * ((scene.compact ? 0.32 : 0.38) + (i % 3) * 0.12);
         context.drawImage(textures[i % 4], -length / 2, -breadth / 2, length, breadth);
         context.restore();
       }
@@ -145,7 +147,7 @@ function startPerimeterMist(root = document) {
     if (mistScenes.has(canvas)) return;
     const context = canvas.getContext("2d");
     if (!context) return;
-    const scene = { context, textures: cloudTextures(canvas.dataset.mistColor), phase: index * 0.17, visible: false };
+    const scene = { context, textures: cloudTextures(canvas.dataset.mistColor), phase: index * 0.17, visible: false, compact: canvas.parentElement.classList.contains("member-card") };
     scene.resize = new ResizeObserver(([entry]) => {
       scene.width = entry.contentRect.width;
       scene.height = entry.contentRect.height;

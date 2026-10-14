@@ -50,15 +50,17 @@ function renderMembers(filter = "") {
     return;
   }
   container.innerHTML = members.map((member) => `
-    <article class="member-card">
+    <article class="member-card ${member.goldEffect ? "gold-active" : ""}" style="--mist-color: ${memberFogColor(member)}">
+      ${perimeterMist(member)}
       <div class="member-avatar">${licenseBadge(member)}</div>
       <div class="member-main">
         <b>${escapeHtml(member.nick)}</b>
-        <span>${escapeHtml(member.rank || "Miembro")}</span>
+        <span>${escapeHtml(member.title || member.rank || "Miembro")}</span>
       </div>
       <span class="member-level">Nv ${escapeHtml(member.level)}</span>
     </article>
   `).join("");
+  startPerimeterMist(container);
 }
 
 function renderPublic(data) {

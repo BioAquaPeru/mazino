@@ -380,7 +380,8 @@ h3 {
   opacity: 0;
 }
 
-.elite-card.gold-active > .solar-mist {
+.elite-card.gold-active > .solar-mist,
+.member-card.gold-active > .solar-mist {
   position: absolute;
   inset: -10px;
   width: calc(100% + 20px);
@@ -523,10 +524,12 @@ textarea {
 .member-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 10px;
+  gap: 20px;
 }
 
 .member-card {
+  position: relative;
+  isolation: isolate;
   display: grid;
   grid-template-columns: 42px 1fr auto;
   align-items: center;
@@ -537,6 +540,13 @@ textarea {
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.045);
 }
+
+.member-card.gold-active {
+  border-color: color-mix(in srgb, var(--mist-color) 50%, transparent);
+  background: #080808;
+}
+.member-card > :not(.solar-mist) { position: relative; z-index: 3; }
+.admin-table input[data-mist-toggle] { width: 18px; height: 18px; accent-color: #ef2639; }
 
 .member-avatar {
   width: 42px;
@@ -560,6 +570,8 @@ textarea {
 .muted {
   color: var(--muted);
 }
+
+.member-main span { overflow-wrap: anywhere; }
 
 .member-level {
   font-weight: 800;
