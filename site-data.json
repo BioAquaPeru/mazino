@@ -25,14 +25,14 @@
       "fogColor": "#ffd45c"
     },
     {
-      "id": "member_35af7f3dbd0eed9b",
-      "nick": "Yukiter",
-      "level": 72,
+      "id": "member_0dbd2cb8cc1cd910",
+      "nick": "Aldair-",
+      "level": 80,
       "rank": "miembro",
-      "title": "Jefazo",
+      "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#4ee087"
+      "fogColor": "#bd006e"
     },
     {
       "id": "member_43858d32694d8187",
@@ -40,19 +40,9 @@
       "level": 80,
       "rank": "miembro",
       "title": "Leyenda",
-      "goldEffect": true,
+      "goldEffect": false,
       "license": "sol",
       "fogColor": "#ff0000"
-    },
-    {
-      "id": "member_0dbd2cb8cc1cd910",
-      "nick": "Aldair-",
-      "level": 80,
-      "rank": "miembro",
-      "title": "Jefito",
-      "goldEffect": true,
-      "license": "sol",
-      "fogColor": "#bd006e"
     },
     {
       "id": "member_2e961ebd72ede9f6",
@@ -60,7 +50,7 @@
       "level": 73,
       "rank": "miembro",
       "title": "",
-      "goldEffect": true,
+      "goldEffect": false,
       "license": "sol",
       "fogColor": "#ff0000"
     },
@@ -93,6 +83,16 @@
       "goldEffect": false,
       "license": "sol",
       "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_35af7f3dbd0eed9b",
+      "nick": "Yukiter",
+      "level": 72,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": true,
+      "license": "sol",
+      "fogColor": "#4ee087"
     },
     {
       "id": "member_faf3c0a293d4aa76",
