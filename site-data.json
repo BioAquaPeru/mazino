@@ -40,7 +40,7 @@
       "level": 80,
       "rank": "miembro",
       "title": "Leyenda",
-      "goldEffect": false,
+      "goldEffect": true,
       "license": "sol",
       "fogColor": "#ff0000"
     },
@@ -200,9 +200,9 @@
       "level": 67,
       "rank": "miembro",
       "title": "",
-      "goldEffect": false,
+      "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#00ffd5"
     },
     {
       "id": "member_802f53c82c2aa66c",
@@ -240,9 +240,9 @@
       "level": 63,
       "rank": "miembro",
       "title": "",
-      "goldEffect": false,
+      "goldEffect": true,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#fb37a9"
     },
     {
       "id": "member_981bee58f32fb655",
