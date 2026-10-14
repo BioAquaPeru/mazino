@@ -25,6 +25,16 @@
       "fogColor": "#ffd45c"
     },
     {
+      "id": "member_43858d32694d8187",
+      "nick": "NishidaScz",
+      "level": 80,
+      "rank": "miembro",
+      "title": "Leyenda",
+      "goldEffect": true,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
       "id": "member_0dbd2cb8cc1cd910",
       "nick": "Aldair-",
       "level": 80,
@@ -35,14 +45,24 @@
       "fogColor": "#ffffff"
     },
     {
-      "id": "member_43858d32694d8187",
-      "nick": "NishidaScz",
-      "level": 80,
+      "id": "member_280ea03862ee3a60",
+      "nick": "Loud Rhythm",
+      "level": 67,
       "rank": "miembro",
-      "title": "Leyenda",
+      "title": "JEFITA",
       "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#00ffd5"
+    },
+    {
+      "id": "member_9136b3c24dd7aee9",
+      "nick": "LittleMelody",
+      "level": 63,
+      "rank": "miembro",
+      "title": "JEFITA",
+      "goldEffect": true,
+      "license": "luna",
+      "fogColor": "#fb37a9"
     },
     {
       "id": "member_2e961ebd72ede9f6",
@@ -195,16 +215,6 @@
       "fogColor": "#ff0000"
     },
     {
-      "id": "member_280ea03862ee3a60",
-      "nick": "Loud Rhythm",
-      "level": 67,
-      "rank": "miembro",
-      "title": "JEFITA",
-      "goldEffect": true,
-      "license": "sol",
-      "fogColor": "#00ffd5"
-    },
-    {
       "id": "member_802f53c82c2aa66c",
       "nick": "Nightshade",
       "level": 66,
@@ -233,16 +243,6 @@
       "goldEffect": false,
       "license": "luna",
       "fogColor": "#ff0000"
-    },
-    {
-      "id": "member_9136b3c24dd7aee9",
-      "nick": "LittleMelody",
-      "level": 63,
-      "rank": "miembro",
-      "title": "JEFITA",
-      "goldEffect": true,
-      "license": "luna",
-      "fogColor": "#fb37a9"
     },
     {
       "id": "member_981bee58f32fb655",
