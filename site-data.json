@@ -29,10 +29,10 @@
       "nick": "Aldair-",
       "level": 80,
       "rank": "miembro",
-      "title": "",
-      "goldEffect": false,
+      "title": "TOP DE TOPS",
+      "goldEffect": true,
       "license": "sol",
-      "fogColor": "#bd006e"
+      "fogColor": "#ffffff"
     },
     {
       "id": "member_43858d32694d8187",
