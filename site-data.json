@@ -8,11 +8,502 @@
     "whatsappTemplate": "Hola, quiero unirme a Mazino. Mi nick en R2Beat es: [NICK].",
     "logoUrl": "/assets/mazino-transparent.png",
     "membersTitle": "MIEMBROS DE MAZINO",
-    "eliteTitle": "ALTO MANDO",
+    "eliteTitle": "JEFITOS",
     "eliteEnabled": false,
-    "membersEnabled": false
+    "membersEnabled": true
   },
   "elite": [],
-  "members": [],
+  "members": [
+    {
+      "id": "member_3c8328a3e554119e",
+      "nick": "Urek-Mazino",
+      "level": 72,
+      "rank": "lider",
+      "title": "Fundador",
+      "goldEffect": true,
+      "license": "sol",
+      "fogColor": "#ffd45c"
+    },
+    {
+      "id": "member_35af7f3dbd0eed9b",
+      "nick": "Yukiter",
+      "level": 72,
+      "rank": "miembro",
+      "title": "Jefazo",
+      "goldEffect": true,
+      "license": "sol",
+      "fogColor": "#4ee087"
+    },
+    {
+      "id": "member_43858d32694d8187",
+      "nick": "NishidaScz",
+      "level": 79,
+      "rank": "miembro",
+      "title": "Leyenda",
+      "goldEffect": true,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_0dbd2cb8cc1cd910",
+      "nick": "Aldair-",
+      "level": 80,
+      "rank": "miembro",
+      "title": "Jefito",
+      "goldEffect": true,
+      "license": "sol",
+      "fogColor": "#bd006e"
+    },
+    {
+      "id": "member_2e961ebd72ede9f6",
+      "nick": "STEBAN45",
+      "level": 73,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": true,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_83f46703c6b26753",
+      "nick": "DpressedBoy-",
+      "level": 72,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_0a40d8eebf3276e6",
+      "nick": "ISADORA",
+      "level": 72,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_2daaf31b5a248a7a",
+      "nick": "Unnyos",
+      "level": 72,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_faf3c0a293d4aa76",
+      "nick": "-Sebas-",
+      "level": 71,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_42276c2a2cd5047d",
+      "nick": "Angela",
+      "level": 71,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_780a087d996700b9",
+      "nick": "iTzCrowXx",
+      "level": 71,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_458f896d76999e0e",
+      "nick": "Vindictuz",
+      "level": 71,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_18ead76dd406ffa4",
+      "nick": "Natsuki",
+      "level": 70,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_9de1c873cba5d950",
+      "nick": "Peterbot",
+      "level": 70,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_6bf46cdd35eeebc8",
+      "nick": "Absalon",
+      "level": 69,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_8197cf9e037d6883",
+      "nick": "xiaoXIe",
+      "level": 69,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_ffa0b2e4969d8247",
+      "nick": "NatzuRoll",
+      "level": 68,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_8062db94dc7eedc8",
+      "nick": "garu12",
+      "level": 67,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_280ea03862ee3a60",
+      "nick": "Loud Rhythm",
+      "level": 67,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_802f53c82c2aa66c",
+      "nick": "Nightshade",
+      "level": 66,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_22c3eb20d246c7e7",
+      "nick": "Seymour",
+      "level": 65,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_5839034cebcbede6",
+      "nick": "Br4vli0",
+      "level": 63,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_9136b3c24dd7aee9",
+      "nick": "LittleMelody",
+      "level": 63,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_981bee58f32fb655",
+      "nick": "yasuriyamile",
+      "level": 63,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_cf65e2bb536301e5",
+      "nick": "FISH-WOMAN",
+      "level": 62,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_1d613b5ccaa326c3",
+      "nick": "Lowkey",
+      "level": 62,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_e248ab3634fdb1a4",
+      "nick": "Daviid",
+      "level": 61,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_c3c88182291e0ef1",
+      "nick": "makoto",
+      "level": 61,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_f7773b27edf32f6b",
+      "nick": "Mayonesa",
+      "level": 61,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_5dc5291ad4c85be7",
+      "nick": "BeBeSSiTa",
+      "level": 60,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_928574ac1e3c5625",
+      "nick": "TYRONE",
+      "level": 59,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_452581f10e1bc94c",
+      "nick": "Fabiana",
+      "level": 58,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_536c2e5822811319",
+      "nick": "FISH-MAN",
+      "level": 58,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_6ce5b8e629fca36e",
+      "nick": "novatooo",
+      "level": 55,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_62997c432f744a4e",
+      "nick": "Pelado002",
+      "level": 55,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_6464baa0481cff25",
+      "nick": "traxes",
+      "level": 55,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_95ab718cd531e6a1",
+      "nick": "-SkyBeat",
+      "level": 54,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "estrella",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_361721d827228f46",
+      "nick": "Blunnted",
+      "level": 54,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_e83b28643cf2ac90",
+      "nick": "I.IMaxI.I",
+      "level": 51,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_82716656f21c556d",
+      "nick": "Latias",
+      "level": 51,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_7aad2b60491b0f2e",
+      "nick": "Bryan-sam",
+      "level": 49,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_c8a97a6a83fa8a6c",
+      "nick": "Douze_",
+      "level": 48,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_a775f8eab1ba8027",
+      "nick": "Slushi",
+      "level": 47,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_c04f594556d772c0",
+      "nick": "KogaScz",
+      "level": 46,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_e012c435833615c3",
+      "nick": "Emilia",
+      "level": 45,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "estrella",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_d4ba2e403f658b5b",
+      "nick": "Gabriel",
+      "level": 45,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_4869d821a90dc414",
+      "nick": "StarGamer",
+      "level": 44,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_8fae85ed99721891",
+      "nick": "Aztharot09",
+      "level": 38,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_8cabd69e28d48043",
+      "nick": "LusianWolf",
+      "level": 15,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "",
+      "fogColor": "#ff0000"
+    }
+  ],
   "totalMembers": 49
 }

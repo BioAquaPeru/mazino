@@ -650,6 +650,19 @@ dialog::backdrop {
   font-weight: 700;
 }
 
+.github-badge {
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--muted);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.github-badge.connected, .github-status.success { color: #77e3ac; }
+.github-status { margin-top: 14px; overflow-wrap: anywhere; }
+.github-link { align-self: center; color: #e5e5e5; }
+button:disabled { cursor: wait; opacity: 0.6; }
+
 .empty-state,
 .load-error {
   color: var(--muted);
