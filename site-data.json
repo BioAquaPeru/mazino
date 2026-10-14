@@ -30,14 +30,14 @@
       "level": 72,
       "rank": "miembro",
       "title": "Jefazo",
-      "goldEffect": true,
+      "goldEffect": false,
       "license": "sol",
       "fogColor": "#4ee087"
     },
     {
       "id": "member_43858d32694d8187",
       "nick": "NishidaScz",
-      "level": 79,
+      "level": 80,
       "rank": "miembro",
       "title": "Leyenda",
       "goldEffect": true,
@@ -165,8 +165,8 @@
       "fogColor": "#ff0000"
     },
     {
-      "id": "member_8197cf9e037d6883",
-      "nick": "xiaoXIe",
+      "id": "member_ffa0b2e4969d8247",
+      "nick": "NatzuRoll",
       "level": 69,
       "rank": "miembro",
       "title": "",
@@ -175,9 +175,9 @@
       "fogColor": "#ff0000"
     },
     {
-      "id": "member_ffa0b2e4969d8247",
-      "nick": "NatzuRoll",
-      "level": 68,
+      "id": "member_8197cf9e037d6883",
+      "nick": "xiaoXIe",
+      "level": 69,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
@@ -227,7 +227,7 @@
     {
       "id": "member_5839034cebcbede6",
       "nick": "Br4vli0",
-      "level": 63,
+      "level": 64,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
@@ -395,6 +395,16 @@
       "fogColor": "#ff0000"
     },
     {
+      "id": "member_463e4390eb104b83",
+      "nick": "Sr.Santos",
+      "level": 53,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ffd45c"
+    },
+    {
       "id": "member_e83b28643cf2ac90",
       "nick": "I.IMaxI.I",
       "level": 51,
@@ -443,6 +453,16 @@
       "goldEffect": false,
       "license": "luna",
       "fogColor": "#ff0000"
+    },
+    {
+      "id": "member_8973e8680c414177",
+      "nick": "*Pandita*",
+      "level": 46,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ffd45c"
     },
     {
       "id": "member_c04f594556d772c0",
@@ -505,5 +525,5 @@
       "fogColor": "#ff0000"
     }
   ],
-  "totalMembers": 49
+  "totalMembers": 51
 }
