@@ -22,7 +22,9 @@
       "title": "Lider",
       "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ffd45c"
+      "fogColor": "#ffd45c",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_43858d32694d8187",
@@ -32,7 +34,9 @@
       "title": "Leyenda",
       "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_0dbd2cb8cc1cd910",
@@ -42,7 +46,9 @@
       "title": "TOP DE TOPS",
       "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ffffff"
+      "fogColor": "#ffffff",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_280ea03862ee3a60",
@@ -52,7 +58,9 @@
       "title": "JEFITA",
       "goldEffect": true,
       "license": "sol",
-      "fogColor": "#00ffd5"
+      "fogColor": "#00ffd5",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_9136b3c24dd7aee9",
@@ -62,7 +70,9 @@
       "title": "JEFITA",
       "goldEffect": true,
       "license": "luna",
-      "fogColor": "#fb37a9"
+      "fogColor": "#fb37a9",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_2e961ebd72ede9f6",
@@ -72,7 +82,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_83f46703c6b26753",
@@ -82,7 +94,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_0a40d8eebf3276e6",
@@ -92,7 +106,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_2daaf31b5a248a7a",
@@ -102,7 +118,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_35af7f3dbd0eed9b",
@@ -112,7 +130,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#4ee087"
+      "fogColor": "#4ee087",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_faf3c0a293d4aa76",
@@ -122,7 +142,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_42276c2a2cd5047d",
@@ -132,7 +154,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_780a087d996700b9",
@@ -142,7 +166,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_458f896d76999e0e",
@@ -152,7 +178,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_18ead76dd406ffa4",
@@ -162,7 +190,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_9de1c873cba5d950",
@@ -172,7 +202,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_6bf46cdd35eeebc8",
@@ -182,7 +214,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_ffa0b2e4969d8247",
@@ -192,7 +226,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_8197cf9e037d6883",
@@ -202,7 +238,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_8062db94dc7eedc8",
@@ -212,7 +250,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_802f53c82c2aa66c",
@@ -222,7 +262,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_22c3eb20d246c7e7",
@@ -232,7 +274,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_5839034cebcbede6",
@@ -242,7 +286,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_981bee58f32fb655",
@@ -252,7 +298,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_cf65e2bb536301e5",
@@ -262,7 +310,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_1d613b5ccaa326c3",
@@ -272,7 +322,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_e248ab3634fdb1a4",
@@ -282,7 +334,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_c3c88182291e0ef1",
@@ -292,7 +346,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_f7773b27edf32f6b",
@@ -302,7 +358,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_5dc5291ad4c85be7",
@@ -312,7 +370,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_928574ac1e3c5625",
@@ -322,7 +382,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_452581f10e1bc94c",
@@ -332,7 +394,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_536c2e5822811319",
@@ -342,7 +406,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_6ce5b8e629fca36e",
@@ -352,7 +418,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_62997c432f744a4e",
@@ -362,7 +430,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_6464baa0481cff25",
@@ -372,7 +442,9 @@
       "title": "",
       "goldEffect": false,
       "license": "sol",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_95ab718cd531e6a1",
@@ -382,7 +454,9 @@
       "title": "",
       "goldEffect": false,
       "license": "estrella",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_361721d827228f46",
@@ -392,7 +466,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_463e4390eb104b83",
@@ -402,7 +478,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ffd45c"
+      "fogColor": "#ffd45c",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_e83b28643cf2ac90",
@@ -412,7 +490,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_82716656f21c556d",
@@ -422,7 +502,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_7aad2b60491b0f2e",
@@ -432,7 +514,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_c8a97a6a83fa8a6c",
@@ -442,7 +526,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_a775f8eab1ba8027",
@@ -452,7 +538,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_8973e8680c414177",
@@ -462,7 +550,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ffd45c"
+      "fogColor": "#ffd45c",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_c04f594556d772c0",
@@ -472,7 +562,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_e012c435833615c3",
@@ -482,7 +574,9 @@
       "title": "",
       "goldEffect": false,
       "license": "estrella",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_8fae85ed99721891",
@@ -492,7 +586,9 @@
       "title": "",
       "goldEffect": false,
       "license": "luna",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     },
     {
       "id": "member_8cabd69e28d48043",
@@ -502,7 +598,9 @@
       "title": "",
       "goldEffect": false,
       "license": "",
-      "fogColor": "#ff0000"
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     }
   ],
   "totalMembers": 49

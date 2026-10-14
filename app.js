@@ -41,7 +41,8 @@ function renderElite() {
 function renderMembers(filter = "") {
   const container = $("[data-members]");
   const query = filter.trim().toLowerCase();
-  const members = state.members.filter((member) => member.nick.toLowerCase().includes(query));
+  const groups = groupMemberPairs(state.members, query);
+  const members = groups.flat();
   $("[data-member-count]").textContent = query
     ? `${members.length} de ${state.members.length} miembros`
     : `${state.members.length} miembros | ${state.totalMembers} en el circulo`;
@@ -49,17 +50,7 @@ function renderMembers(filter = "") {
     container.innerHTML = `<p class="empty-state">No hay integrantes para mostrar.</p>`;
     return;
   }
-  container.innerHTML = members.map((member) => `
-    <article class="member-card ${member.goldEffect ? "gold-active" : ""}" style="--mist-color: ${memberFogColor(member)}">
-      ${perimeterMist(member)}
-      <div class="member-avatar">${licenseBadge(member)}</div>
-      <div class="member-main">
-        <b>${escapeHtml(member.nick)}</b>
-        <span>${escapeHtml(member.title || member.rank || "Miembro")}</span>
-      </div>
-      <span class="member-level">Nv ${escapeHtml(member.level)}</span>
-    </article>
-  `).join("");
+  container.innerHTML = renderMemberGroups(groups);
   startPerimeterMist(container);
 }
 
