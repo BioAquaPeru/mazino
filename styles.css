@@ -792,6 +792,26 @@ button:disabled { cursor: wait; opacity: 0.6; }
   margin-top: 14px;
 }
 
+.admin-member-tools {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.admin-member-tools .search-box { width: min(360px, 100%); }
+.admin-member-tools p { margin: 0; }
+
+.partner-picker {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.partner-picker .form-status { margin: 0; }
+
 .wide,
 .editor-actions {
   grid-column: 1 / -1;
