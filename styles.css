@@ -475,6 +475,9 @@ h3 {
 .settings-grid textarea,
 .member-editor select,
 .member-editor input,
+.admin-date-filter input,
+.admin-date-filter select,
+.sync-controls select,
 .password-form input {
   width: 100%;
   min-height: 42px;
@@ -802,6 +805,13 @@ button:disabled { cursor: wait; opacity: 0.6; }
 
 .admin-member-tools .search-box { width: min(360px, 100%); }
 .admin-member-tools p { margin: 0; }
+.admin-date-filter,
+.sync-controls label { display: grid; gap: 4px; color: var(--muted); font-weight: 700; min-width: 0; }
+.admin-date-filter input { color-scheme: dark; }
+.admin-date-filter option,
+.sync-controls option { background: #12090a; }
+.member-tenure { display: block; color: var(--muted); white-space: nowrap; }
+.sync-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
 
 .partner-picker {
   display: grid;
