@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=27" />
+    <link rel="stylesheet" href="./styles.css?v=30" />
   </head>
   <body>
     <div class="site-shell">
@@ -83,8 +83,26 @@
       </form>
     </dialog>
 
+    <dialog class="prize-dialog" data-prize-dialog aria-labelledby="prize-title">
+      <div class="prize-dialog-body">
+        <button class="icon-button close-button" type="button" aria-label="Cerrar premios" data-prize-close>x</button>
+        <p class="section-kicker">MAZINO PREMIOS</p>
+        <h2 id="prize-title" data-prize-heading>Premios</h2>
+        <p class="muted" data-prize-identity></p>
+        <form class="prize-login" data-prize-login>
+          <label><span>Tu nick de R2Beat</span><input name="nick" maxlength="40" autocomplete="username" required /></label>
+          <label><span>Tu contrasena de premios</span><input name="password" type="password" autocomplete="current-password" maxlength="100" required /></label>
+          <button class="primary-action small-action" type="submit">Desbloquear premios</button>
+        </form>
+        <p class="form-status" role="status" data-prize-status></p>
+        <div data-personal-prizes></div>
+        <div data-prize-events></div>
+        <button class="ghost-button" type="button" data-prize-logout hidden>Cerrar sesion de premios</button>
+      </div>
+    </dialog>
     <script src="./member-badge.js?v=22" defer></script>
-    <script src="./member-pairs.js?v=27" defer></script>
-    <script src="./app.js?v=26" defer></script>
+    <script src="./member-pairs.js?v=30" defer></script>
+    <script src="./prizes.js?v=30" defer></script>
+    <script src="./app.js?v=30" defer></script>
   </body>
 </html>

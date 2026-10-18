@@ -29,7 +29,7 @@ function renderElite() {
       ${perimeterMist(member)}
       <div class="elite-avatar">${licenseBadge(member)}</div>
       <div>
-        <h3>${escapeHtml(member.nick)}</h3>
+        <h3><button class="member-name" type="button" data-prize-open="${escapeHtml(member.id)}">${escapeHtml(member.nick)}</button></h3>
         <p class="elite-level">Nv ${escapeHtml(member.level)}</p>
         <p class="elite-title">${escapeHtml(member.title || "Sublider")}</p>
       </div>
@@ -56,6 +56,7 @@ function renderMembers(filter = "") {
 
 function renderPublic(data) {
   state.settings = data.settings;
+  configurePrizes(data.settings);
   state.elite = data.elite;
   state.members = data.members;
   state.totalMembers = data.totalMembers ?? (state.members.length + state.elite.length);

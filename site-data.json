@@ -10,7 +10,8 @@
     "membersTitle": "MIEMBROS DE MAZINO",
     "eliteTitle": "JEFITOS",
     "eliteEnabled": false,
-    "membersEnabled": true
+    "membersEnabled": true,
+    "rewardsServiceUrl": "https://mazino-premios.amused-field-8941.chatgpt.site"
   },
   "elite": [],
   "members": [

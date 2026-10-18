@@ -20,7 +20,7 @@ function memberCardMarkup(member) {
       ${perimeterMist(member)}
       <div class="member-avatar">${licenseBadge(member)}</div>
       <div class="member-main">
-        <b>${escapeHtml(member.nick)}</b>
+        <b><button class="member-name" type="button" data-prize-open="${escapeHtml(member.id)}">${escapeHtml(member.nick)}</button></b>
         <span>${escapeHtml(member.title || member.rank || "Miembro")}</span>
       </div>
       <span class="member-level">Nv ${escapeHtml(member.level)}</span>

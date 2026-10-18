@@ -470,6 +470,9 @@ h3 {
 }
 
 .search-box input,
+.prize-login input,
+.rewards-toolbar input,
+.rewards-toolbar select,
 .vault-card input,
 .settings-grid input,
 .settings-grid textarea,
@@ -821,6 +824,41 @@ button:disabled { cursor: wait; opacity: 0.6; }
 }
 
 .partner-picker .form-status { margin: 0; }
+
+.member-name {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  white-space: inherit;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.member-name:hover { text-decoration: underline; text-underline-offset: 3px; }
+.member-name:focus-visible { outline: 2px solid #ff6776; outline-offset: 3px; }
+.prize-dialog { width: min(480px, calc(100vw - 24px)); max-height: 90svh; }
+.prize-dialog-body { position: relative; overflow: auto; max-height: 90svh; padding: 26px 22px; border: 1px solid #6f1721; border-radius: 8px; background: #0b0809; }
+.prize-dialog h2 { padding-right: 28px; font-size: 1.15rem; overflow-wrap: anywhere; }
+.prize-login { display: grid; gap: 12px; }
+.prize-login label,
+.rewards-toolbar label { display: grid; gap: 5px; min-width: 0; color: var(--muted); font-weight: 700; }
+.prize-item { padding: 18px 0; border-top: 1px solid var(--line); }
+.prize-item h3 { font-size: 0.9rem; overflow-wrap: anywhere; }
+.prize-item p { margin: 8px 0; }
+.prize-code { display: block; margin: 14px 0; padding: 12px; border: 1px solid #796525; border-radius: 4px; background: #17140b; color: #fff3ba; font-size: 1.05rem; overflow-wrap: anywhere; user-select: all; }
+.rewards-subtitle { margin-top: 26px; font-size: 1rem; }
+.rewards-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 14px 0; }
+.rewards-toolbar label { flex: 1 1 200px; }
+[data-reward-credential] label { flex-basis: 400px; }
+[data-coupon-table] code { display: block; max-width: 280px; overflow-wrap: anywhere; white-space: normal; }
 
 .wide,
 .editor-actions {
