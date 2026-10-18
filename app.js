@@ -77,16 +77,14 @@ function renderPublic(data) {
     $("[data-logo]").src = publicAssetUrl(data.settings.logoUrl);
   }
 
-  if (!data.settings.joinEnabled) {
-    $$("[data-join-open]").forEach((button) => {
-      button.disabled = true;
-      button.classList.add("disabled");
-      button.querySelector("span").textContent = "SOLICITUDES PAUSADAS";
-    });
-  }
+  $$("[data-join-open]").forEach((button) => {
+    button.disabled = !data.settings.joinEnabled;
+    button.classList.toggle("disabled", button.disabled);
+    if (button.disabled) button.querySelector("span").textContent = "SOLICITUDES PAUSADAS";
+  });
 
   renderElite();
-  renderMembers();
+  renderMembers($("[data-member-search]")?.value || "");
   updateFloatingButton();
 }
 
@@ -101,7 +99,25 @@ async function loadPublic() {
   const endpoint = document.documentElement.hasAttribute("data-static") ? "./site-data.json" : "./api/public";
   const response = await fetch(endpoint, { cache: "no-store" });
   if (!response.ok) throw new Error("No se pudo cargar MAZINO.");
-  renderPublic(await response.json());
+  const saved = await response.json();
+  renderPublic(saved);
+  let signature = JSON.stringify({ settings: saved.settings, members: saved.members, elite: saved.elite, totalMembers: saved.totalMembers });
+  const service = saved.settings.rewardsServiceUrl;
+  if (service && /^https:\/\/[a-z0-9.-]+$/i.test(service)) {
+    const refresh = async () => {
+      try {
+        const current = await fetch(`${service}/api/site`, { cache: "no-store", signal: AbortSignal.timeout(20000) });
+        if (!current.ok) return;
+        const data = await current.json();
+        if (data.settings && Array.isArray(data.members) && Array.isArray(data.elite)) {
+          const next = JSON.stringify({ settings: data.settings, members: data.members, elite: data.elite, totalMembers: data.totalMembers });
+          if (signature !== next) { signature = next; renderPublic(data); }
+        }
+      } catch { /* The published static version remains usable during outages. */ }
+    };
+    await refresh();
+    setInterval(() => { if (!document.hidden) refresh(); }, 60000);
+  }
 }
 
 function wireJoinDialog() {

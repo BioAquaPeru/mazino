@@ -3,6 +3,7 @@ let rewardOwner = "";
 let rewardApi = "";
 let rewardEvents = [];
 let rewardBusy = false;
+let rewardClockOffset = 0;
 const rewardDialog = document.querySelector("[data-prize-dialog]");
 
 function saveRewardSession() {
@@ -43,17 +44,33 @@ function configurePrizes(settings) {
 
 function renderPrizeEvents() {
   const container = rewardDialog.querySelector("[data-prize-events]");
+  const savedKeys = new Map(Array.from(rewardDialog.querySelectorAll?.("[data-event-key]") || [], (input) => [input.dataset.eventKey, input.value]));
   const events = rewardEvents.filter((event) => event.ownerId === rewardOwner);
   container.innerHTML = events.map((event) => {
     const full = event.claimed >= event.total;
     const start = new Date(event.startsAt).toLocaleString("es-PE", { timeZone: "America/Lima" });
-    return `<section class="prize-item"><h3>${escapeHtml(event.title)}</h3><p>${full ? "Premio reclamado" : `Inicio: ${escapeHtml(start)} (Peru)`}</p><p>${event.claimed} de ${event.total} premios entregados</p><button type="button" class="primary-action small-action" data-flash-claim="${escapeHtml(event.id)}" ${full || !rewardSession ? "disabled" : ""}>Reclamar premio relampago</button></section>`;
+    return `<section class="prize-item"><h3>${escapeHtml(event.title)}</h3><p>Apertura: ${escapeHtml(start)} (Peru)</p><p data-event-opening></p><p>${event.claimed} de ${event.total} premios entregados</p>${event.keyRequired ? `<label class="event-key-field"><span>Clave de este evento</span><input type="password" inputmode="numeric" maxlength="6" autocomplete="off" data-event-key="${escapeHtml(event.id)}" /></label>` : ""}<button type="button" class="primary-action small-action" data-flash-claim="${escapeHtml(event.id)}" data-opens-at="${event.startsAt}" data-ends-at="${event.endsAt || 0}" data-full="${full ? "1" : "0"}" ${full || !rewardSession ? "disabled" : ""}>Reclamar premio relampago</button></section>`;
   }).join("");
+  for (const input of rewardDialog.querySelectorAll?.("[data-event-key]") || []) input.value = savedKeys.get(input.dataset.eventKey) || "";
+  updateEventOpening();
 }
+
+function updateEventOpening() {
+  const now = Date.now() + rewardClockOffset;
+  for (const button of rewardDialog.querySelectorAll?.("[data-flash-claim]") || []) {
+    const seconds = Math.max(0, Math.ceil((Number(button.dataset.opensAt) - now) / 1000));
+    const ended = Number(button.dataset.endsAt) > 0 && Number(button.dataset.endsAt) < now;
+    const full = button.dataset.full === "1";
+    button.disabled = !rewardSession || seconds > 0 || ended || full || rewardBusy;
+    button.closest(".prize-item").querySelector("[data-event-opening]").textContent = full ? "Premios agotados" : ended ? "Evento finalizado" : seconds ? `Abre en ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}` : "Evento abierto";
+  }
+}
+if (typeof setInterval === "function") setInterval(() => { if (rewardDialog.open) updateEventOpening(); }, 1000);
 
 async function refreshPrizeDialog() {
   renderRewardIdentity();
   const data = await prizeRequest("public");
+  rewardClockOffset = Number.isFinite(data.serverNow) ? data.serverNow - Date.now() : 0;
   rewardEvents = data.events;
   renderPrizeEvents();
   const container = rewardDialog.querySelector("[data-personal-prizes]");
@@ -82,7 +99,11 @@ document.addEventListener("click", async (event) => {
   rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
   rewardDialog.querySelector("[data-prize-events]").innerHTML = "";
   rewardDialog.showModal();
-  try { await refreshPrizeDialog(); rewardDialog.querySelector("[data-prize-status]").textContent = ""; }
+  try {
+    await refreshPrizeDialog();
+    if (!rewardSession && rewardEvents.some((entry) => entry.ownerId === rewardOwner) && rewardDialog.querySelector('[name="nick"]').value === name) rewardDialog.querySelector('[name="nick"]').value = "";
+    rewardDialog.querySelector("[data-prize-status]").textContent = "";
+  }
   catch (error) { rewardDialog.querySelector("[data-prize-status]").textContent = error.message; }
 });
 
@@ -90,6 +111,7 @@ rewardDialog.querySelector("[data-prize-close]").addEventListener("click", () =>
 rewardDialog.addEventListener("close", () => {
   rewardDialog.querySelector('[name="password"]').value = "";
   rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
+  rewardDialog.querySelector("[data-prize-events]").innerHTML = "";
 });
 rewardDialog.querySelector("[data-prize-login]").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -124,7 +146,9 @@ rewardDialog.addEventListener("click", async (event) => {
       rewardSession = null; saveRewardSession();
       await refreshPrizeDialog();
     } else {
-      await prizeRequest("claim", button.dataset.flashClaim ? { eventId: button.dataset.flashClaim } : { couponId: button.dataset.personalClaim });
+      const input = button.dataset.flashClaim ? button.closest(".prize-item").querySelector("[data-event-key]") : null;
+      if (input && !/^\d{6}$/.test(input.value)) throw new Error("Escribe la clave de 6 numeros de este evento.");
+      await prizeRequest("claim", button.dataset.flashClaim ? { eventId: button.dataset.flashClaim, eventKey: input?.value || "" } : { couponId: button.dataset.personalClaim });
       await refreshPrizeDialog();
       rewardDialog.querySelector("[data-prize-status]").textContent = "Premio entregado. Copia tu codigo y guardalo.";
     }

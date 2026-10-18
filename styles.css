@@ -471,6 +471,7 @@ h3 {
 
 .search-box input,
 .prize-login input,
+.event-key-field input,
 .rewards-toolbar input,
 [data-coupon-name-form] input,
 .rewards-toolbar select,
@@ -814,6 +815,12 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .admin-section-title .github-badge { display: inline-block; margin-left: 12px; vertical-align: middle; }
 .admin-section-title:focus-visible { outline: 2px solid #ff6776; outline-offset: 6px; }
 .admin-panel[open] > .admin-section-title { padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.admin-subsection { border-top: 1px solid var(--line); padding: 14px 0; min-width: 0; }
+.admin-subsection > summary { cursor: pointer; font-weight: 700; font-size: 1rem; overflow-wrap: anywhere; }
+.admin-subsection > summary::marker { color: #ff6776; }
+.admin-subsection[open] > summary { margin-bottom: 14px; }
+.admin-subsection > summary:focus-visible { outline: 2px solid #ff6776; outline-offset: 5px; }
+[data-event-key-output] { font-family: monospace; font-size: 1.15rem; }
 
 .settings-grid,
 .member-editor form {
@@ -874,10 +881,12 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .prize-dialog h2 { padding-right: 28px; font-size: 1.15rem; overflow-wrap: anywhere; }
 .prize-login { display: grid; gap: 12px; }
 .prize-login label,
+.event-key-field,
 .rewards-toolbar label { display: grid; gap: 5px; min-width: 0; color: var(--muted); font-weight: 700; }
 .prize-item { padding: 18px 0; border-top: 1px solid var(--line); }
 .prize-item h3 { font-size: 0.9rem; overflow-wrap: anywhere; }
 .prize-item p { margin: 8px 0; }
+.event-key-field { margin: 12px 0; }
 .prize-code { display: block; margin: 14px 0; padding: 12px; border: 1px solid #796525; border-radius: 4px; background: #17140b; color: #fff3ba; font-size: 1.05rem; overflow-wrap: anywhere; user-select: all; }
 .rewards-subtitle { margin-top: 26px; font-size: 1rem; }
 .delivery-summary { margin: 0; padding: 12px 0; border-block: 1px solid var(--line); color: #fff3ba; font-weight: 700; overflow-wrap: anywhere; }
