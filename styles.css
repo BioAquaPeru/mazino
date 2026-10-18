@@ -472,9 +472,11 @@ h3 {
 .search-box input,
 .prize-login input,
 .rewards-toolbar input,
+[data-coupon-name-form] input,
 .rewards-toolbar select,
 .vault-card input,
 .settings-grid input,
+.settings-grid select,
 .settings-grid textarea,
 .member-editor select,
 .member-editor input,
@@ -490,6 +492,18 @@ h3 {
   background: rgba(255, 255, 255, 0.06);
   color: var(--text);
   outline: 0;
+}
+
+.admin-body select {
+  color-scheme: dark;
+  background-color: #211d1e;
+  color: #fff6f3;
+}
+
+.admin-body select option,
+.admin-body select optgroup {
+  background-color: #211d1e;
+  color: #fff6f3;
 }
 
 .member-editor input[type="color"],
@@ -790,6 +804,17 @@ button:disabled { cursor: wait; opacity: 0.6; }
   background: rgba(255, 255, 255, 0.045);
 }
 
+.admin-section-title {
+  cursor: pointer;
+  list-style-position: inside;
+  overflow-wrap: anywhere;
+}
+.admin-section-title::marker { color: #ff6776; }
+.admin-section-title h2 { display: inline; margin: 0; font-size: 1.05rem; line-height: 1.6; }
+.admin-section-title .github-badge { display: inline-block; margin-left: 12px; vertical-align: middle; }
+.admin-section-title:focus-visible { outline: 2px solid #ff6776; outline-offset: 6px; }
+.admin-panel[open] > .admin-section-title { padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+
 .settings-grid,
 .member-editor form {
   display: grid;
@@ -855,10 +880,15 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .prize-item p { margin: 8px 0; }
 .prize-code { display: block; margin: 14px 0; padding: 12px; border: 1px solid #796525; border-radius: 4px; background: #17140b; color: #fff3ba; font-size: 1.05rem; overflow-wrap: anywhere; user-select: all; }
 .rewards-subtitle { margin-top: 26px; font-size: 1rem; }
+.delivery-summary { margin: 0; padding: 12px 0; border-block: 1px solid var(--line); color: #fff3ba; font-weight: 700; overflow-wrap: anywhere; }
+[data-delivery-submit], [data-coupon-assign] { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .rewards-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 14px 0; }
 .rewards-toolbar label { flex: 1 1 200px; }
-[data-reward-credential] label { flex-basis: 400px; }
+[data-reward-credential] label { flex-basis: 200px; }
+[data-reward-secret] { font-family: monospace; font-size: 1.15rem; }
 [data-coupon-table] code { display: block; max-width: 280px; overflow-wrap: anywhere; white-space: normal; }
+[data-coupon-name-form] { display: grid; gap: 6px; min-width: 170px; }
+[data-coupon-name-form] button { justify-self: start; margin: 0; }
 
 .wide,
 .editor-actions {
