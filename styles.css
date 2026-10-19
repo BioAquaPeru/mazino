@@ -886,6 +886,8 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .prize-item { padding: 18px 0; border-top: 1px solid var(--line); }
 .prize-item h3 { font-size: 0.9rem; overflow-wrap: anywhere; }
 .prize-item p { margin: 8px 0; }
+.prize-item .event-winners { border-left: 2px solid #e8bc61; background: #19150e; padding: 12px 14px; color: #ffedbd; line-height: 1.6; overflow-wrap: anywhere; }
+.event-winners strong { color: #fff5d9; }
 .event-key-field { margin: 12px 0; }
 .prize-code { display: block; margin: 14px 0; padding: 12px; border: 1px solid #796525; border-radius: 4px; background: #17140b; color: #fff3ba; font-size: 1.05rem; overflow-wrap: anywhere; user-select: all; }
 .rewards-subtitle { margin-top: 26px; font-size: 1rem; }
