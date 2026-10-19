@@ -28,27 +28,15 @@
       "pairColor": "#ef8fb5"
     },
     {
-      "id": "member_0dbd2cb8cc1cd910",
-      "nick": "Aldair-",
-      "level": 81,
+      "id": "member_280ea03862ee3a60",
+      "nick": "Loud Rhythm",
+      "level": 69,
       "rank": "miembro",
-      "title": "TOP",
+      "title": "LA JEFA",
       "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ffffff",
-      "partnerId": "member_8973e8680c414177",
-      "pairColor": "#ef8fb5"
-    },
-    {
-      "id": "member_9136b3c24dd7aee9",
-      "nick": "LittleMelody",
-      "level": 64,
-      "rank": "miembro",
-      "title": "miembro",
-      "goldEffect": true,
-      "license": "luna",
-      "fogColor": "#fb37a9",
-      "partnerId": "member_280ea03862ee3a60",
+      "fogColor": "#ffd45c",
+      "partnerId": "",
       "pairColor": "#ef8fb5"
     },
     {
@@ -59,14 +47,26 @@
       "title": "LEYENDA",
       "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ffffff",
+      "fogColor": "#ff0000",
       "partnerId": "",
+      "pairColor": "#ef8fb5"
+    },
+    {
+      "id": "member_0dbd2cb8cc1cd910",
+      "nick": "Aldair-",
+      "level": 81,
+      "rank": "miembro",
+      "title": "TOP",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#00e6cb",
+      "partnerId": "member_8973e8680c414177",
       "pairColor": "#ef8fb5"
     },
     {
       "id": "member_c855a8fff84298a4",
       "nick": "Best-KevPlay",
-      "level": 75,
+      "level": 76,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
@@ -78,12 +78,12 @@
     {
       "id": "member_780a087d996700b9",
       "nick": "iTzCrowXx",
-      "level": 74,
+      "level": 75,
       "rank": "miembro",
       "title": "",
-      "goldEffect": false,
+      "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ff0000",
+      "fogColor": "#ffffff",
       "partnerId": "",
       "pairColor": "#ef8fb5"
     },
@@ -141,9 +141,9 @@
       "level": 72,
       "rank": "miembro",
       "title": "",
-      "goldEffect": false,
+      "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ff0000",
+      "fogColor": "#00ffbf",
       "partnerId": "",
       "pairColor": "#ef8fb5"
     },
@@ -208,8 +208,8 @@
       "pairColor": "#ef8fb5"
     },
     {
-      "id": "member_8197cf9e037d6883",
-      "nick": "xiaoXIe",
+      "id": "member_5839034cebcbede6",
+      "nick": "Br4vli0",
       "level": 69,
       "rank": "miembro",
       "title": "",
@@ -220,27 +220,15 @@
       "pairColor": "#ef8fb5"
     },
     {
-      "id": "member_5839034cebcbede6",
-      "nick": "Br4vli0",
-      "level": 68,
+      "id": "member_8197cf9e037d6883",
+      "nick": "xiaoXIe",
+      "level": 69,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
       "license": "luna",
       "fogColor": "#ff0000",
       "partnerId": "",
-      "pairColor": "#ef8fb5"
-    },
-    {
-      "id": "member_280ea03862ee3a60",
-      "nick": "Loud Rhythm",
-      "level": 68,
-      "rank": "miembro",
-      "title": "LA JEFA",
-      "goldEffect": true,
-      "license": "sol",
-      "fogColor": "#00ffd5",
-      "partnerId": "member_9136b3c24dd7aee9",
       "pairColor": "#ef8fb5"
     },
     {
@@ -304,6 +292,18 @@
       "pairColor": "#ef8fb5"
     },
     {
+      "id": "member_5dc5291ad4c85be7",
+      "nick": "BeBeSSiTa",
+      "level": 62,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
+    },
+    {
       "id": "member_e248ab3634fdb1a4",
       "nick": "Daviid",
       "level": 62,
@@ -340,18 +340,6 @@
       "pairColor": "#ef8fb5"
     },
     {
-      "id": "member_5dc5291ad4c85be7",
-      "nick": "BeBeSSiTa",
-      "level": 61,
-      "rank": "miembro",
-      "title": "",
-      "goldEffect": false,
-      "license": "sol",
-      "fogColor": "#ff0000",
-      "partnerId": "",
-      "pairColor": "#ef8fb5"
-    },
-    {
       "id": "member_c3c88182291e0ef1",
       "nick": "makoto",
       "level": 61,
@@ -378,7 +366,7 @@
     {
       "id": "member_452581f10e1bc94c",
       "nick": "Fabiana",
-      "level": 59,
+      "level": 60,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
@@ -456,6 +444,18 @@
       "goldEffect": false,
       "license": "luna",
       "fogColor": "#ff0000",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
+    },
+    {
+      "id": "member_389fed77-f080-4712-bb8c-bb2f138591da",
+      "nick": "Se_Keiler",
+      "level": 55,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "luna",
+      "fogColor": "#ffd45c",
       "partnerId": "",
       "pairColor": "#ef8fb5"
     },
@@ -566,7 +566,19 @@
       "fogColor": "#ff0000",
       "partnerId": "",
       "pairColor": "#ef8fb5"
+    },
+    {
+      "id": "member_548ea599-ed22-4e3c-b524-4b365773cd1b",
+      "nick": "-*M.O.B.-*",
+      "level": 28,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "estrella",
+      "fogColor": "#ffd45c",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
     }
   ],
-  "totalMembers": 46
+  "totalMembers": 47
 }
