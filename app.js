@@ -65,7 +65,8 @@ function renderPublic(data) {
   $("[data-elite-section]").hidden = !showElite;
   $("[data-members-section]").hidden = !showMembers;
   $("[data-public-content]").hidden = !showElite && !showMembers;
-  $("[data-footer]").hidden = !showElite && !showMembers;
+  $("[data-footer]").hidden = false;
+  updateGuideContact();
   document.body.classList.toggle("hero-only", !showElite && !showMembers);
 
   $$("[data-field]").forEach((node) => {
@@ -159,6 +160,66 @@ function wireSearch() {
   input.addEventListener("input", () => renderMembers(input.value));
 }
 
+const prizeGuides = {
+  personal: { title: "C\u00f3mo reclamar mi premio del c\u00edrculo", steps: [
+    { title: "Busca y abre tu nick", image: "premio-nick.jpg", alt: "Ejemplo de TuNick resaltado en los miembros de MAZINO", text: "Busca tu nombre en Miembros de MAZINO o en los destacados. Haz clic en tu propio nick para abrir tus premios." },
+    { title: "Ingresa con tu clave del circulo", image: "premio-login.jpg", alt: "Formulario de premios con TuNick y una clave de ejemplo oculta", text: "Escribe tu nick y la clave del circulo que te entrego el lider. Pulsa Desbloquear premios. No es la clave de tu cuenta de R2Beat." },
+    { title: "Reclama el premio asignado", image: "premio-reclamar.jpg", alt: "Premio personal de ejemplo y boton Reclamar cupon", text: "Elige tu premio pendiente y pulsa Reclamar cupon. Si no tienes premios pendientes, consulta con el lider." },
+    { title: "Copia el codigo y canjealo en R2Beat", image: "premio-copiar.jpg", alt: "Codigo de ejemplo no valido con Copiar codigo y Ya lo guarde", text: "Pulsa Copiar codigo y usalo en el cupon de R2Beat. Guarda el codigo antes de pulsar Ya lo guarde: despues dejara de aparecer en tu usuario." },
+  ] },
+  flash: { title: "C\u00f3mo participar en eventos rel\u00e1mpago", steps: [
+    { title: "Abre el nick del anfitrion", image: "evento-anfitrion.jpg", alt: "Nick Lider resaltado como anfitrion de un evento de ejemplo", text: "Haz clic en el nick que anuncio el organizador del evento. Puede ser el lider u otro anfitrion; no tiene que ser tu propio nick." },
+    { title: "Identificate con tu propia cuenta", image: "premio-login.jpg", alt: "Ingreso con TuNick y tu clave del circulo, no con la cuenta del anfitrion", text: "Ingresa tu propio nick y tu clave del circulo. No uses la cuenta del anfitrion. Asi el premio quedara registrado a tu nombre." },
+    { title: "Espera la apertura y escribe la clave del evento", image: "evento-clave.jpg", alt: "Evento abierto de ejemplo con el campo Clave de este evento y Reclamar premio relampago", text: "Busca el evento y revisa su hora de apertura, mostrada en hora de Peru. Cuando abra, escribe la clave del evento compartida por el organizador y pulsa Reclamar premio relampago. Es distinta de tu clave del circulo." },
+    { title: "Reclama y guarda tu premio", image: "premio-copiar.jpg", alt: "Premio de ejemplo con codigo para copiar y guardar", text: "Si alcanzaste un premio, copia y guarda el codigo para usarlo en R2Beat. Los premios se entregan por orden de reclamo hasta agotarse. Si ya terminaron, veras los ganadores del evento." },
+  ] },
+};
+let currentGuide = "personal";
+let currentGuideStep = 0;
+let guideTrigger = null;
+
+function updateGuideContact() {
+  const phone = String(state.settings?.whatsappNumber || "").replace(/[^\d]/g, "");
+  const link = $("[data-guide-contact]");
+  link.hidden = !phone;
+  $("[data-guide-no-contact]").hidden = Boolean(phone);
+  if (phone) link.href = `https://wa.me/${phone}?text=${encodeURIComponent("Hola, soy integrante de MAZINO. Mi nick en R2Beat es: ____. Necesito mi clave del circulo para reclamar mis premios.")}`;
+  else link.removeAttribute("href");
+}
+
+function renderGuideStep() {
+  const guide = prizeGuides[currentGuide], step = guide.steps[currentGuideStep];
+  $("[data-guide-title]").textContent = guide.title;
+  $("[data-guide-progress]").textContent = `Paso ${currentGuideStep + 1} de ${guide.steps.length}`;
+  $("[data-guide-step-title]").textContent = step.title;
+  const image = $("[data-guide-image]");
+  image.src = publicAssetUrl(`/assets/guides/${step.image}`);
+  image.alt = step.alt;
+  $("[data-guide-description]").textContent = step.text;
+  $("[data-guide-prev]").disabled = currentGuideStep === 0;
+  $("[data-guide-next]").hidden = currentGuideStep === guide.steps.length - 1;
+  $("[data-guide-done]").hidden = currentGuideStep !== guide.steps.length - 1;
+}
+
+function wireGuides() {
+  const dialog = $("[data-guide-dialog]");
+  $$("[data-guide-open]").forEach((button) => button.addEventListener("click", () => {
+    if (!Object.hasOwn(prizeGuides, button.dataset.guideOpen)) return;
+    currentGuide = button.dataset.guideOpen; currentGuideStep = 0; guideTrigger = button;
+    renderGuideStep(); updateGuideContact(); dialog.showModal();
+  }));
+  $("[data-guide-prev]").addEventListener("click", () => { if (currentGuideStep > 0) { currentGuideStep--; renderGuideStep(); dialog.scrollTop = 0; } });
+  $("[data-guide-next]").addEventListener("click", () => {
+    if (currentGuideStep < prizeGuides[currentGuide].steps.length - 1) {
+      currentGuideStep++; renderGuideStep(); dialog.scrollTop = 0;
+      if (currentGuideStep === prizeGuides[currentGuide].steps.length - 1) $("[data-guide-done]").focus();
+    }
+  });
+  $("[data-guide-close]").addEventListener("click", () => dialog.close());
+  $("[data-guide-done]").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("close", () => guideTrigger?.focus());
+}
+
 function updateFloatingButton() {
   const floating = $(".floating-join");
   const heroAction = $(".hero-actions");
@@ -176,6 +237,7 @@ function wireFloatingButton() {
 
 wireJoinDialog();
 wireSearch();
+wireGuides();
 wireFloatingButton();
 $("[data-year]").textContent = new Date().getFullYear();
 loadPublic().catch(() => {
