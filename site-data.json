@@ -57,7 +57,7 @@
       "level": 81,
       "rank": "miembro",
       "title": "TOP",
-      "goldEffect": false,
+      "goldEffect": true,
       "license": "sol",
       "fogColor": "#00e6cb",
       "partnerId": "member_8973e8680c414177",
@@ -582,7 +582,7 @@
     {
       "id": "member_548ea599-ed22-4e3c-b524-4b365773cd1b",
       "nick": "-*M.O.B.-*",
-      "level": 33,
+      "level": 35,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
