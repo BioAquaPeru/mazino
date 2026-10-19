@@ -722,6 +722,8 @@ dialog::backdrop {
 }
 
 .icon-button,
+.profile-prize-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.profile-prize-actions .mini-button { display: inline-flex; align-items: center; gap: 5px; }
 .mini-button {
   border: 1px solid var(--line);
   border-radius: 6px;
