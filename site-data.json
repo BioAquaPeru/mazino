@@ -129,9 +129,9 @@
       "level": 72,
       "rank": "miembro",
       "title": "",
-      "goldEffect": false,
+      "goldEffect": true,
       "license": "sol",
-      "fogColor": "#ff0000",
+      "fogColor": "#ff00ea",
       "partnerId": "member_3c8328a3e554119e",
       "pairColor": "#ef8fb5"
     },
