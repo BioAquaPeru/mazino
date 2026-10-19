@@ -861,7 +861,8 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .profile-assign-form { display: grid; grid-template-columns: minmax(0, 1fr) 100px; gap: 16px; }
 .profile-assign-form label { display: grid; gap: 8px; font-size: 14px; min-width: 0; }
 .profile-assign-form .editor-actions { grid-column: 1 / -1; align-items: center; }
-.profile-assign-form select, .profile-assign-form input { width: 100%; min-width: 0; }
+.profile-assign-form select, .profile-assign-form input { width: 100%; min-width: 0; min-height: 42px; padding: 10px 12px; border: 1px solid #493840; border-radius: 5px; background: #211c1e; color: #fff; color-scheme: dark; font: inherit; }
+.profile-assign-form select option { background: #211c1e; color: #fff; }
 @media (max-width: 850px) {
   .admin-layout { grid-template-columns: minmax(0, 1fr); gap: 18px; }
   .admin-navigation { top: 0; z-index: 10; padding: 10px 0; border-right: 0; border-bottom: 1px solid var(--line); max-height: none; }
