@@ -857,6 +857,11 @@ button:disabled { cursor: wait; opacity: 0.6; }
 .profile-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 24px; margin: 0; }
 .profile-facts > div { padding: 16px 0; border-bottom: 1px solid var(--line); }
 .member-profile-dialog .admin-table { font-size: 14px; }
+.profile-assign-title { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+.profile-assign-form { display: grid; grid-template-columns: minmax(0, 1fr) 100px; gap: 16px; }
+.profile-assign-form label { display: grid; gap: 8px; font-size: 14px; min-width: 0; }
+.profile-assign-form .editor-actions { grid-column: 1 / -1; align-items: center; }
+.profile-assign-form select, .profile-assign-form input { width: 100%; min-width: 0; }
 @media (max-width: 850px) {
   .admin-layout { grid-template-columns: minmax(0, 1fr); gap: 18px; }
   .admin-navigation { top: 0; z-index: 10; padding: 10px 0; border-right: 0; border-bottom: 1px solid var(--line); max-height: none; }
@@ -869,9 +874,10 @@ button:disabled { cursor: wait; opacity: 0.6; }
   .member-profile-body { padding: 16px; }
 }
 @media (max-width: 420px) {
-  .profile-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
+  .profile-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
   .profile-tabs button { min-width: 0; padding: 10px 3px; font-size: 13px; }
   .member-profile-head h2 { font-size: 20px; }
+  .profile-assign-form { grid-template-columns: minmax(0, 1fr); }
 }
 
 .admin-panel {

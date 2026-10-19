@@ -402,7 +402,7 @@
     {
       "id": "member_8973e8680c414177",
       "nick": "*Pandita*",
-      "level": 56,
+      "level": 57,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
@@ -568,9 +568,21 @@
       "pairColor": "#ef8fb5"
     },
     {
+      "id": "member_55d5676b-21c2-463f-a26a-a4a888cd0bcf",
+      "nick": "*-KonejiTo-*",
+      "level": 42,
+      "rank": "miembro",
+      "title": "",
+      "goldEffect": false,
+      "license": "sol",
+      "fogColor": "#ffd45c",
+      "partnerId": "",
+      "pairColor": "#ef8fb5"
+    },
+    {
       "id": "member_548ea599-ed22-4e3c-b524-4b365773cd1b",
       "nick": "-*M.O.B.-*",
-      "level": 28,
+      "level": 33,
       "rank": "miembro",
       "title": "",
       "goldEffect": false,
@@ -580,5 +592,5 @@
       "pairColor": "#ef8fb5"
     }
   ],
-  "totalMembers": 47
+  "totalMembers": 48
 }
