@@ -1102,3 +1102,5 @@ button:disabled { cursor: wait; opacity: 0.6; }
   }
 
 }
+.tracking-code { display: block; overflow-wrap: anywhere; word-break: break-all; max-width: 260px; }
+.tracking-dialog { width: min(1100px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); }
