@@ -220,6 +220,31 @@ function wireGuides() {
   dialog.addEventListener("close", () => guideTrigger?.focus());
 }
 
+function wireRcoinGuide() {
+  const dialog = $("[data-rcoin-dialog]"), trigger = $("[data-rcoin-open]"), view = $("[data-rcoin-view]");
+  const zoom = $("[data-rcoin-zoom]"), poster = $("[data-rcoin-poster]");
+  function resetZoom() {
+    view.classList.remove("is-zoomed"); zoom.setAttribute("aria-pressed", "false");
+    $("[data-rcoin-zoom-icon]").src = publicAssetUrl("/assets/guides/icon-zoom-in.svg");
+    $("[data-rcoin-zoom-label]").textContent = "Ampliar";
+    view.scrollTop = 0; view.scrollLeft = 0;
+  }
+  trigger.addEventListener("click", () => {
+    if (dialog.open) return;
+    if (!poster.getAttribute("src")) poster.src = publicAssetUrl("/assets/guides/rcoin-donacion-v1.png");
+    resetZoom(); dialog.showModal();
+  });
+  zoom.addEventListener("click", () => {
+    const enlarged = view.classList.toggle("is-zoomed");
+    zoom.setAttribute("aria-pressed", String(enlarged));
+    $("[data-rcoin-zoom-label]").textContent = enlarged ? "Ajustar" : "Ampliar";
+    $("[data-rcoin-zoom-icon]").src = publicAssetUrl(`/assets/guides/icon-zoom-${enlarged ? "out" : "in"}.svg`);
+    view.scrollLeft = 0; view.scrollTop = 0;
+  });
+  $("[data-rcoin-close]").addEventListener("click", () => dialog.close());
+  dialog.addEventListener("close", () => { resetZoom(); trigger.focus(); });
+}
+
 function updateFloatingButton() {
   const floating = $(".floating-join");
   const heroAction = $(".hero-actions");
@@ -238,6 +263,7 @@ function wireFloatingButton() {
 wireJoinDialog();
 wireSearch();
 wireGuides();
+wireRcoinGuide();
 wireFloatingButton();
 $("[data-year]").textContent = new Date().getFullYear();
 loadPublic().catch(() => {

@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=40" />
+    <link rel="stylesheet" href="./styles.css?v=44" />
   </head>
   <body>
     <div class="site-shell">
@@ -65,9 +65,10 @@
         </section>
       </main>
       <footer class="site-footer" data-footer hidden>
-        <nav class="footer-guides" aria-label="Guias de premios">
+        <nav class="footer-guides" aria-label="Guias del circulo">
           <button class="ghost-button guide-trigger" type="button" data-guide-open="personal"><img src="./assets/guides/icon-book.svg" alt="" width="20" height="20" />C&oacute;mo reclamar mi premio del c&iacute;rculo</button>
           <button class="ghost-button guide-trigger" type="button" data-guide-open="flash"><img src="./assets/guides/icon-zap.svg" alt="" width="20" height="20" />C&oacute;mo participar en eventos rel&aacute;mpago</button>
+          <button class="ghost-button guide-trigger" type="button" data-rcoin-open aria-haspopup="dialog" aria-controls="rcoin-guide"><img src="./assets/guides/icon-coins.svg" alt="" width="20" height="20" />C&oacute;mo donar Rcoin al circulo</button>
         </nav>
         <strong>MAZINO CORP.</strong>
         <p>&copy; <span data-year>2026</span> MAZINO CORP. Todos los derechos reservados.</p>
@@ -134,9 +135,22 @@
         </aside>
       </div>
     </dialog>
+    <dialog class="rcoin-dialog" id="rcoin-guide" data-rcoin-dialog aria-labelledby="rcoin-guide-title">
+      <header class="rcoin-head">
+        <h2 id="rcoin-guide-title">C&oacute;mo donar Rcoin al circulo</h2>
+        <div class="rcoin-tools">
+          <button class="ghost-button" type="button" data-rcoin-zoom aria-pressed="false" aria-controls="rcoin-image-view"><img src="./assets/guides/icon-zoom-in.svg" alt="" width="20" height="20" data-rcoin-zoom-icon /><span data-rcoin-zoom-label>Ampliar</span></button>
+          <button class="icon-button" type="button" data-rcoin-close aria-label="Cerrar guia de Rcoin" title="Cerrar guia" autofocus><img src="./assets/guides/icon-close.svg" alt="" width="20" height="20" /></button>
+        </div>
+      </header>
+      <div class="rcoin-scroll" id="rcoin-image-view" data-rcoin-view tabindex="0" role="region" aria-label="Guia ilustrada de donaciones Rcoin">
+        <img class="rcoin-poster" data-rcoin-poster width="1024" height="1536" decoding="async" alt="Guia MAZINO: abre Mensajeria, selecciona Circulo y Sala de conversacion en circulos, abre Menu de Circulo y Dinero de Circulo, pulsa Donar Rcoin, escribe la cantidad y pulsa Aceptar. Los botones estan resaltados en rojo. Solo permanece el nombre Urek-Mazino." />
+        <details class="rcoin-text"><summary>Pasos en texto</summary><ol><li>Abre <strong>Mensajer&iacute;a</strong>.</li><li>Selecciona <strong>C&iacute;rculo</strong> y luego <strong>Sala de conversaci&oacute;n en c&iacute;rculos</strong>.</li><li>Dentro de la sala, abre <strong>Men&uacute; de C&iacute;rculo</strong> y elige <strong>Dinero de C&iacute;rculo</strong>.</li><li>Pulsa <strong>Donar Rcoin</strong>.</li><li>Escribe la cantidad que deseas donar, rev&iacute;sala y pulsa <strong>Aceptar</strong>.</li></ol><p>La donaci&oacute;n se realiza dentro de R2Beat, no en esta p&aacute;gina. Las cantidades de la imagen son ejemplos de referencia.</p></details>
+      </div>
+    </dialog>
     <script src="./member-badge.js?v=22" defer></script>
     <script src="./member-pairs.js?v=30" defer></script>
     <script src="./prizes.js?v=38" defer></script>
-    <script src="./app.js?v=40" defer></script>
+    <script src="./app.js?v=41" defer></script>
   </body>
 </html>

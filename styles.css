@@ -414,6 +414,27 @@ h3 {
 .guide-help { margin-top: 22px; padding-top: 18px; border-top: 1px solid #39272f; }
 .guide-help p { margin: 0 0 12px; line-height: 1.5; color: #e0c7d0; }
 .guide-contact { padding: 10px 16px; text-decoration: none; font-weight: 700; color: #f6dcad; text-transform: none; }
+.rcoin-dialog { width: min(1048px, calc(100vw - 24px)); max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid #6f2530; border-radius: 8px; background: #090909; color: #f7edf0; overflow: hidden; }
+.rcoin-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 16px; border-bottom: 1px solid #39272f; }
+.rcoin-head h2 { margin: 0; font: 700 18px/1.4 Arial, Helvetica, sans-serif; text-transform: none; letter-spacing: 0; }
+.rcoin-tools { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+.rcoin-tools button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; font: 600 14px Arial, Helvetica, sans-serif; text-transform: none; }
+.rcoin-tools [data-rcoin-close] { width: 40px; height: 40px; padding: 0; border: 1px solid #50333d; border-radius: 5px; background: #21191d; color: #fff; cursor: pointer; }
+.rcoin-tools [data-rcoin-close]:hover { background: #38232c; }
+.rcoin-scroll { max-height: calc(100dvh - 118px); overflow: auto; overscroll-behavior: contain; }
+.rcoin-poster { display: block; width: 100%; height: auto; max-width: none; }
+.rcoin-scroll.is-zoomed .rcoin-poster { width: 1536px; }
+.rcoin-text { padding: 20px; font: 14px/1.65 Arial, Helvetica, sans-serif; overflow-wrap: anywhere; }
+.rcoin-text summary { cursor: pointer; font-weight: 700; }
+.rcoin-text ol { padding-left: 22px; }
+.rcoin-text li { padding: 5px 0; }
+.rcoin-text p { color: #cdb9c2; }
+.rcoin-dialog :focus-visible { outline: 2px solid #f5c671; outline-offset: -3px; }
+@media (max-width: 600px) {
+  .rcoin-head { gap: 10px; padding: 12px; }
+  .rcoin-head h2 { flex-basis: 100%; padding-right: 0; font-size: 16px; }
+  .rcoin-scroll { max-height: calc(100dvh - 160px); }
+}
 @media (max-width: 560px) {
   .footer-guides { flex-direction: column; }
   .guide-trigger { text-align: left; justify-content: flex-start; line-height: 1.3; }
