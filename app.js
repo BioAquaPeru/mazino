@@ -96,29 +96,77 @@ function buildWhatsAppUrl(nick) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
+const PUBLIC_SNAPSHOT_KEY = "mazino:public-snapshot:v1";
+function publicSnapshot(value) {
+  if (!value?.settings || !Array.isArray(value.members) || !Array.isArray(value.elite)) return null;
+  const textFields = ['siteName', 'heroPhrase', 'joinButtonText', 'whatsappNumber', 'whatsappTemplate', 'logoUrl', 'membersTitle', 'eliteTitle', 'rewardsServiceUrl'];
+  const flags = ['joinEnabled', 'eliteEnabled', 'membersEnabled'];
+  if (textFields.some(k => typeof value.settings[k] !== 'string') || flags.some(k => typeof value.settings[k] !== 'boolean')) return null;
+  const people = [...value.elite, ...value.members];
+  if (people.length > 200 || people.some(m => !m || typeof m.id !== 'string' || !m.id || typeof m.nick !== 'string' || !m.nick.trim() || !Number.isInteger(m.level) || m.level < 1 || m.level > 999)
+    || new Set(people.map(m => m.id)).size !== people.length) return null;
+  const total = value.totalMembers ?? people.length;
+  if (!Number.isInteger(total) || total < people.length || total > 200) return null;
+  if ((!value.settings.eliteEnabled && value.elite.length) || (!value.settings.membersEnabled && value.members.length)
+    || (value.settings.membersEnabled && total !== people.length)) return null;
+  // Cache only the public presentation fields, never login sessions, passwords or coupon data.
+  const settings = Object.fromEntries(textFields.map(k => [k, value.settings[k].slice(0, 1000)]));
+  for (const k of flags) settings[k] = value.settings[k];
+  const member = m => Object.fromEntries(['id', 'nick', 'level', 'rank', 'title', 'license', 'goldEffect', 'fogColor', 'pairColor', 'partnerId'].map(k => [k, m[k]]));
+  const lastSyncAt = Number.isFinite(Date.parse(value.sync?.lastSyncAt)) ? value.sync.lastSyncAt : null;
+  return { settings, elite: value.elite.map(member), members: value.members.map(member), totalMembers: total, sync: { lastSyncAt } };
+}
+function snapshotVersion(data) { return Date.parse(data?.sync?.lastSyncAt) || 0; }
+function readPublicSnapshot() {
+  try {
+    const data = publicSnapshot(JSON.parse(localStorage.getItem(PUBLIC_SNAPSHOT_KEY)));
+    return snapshotVersion(data) > 0 ? data : null;
+  } catch { return null; }
+}
 async function loadPublic() {
-  const endpoint = document.documentElement.hasAttribute("data-static") ? "./site-data.json" : "./api/public";
-  const response = await fetch(endpoint, { cache: "no-store" });
-  if (!response.ok) throw new Error("No se pudo cargar MAZINO.");
-  const saved = await response.json();
-  renderPublic(saved);
-  let signature = JSON.stringify({ settings: saved.settings, members: saved.members, elite: saved.elite, totalMembers: saved.totalMembers });
-  const service = saved.settings.rewardsServiceUrl;
+  let latest = readPublicSnapshot(), signature = '';
+  const show = data => {
+    const next = JSON.stringify({ settings: data.settings, members: data.members, elite: data.elite, totalMembers: data.totalMembers });
+    if (next !== signature) { renderPublic(data); signature = next; }
+  };
+  if (latest) show(latest);
+  let saved = null;
+  try {
+    const endpoint = document.documentElement.hasAttribute('data-static') ? './site-data.json' : './api/public';
+    const response = await fetch(endpoint, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
+    if (response.ok) saved = publicSnapshot(await response.json());
+  } catch { /* A verified browser snapshot also survives failure of the static bootstrap. */ }
+  const service = saved?.settings.rewardsServiceUrl || latest?.settings.rewardsServiceUrl;
   if (service && /^https:\/\/[a-z0-9.-]+$/i.test(service)) {
-    const refresh = async () => {
-      try {
-        const current = await fetch(`${service}/api/site`, { cache: "no-store", signal: AbortSignal.timeout(20000) });
-        if (!current.ok) return;
-        const data = await current.json();
-        if (data.settings && Array.isArray(data.members) && Array.isArray(data.elite)) {
-          const next = JSON.stringify({ settings: data.settings, members: data.members, elite: data.elite, totalMembers: data.totalMembers });
-          if (signature !== next) { signature = next; renderPublic(data); }
-        }
-      } catch { /* The published static version remains usable during outages. */ }
+    let refreshing = false;
+    const accept = data => {
+      if (!data || data.settings.rewardsServiceUrl !== service || snapshotVersion(data) <= 0) return;
+      // Another tab may have saved a newer version while this request was in flight.
+      const cached = readPublicSnapshot();
+      if (cached?.settings.rewardsServiceUrl === service && snapshotVersion(cached) > snapshotVersion(latest)) { latest = cached; show(latest); }
+      if (latest?.settings.rewardsServiceUrl === service && snapshotVersion(data) <= snapshotVersion(latest)) return;
+      latest = data; show(data);
+      try { localStorage.setItem(PUBLIC_SNAPSHOT_KEY, JSON.stringify(data)); } catch { /* Private mode and full storage must not break the page. */ }
     };
+    const refresh = async () => {
+      if (refreshing) return;
+      refreshing = true;
+      try {
+        const response = await fetch(`${service}/api/site`, { cache: 'no-store', signal: AbortSignal.timeout(20000) });
+        if (response.ok) accept(publicSnapshot(await response.json()));
+      } catch { /* Keep the last verified version on timeouts, errors and malformed replies. */ }
+      finally { refreshing = false; }
+    };
+    // A new device checks the live service before displaying the static backup.
     await refresh();
+    if (snapshotVersion(saved) > snapshotVersion(latest)) accept(saved);
     setInterval(() => { if (!document.hidden) refresh(); }, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    window.addEventListener('online', refresh);
+    window.addEventListener('storage', event => { if (event.key === PUBLIC_SNAPSHOT_KEY) accept(readPublicSnapshot()); });
   }
+  if (!latest && saved) show(saved);
+  if (!latest && !saved) throw new Error('No se pudo cargar MAZINO.');
 }
 
 function wireJoinDialog() {
