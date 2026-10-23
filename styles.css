@@ -512,22 +512,26 @@ h3 {
   font-weight: 700;
 }
 
-.community-section { padding-top: 24px; padding-bottom: 24px; }
+.community-section { width: min(1600px, calc(100% - 48px)); padding-top: 24px; padding-bottom: 24px; }
 .community-section h2 { font-size: 1.25rem; }
 .ranking-note { color: var(--muted); font-size: .75rem; }
-.ranking-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; max-width: 920px; }
-.ranking-card { position: relative; isolation: isolate; min-width: 0; border: 1px solid #38272e; border-radius: 5px; padding: 8px; background: #0b090a; }
+.ranking-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; width: 100%; }
+.ranking-card { position: relative; isolation: isolate; min-width: 0; border: 1px solid #38272e; border-radius: 5px; padding: 12px; background: #0b090a; }
 .ranking-card.gold-active { border-color: var(--mist-color); }
 .ranking-card > :not(.solar-mist) { position: relative; z-index: 3; }
 .ranking-card-top { display: flex; align-items: center; justify-content: space-between; min-height: 18px; }
-.ranking-card .license-icon { width: 18px; height: 18px; }
+.ranking-card .license-icon { width: 22px; height: 22px; }
 .ranking-position { color: #e9ba5b; font-weight: 700; font-size: .75rem; }
-.ranking-card h3 { margin: 4px 0 2px; font-family: Rajdhani, sans-serif; font-size: .85rem; line-height: 1.15; overflow-wrap: anywhere; }
-.ranking-role { margin: 0; color: var(--muted); font-size: .65rem; line-height: 1.1; }
-.ranking-value { margin: 4px 0 0; font-size: .85rem; font-weight: 700; color: #f2d686; }
+.ranking-card h3 { margin: 5px 0 3px; font-family: Rajdhani, sans-serif; font-size: 1rem; line-height: 1.15; overflow-wrap: anywhere; }
+.ranking-role { margin: 0; color: var(--muted); font-size: .75rem; line-height: 1.1; }
+.ranking-value { margin: 6px 0 0; font-size: 1rem; font-weight: 700; color: #f2d686; }
 .ranking-value small { font-size: .6rem; font-weight: 500; }
 .ranking-circle { margin: 3px 0 0; color: #89d5cf; font-size: .7rem; overflow-wrap: anywhere; }
 .ranking-empty { grid-column: 1 / -1; color: var(--muted); }
+.ranking-modes { display: flex; flex-shrink: 0; border: 1px solid #54343f; border-radius: 5px; overflow: hidden; }
+.ranking-modes button { border: 0; border-radius: 0; padding: 8px 14px; background: #130e11; font: 700 .85rem Rajdhani, sans-serif; cursor: pointer; }
+.ranking-modes button[aria-pressed="true"] { background: #9b142c; color: #fff; }
+.ranking-modes button:focus-visible { outline: 2px solid #f2d686; outline-offset: -3px; }
 .prize-donation-preview { margin: 12px 0 16px; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .prize-donation-preview p { margin: 2px 0; font-size: .9rem; overflow-wrap: anywhere; }
 .personal-donations { margin: 16px 0; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -543,9 +547,12 @@ h3 {
 .prize-dialog .close-button { display: grid; place-items: center; background: #21171b; color: #fff6f3; border: 1px solid #72505b; border-radius: 4px; font-size: 1.1rem; line-height: 1; cursor: pointer; }
 .goal-pending { color: #e1bf71; }
 .goal-result.fulfilled { color: #75ceb3; }
-@media (max-width: 900px) { .ranking-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 640px; } }
+@media (max-width: 900px) { .ranking-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 560px) {
-  .ranking-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-width: none; }
+  .community-section { width: calc(100% - 32px); }
+  .community-section .section-head { align-items: flex-start; gap: 12px; }
+  .ranking-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .ranking-card { padding: 10px; }
   .community-section h2 { font-size: 1.1rem; }
 }
 

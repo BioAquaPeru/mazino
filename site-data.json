@@ -256,24 +256,24 @@
       "partnerId": ""
     },
     {
-      "id": "member_548ea599-ed22-4e3c-b524-4b365773cd1b",
-      "nick": "-*M.O.B.-*",
-      "level": 64,
+      "id": "member_e33a92ce19165c70",
+      "nick": "imGAGO",
+      "level": 65,
       "rank": "miembro",
       "title": "",
-      "license": "sol",
+      "license": "luna",
       "goldEffect": false,
       "fogColor": "#ffd45c",
       "pairColor": "#ef8fb5",
       "partnerId": ""
     },
     {
-      "id": "member_e33a92ce19165c70",
-      "nick": "imGAGO",
+      "id": "member_548ea599-ed22-4e3c-b524-4b365773cd1b",
+      "nick": "-*M.O.B.-*",
       "level": 64,
       "rank": "miembro",
       "title": "",
-      "license": "luna",
+      "license": "sol",
       "goldEffect": false,
       "fogColor": "#ffd45c",
       "pairColor": "#ef8fb5",
@@ -594,6 +594,6 @@
   ],
   "totalMembers": 48,
   "sync": {
-    "lastSyncAt": "2026-10-23T04:26:12.050Z"
+    "lastSyncAt": "2026-10-23T04:57:25.494Z"
   }
 }

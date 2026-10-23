@@ -97,7 +97,7 @@ function buildWhatsAppUrl(nick) {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
 
-let communityData = null, communityService = '';
+let communityData = null, communityService = '', donorMode = 'general';
 const rcoinNumber = value => Number(value).toLocaleString('es-PE');
 function publicDonationFor(id) {
   return communityData ? communityData.donations.find(r => r.memberId === id) || { memberId: id, total: null, readingOn: null } : null;
@@ -111,13 +111,21 @@ function renderCommunityRankings() {
   if (!state.settings) return;
   const members = [...state.elite, ...state.members], byId = new Map(members.map(m => [m.id, m]));
   $('[data-community-section]').hidden = $('[data-global-section]').hidden = !state.settings.membersEnabled;
-  const donors = (communityData?.donations || []).filter(r => r.total > 0 && byId.has(r.memberId)).sort((a, b) => b.total - a.total || byId.get(a.memberId).nick.localeCompare(byId.get(b.memberId).nick)).slice(0, 5);
-  $('[data-donor-ranking]').innerHTML = donors.map((r, i) => rankingCard(byId.get(r.memberId), i + 1, `<p class="ranking-value">${rcoinNumber(r.total)} <small>Rcoin</small></p>`)).join('') || '<p class="ranking-empty">Todavia no hay donaciones registradas.</p>';
+  const excluded = new Set((communityData?.exclusions || []).filter(r => r.donors).map(r => r.memberId));
+  const source = donorMode === 'weekly' ? (communityData?.weekly?.entries || []).map(r => ({ ...r, total: r.donated })) : communityData?.donations || [];
+  const donors = source.filter(r => r.total > 0 && byId.has(r.memberId) && !excluded.has(r.memberId)).sort((a, b) => b.total - a.total || byId.get(a.memberId).nick.localeCompare(byId.get(b.memberId).nick)).slice(0, 5);
+  $('[data-donor-ranking]').innerHTML = donors.map((r, i) => rankingCard(byId.get(r.memberId), i + 1, `<p class="ranking-value">${rcoinNumber(r.total)} <small>Rcoin</small></p>`)).join('') || `<p class="ranking-empty">${donorMode === 'weekly' ? 'Todavia no hay incrementos semanales registrados. Se necesitan dos lecturas para comparar.' : 'Todavia no hay donaciones registradas.'}</p>`;
+  const weekly = communityData?.weekly, dateLabel = v => v.split('-').reverse().join('/');
+  $('[data-donor-note]').textContent = donorMode === 'weekly' ? (weekly ? `${dateLabel(weekly.start)} al ${dateLabel(weekly.end)} · Peru` : 'Semana actual') : 'Total acumulado registrado';
+  $('[data-weekly-note]').hidden = donorMode !== 'weekly';
+  $('[data-weekly-note]').textContent = 'Incrementos desde la primera lectura disponible de esta semana. No incluye saldos anteriores.';
   const global = communityData?.global;
-  $('[data-global-ranking]').innerHTML = (global?.entries || []).map(r => {
+  const globalExcluded = new Set((communityData?.exclusions || []).filter(r => r.globalTop).map(r => r.memberId));
+  $('[data-global-ranking]').innerHTML = (global?.entries || []).flatMap(r => {
     const own = r.circle?.id === 10 && members.find(m => m.nick.normalize('NFKC').toLowerCase() === r.nick.normalize('NFKC').toLowerCase());
+    if (own && globalExcluded.has(own.id)) return [];
     const member = own || { nick: r.nick, license: r.license, title: '', goldEffect: false };
-    return rankingCard(member, r.position, `<p class="ranking-value">Nv ${r.level}</p><p class="ranking-circle">${escapeHtml(r.circle?.name || 'Sin circulo')}</p>`);
+    return [rankingCard(member, r.position, `<p class="ranking-value">Nv ${r.level}</p><p class="ranking-circle">${escapeHtml(r.circle?.name || 'Sin circulo')}</p>`)];
   }).join('') || '<p class="ranking-empty">Ranking global pendiente de actualizar.</p>';
   $('[data-global-note]').textContent = global?.updatedAt ? new Date(global.updatedAt).toLocaleDateString('es-PE', { timeZone: 'America/Lima' }) : '';
   startPerimeterMist($('[data-donor-ranking]')); startPerimeterMist($('[data-global-ranking]'));
@@ -130,9 +138,23 @@ function validCommunity(value) {
   const global = value.global;
   if (!global || !Array.isArray(global.entries) || ![0, 5].includes(global.entries.length) || (global.entries.length && (!Number.isSafeInteger(global.updatedAt) || global.updatedAt <= 0))) return null;
   if (global.entries.some((r, i) => r.position !== i + 1 || typeof r.nick !== 'string' || !r.nick || !Number.isInteger(r.level) || r.level < 1 || r.level > 999 || (r.circle !== null && (!Number.isInteger(r.circle?.id) || r.circle.id < 1 || typeof r.circle.name !== 'string')))) return null;
+  const weekly = value.weekly;
+  if (weekly != null && (!date(weekly.start) || !date(weekly.end) || weekly.end < weekly.start || !Array.isArray(weekly.entries) || weekly.entries.length > 200
+    || new Set(weekly.entries.map(r => r?.memberId)).size !== weekly.entries.length || weekly.entries.some(r => !r || typeof r.memberId !== 'string' || !r.memberId || (r.donated !== null && (!Number.isSafeInteger(r.donated) || r.donated < 0 || r.donated > 1e12 || !date(r.fromOn) || !date(r.readingOn) || r.fromOn < weekly.start || r.readingOn < r.fromOn || r.readingOn > weekly.end))))) return null;
+  const exclusions = value.exclusions || [];
+  if (!Array.isArray(exclusions) || exclusions.length > 1000 || new Set(exclusions.map(r => r?.memberId)).size !== exclusions.length || exclusions.some(r => !r || typeof r.memberId !== 'string' || !r.memberId || typeof r.donors !== 'boolean' || typeof r.globalTop !== 'boolean')) return null;
   return { asOf: value.asOf, donations: value.donations.map(r => ({ memberId: r.memberId, total: r.total, readingOn: r.total === null ? null : r.readingOn })),
+    weekly: weekly ? { start: weekly.start, end: weekly.end, entries: weekly.entries.map(r => ({ memberId: r.memberId, donated: r.donated, fromOn: r.fromOn, readingOn: r.readingOn })) } : null,
+    exclusions: exclusions.map(r => ({ memberId: r.memberId, donors: r.donors, globalTop: r.globalTop })),
     global: { entries: global.entries.map(r => ({ position: r.position, nick: r.nick, level: r.level, license: r.license, circle: r.circle ? { id: r.circle.id, name: r.circle.name } : null })), updatedAt: global.updatedAt || null, stale: !!global.stale } };
 }
+document.addEventListener('click', event => {
+  const button = event.target.closest('[data-donor-mode]');
+  if (!button || !['general', 'weekly'].includes(button.dataset.donorMode)) return;
+  donorMode = button.dataset.donorMode;
+  for (const item of document.querySelectorAll('[data-donor-mode]')) item.setAttribute('aria-pressed', String(item === button));
+  renderCommunityRankings();
+});
 function startCommunity(service) {
   if (communityService === service) return;
   communityService = service;
