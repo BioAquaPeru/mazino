@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=47" />
+    <link rel="stylesheet" href="./styles.css?v=48" />
   </head>
   <body>
     <div class="site-shell">
@@ -59,6 +59,15 @@
             </div>
           </div>
           <div class="elite-strip" data-elite></div>
+        </section>
+
+        <section class="section-block event-board" aria-labelledby="event-board-title" data-event-board hidden>
+          <div class="section-head compact-head"><div><p class="section-kicker">PREMIOS DEL CIRCULO</p><h2 id="event-board-title">PIZARRA DE EVENTOS</h2></div>
+            <div class="board-controls"><button class="board-icon" type="button" data-board-prev title="Subir eventos" aria-label="Subir eventos"><img src="./assets/board/chevron-up.svg" alt="" width="18" height="18" /></button><button class="board-icon" type="button" data-board-pause title="Pausar desplazamiento automatico" aria-label="Pausar desplazamiento automatico" aria-pressed="false"><img data-board-pause-icon src="./assets/board/pause.svg" alt="" width="18" height="18" /></button><button class="board-icon" type="button" data-board-next title="Bajar eventos" aria-label="Bajar eventos"><img src="./assets/board/chevron-down.svg" alt="" width="18" height="18" /></button></div>
+          </div>
+          <div class="board-tabs" role="group" aria-label="Estado de los eventos"><button type="button" data-board-tab="upcoming" aria-pressed="false">Proximos <span data-board-count="upcoming">0</span></button><button type="button" data-board-tab="active" aria-pressed="true">Activos <span data-board-count="active">0</span></button><button type="button" data-board-tab="winners" aria-pressed="false">Ganadores <span data-board-count="winners">0</span></button></div>
+          <div class="board-viewport" data-board-viewport tabindex="0" role="region" aria-label="Eventos activos"><div data-board-list></div></div>
+          <p class="ranking-note" role="status" data-board-status></p>
         </section>
 
         <section class="section-block members-section" aria-labelledby="members-title" data-members-section hidden>
@@ -163,7 +172,8 @@
     </dialog>
     <script src="./member-badge.js?v=22" defer></script>
     <script src="./member-pairs.js?v=32" defer></script>
-    <script src="./prizes.js?v=40" defer></script>
+    <script src="./event-board.js?v=1" defer></script>
+    <script src="./prizes.js?v=41" defer></script>
     <script src="./app.js?v=45" defer></script>
   </body>
 </html>

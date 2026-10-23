@@ -51,6 +51,7 @@ async function prizeRequest(path, body) {
 function configurePrizes(settings) {
   const value = String(settings.rewardsServiceUrl || "");
   rewardApi = /^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(value) ? value : "";
+  if (typeof configureEventBoard === 'function') configureEventBoard(settings);
   try {
     const saved = JSON.parse(sessionStorage.getItem("mazino-prizes-session") || "null");
     if (saved?.expiresAt > Date.now() && saved.token && saved.member) rewardSession = saved;
@@ -59,7 +60,7 @@ function configurePrizes(settings) {
 
 function eventIsFinished(event) {
   return event.status === "closed" || (event.available !== undefined ? event.available === 0 : event.claimed >= event.total)
-    || (event.endsAt > 0 && event.endsAt < Date.now() + rewardClockOffset);
+    || (event.endsAt > 0 && event.endsAt <= Date.now() + rewardClockOffset);
 }
 function eventWinnersMarkup(event) {
   if (!event.winners?.length) return "";
@@ -72,11 +73,11 @@ function renderPrizeEvents() {
   const savedKeys = new Map(Array.from(rewardDialog.querySelectorAll?.("[data-event-key]") || [], (input) => [input.dataset.eventKey, input.value]));
   const focused = document.activeElement?.dataset?.eventKey;
   const selection = focused ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
-  const events = rewardEvents.filter((event) => event.ownerId === rewardOwner);
+  const events = rewardEvents.filter((event) => event.ownerId === rewardOwner && !eventIsFinished(event));
   container.innerHTML = events.map((event) => {
     const full = eventIsFinished(event);
     const start = new Date(event.startsAt).toLocaleString("es-PE", { timeZone: "America/Lima" });
-    return `<section class="prize-item"><h3>${escapeHtml(event.title)}</h3><p>Apertura: ${escapeHtml(start)} (Peru)</p><p data-event-opening></p><p>${event.claimed} de ${event.total} premios entregados</p>${eventWinnersMarkup(event)}${event.keyRequired && !full ? `<label class="event-key-field"><span>Clave de este evento</span><input type="password" inputmode="numeric" maxlength="6" autocomplete="off" data-event-key="${escapeHtml(event.id)}" /></label>` : ""}<button type="button" class="primary-action small-action" data-flash-claim="${escapeHtml(event.id)}" data-opens-at="${event.startsAt}" data-ends-at="${event.endsAt || 0}" data-full="${full ? "1" : "0"}" ${full || !rewardSession ? "disabled" : ""}>${full ? "Evento finalizado" : "Reclamar premio relampago"}</button></section>`;
+    return `<section class="prize-item"><h3>${escapeHtml(event.title)}</h3><p>Apertura: ${escapeHtml(start)} (Peru)</p>${event.endsAt ? `<p>Termino: ${escapeHtml(new Date(event.endsAt).toLocaleString('es-PE', { timeZone: 'America/Lima' }))} (Peru)</p>` : ''}<p data-event-opening></p><p>${event.claimed} de ${event.total} premios entregados</p>${eventWinnersMarkup(event)}${event.keyRequired && !full ? `<label class="event-key-field"><span>Clave de este evento</span><input type="password" inputmode="numeric" maxlength="6" autocomplete="off" data-event-key="${escapeHtml(event.id)}" /></label>` : ""}<button type="button" class="primary-action small-action" data-flash-claim="${escapeHtml(event.id)}" data-opens-at="${event.startsAt}" data-ends-at="${event.endsAt || 0}" data-full="${full ? "1" : "0"}" ${full || !rewardSession ? "disabled" : ""}>${full ? "Evento finalizado" : "Reclamar premio relampago"}</button></section>`;
   }).join("");
   for (const input of rewardDialog.querySelectorAll?.("[data-event-key]") || []) {
     input.value = savedKeys.get(input.dataset.eventKey) || "";
@@ -89,9 +90,10 @@ function updateEventOpening() {
   const now = Date.now() + rewardClockOffset;
   for (const button of rewardDialog.querySelectorAll?.("[data-flash-claim]") || []) {
     const seconds = Math.max(0, Math.ceil((Number(button.dataset.opensAt) - now) / 1000));
-    const ended = Number(button.dataset.endsAt) > 0 && Number(button.dataset.endsAt) < now;
+    const ended = Number(button.dataset.endsAt) > 0 && Number(button.dataset.endsAt) <= now;
     const full = button.dataset.full === "1";
     button.disabled = !rewardSession || seconds > 0 || ended || full || rewardBusy;
+    if (ended || full) button.closest('.prize-item').hidden = true;
     button.closest(".prize-item").querySelector("[data-event-opening]").textContent = full ? "Premios agotados" : ended ? "Evento finalizado" : seconds ? `Abre en ${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}` : "Evento abierto";
   }
 }
@@ -107,7 +109,9 @@ if (typeof setInterval === "function") {
 
 async function refreshPublicPrizeEvents() {
   const revision = ++rewardPublicRevision, dialogRevision = rewardDialogRevision;
+  const source = rewardApi;
   const data = await prizeRequest("public");
+  if (typeof acceptEventBoard === 'function') acceptEventBoard(data, source);
   if (!rewardDialog.open || revision !== rewardPublicRevision || dialogRevision !== rewardDialogRevision) return;
   rewardClockOffset = Number.isFinite(data.serverNow) ? data.serverNow - Date.now() : 0;
   const changed = JSON.stringify(rewardEvents) !== JSON.stringify(data.events);
@@ -151,7 +155,7 @@ document.addEventListener("click", async (event) => {
   rewardDialogRevision++; rewardPublicRevision++;
   const revision = rewardDialogRevision;
   rewardOwner = trigger.dataset.prizeOpen;
-  const name = trigger.textContent.trim();
+  const name = trigger.dataset.prizeNick || trigger.textContent.trim();
   rewardDialog.querySelector("[data-prize-heading]").textContent = `Premios de ${name}`;
   rewardDialog.querySelector("[data-prize-login]").reset();
   rewardDialog.querySelector('[name="nick"]').value = rewardSession?.member.nick || name;
@@ -165,7 +169,7 @@ document.addEventListener("click", async (event) => {
   try {
     await refreshPrizeDialog();
     if (revision !== rewardDialogRevision || !rewardDialog.open) return;
-    if (!rewardSession && rewardEvents.some((entry) => entry.ownerId === rewardOwner) && rewardDialog.querySelector('[name="nick"]').value === name) rewardDialog.querySelector('[name="nick"]').value = "";
+    if (!rewardSession && rewardEvents.some((entry) => entry.ownerId === rewardOwner && !eventIsFinished(entry)) && rewardDialog.querySelector('[name="nick"]').value === name) rewardDialog.querySelector('[name="nick"]').value = "";
     rewardDialog.querySelector("[data-prize-status]").textContent = "";
   }
   catch (error) { rewardDialog.querySelector("[data-prize-status]").textContent = error.message; }

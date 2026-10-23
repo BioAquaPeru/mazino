@@ -78,7 +78,7 @@
     {
       "id": "member_780a087d996700b9",
       "nick": "iTzCrowXx",
-      "level": 75,
+      "level": 76,
       "rank": "miembro",
       "title": "",
       "license": "sol",
@@ -582,7 +582,7 @@
     {
       "id": "member_df80b223-4438-411b-83c6-02fcdaba38d5",
       "nick": "Shadow",
-      "level": 17,
+      "level": 21,
       "rank": "miembro",
       "title": "",
       "license": "",
@@ -594,6 +594,6 @@
   ],
   "totalMembers": 48,
   "sync": {
-    "lastSyncAt": "2026-10-23T04:57:25.494Z"
+    "lastSyncAt": "2026-10-23T06:34:30.437Z"
   }
 }
