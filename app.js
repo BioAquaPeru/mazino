@@ -32,7 +32,6 @@ function renderElite() {
         <h3><button class="member-name" type="button" data-prize-open="${escapeHtml(member.id)}">${escapeHtml(member.nick)}</button></h3>
         <p class="elite-level">Nv ${escapeHtml(member.level)}</p>
         <p class="elite-title">${escapeHtml(member.title || "Sublider")}</p>
-        ${publicDonationMarkup(member.id)}
       </div>
     </article>
   `).join("");
@@ -100,10 +99,8 @@ function buildWhatsAppUrl(nick) {
 
 let communityData = null, communityService = '';
 const rcoinNumber = value => Number(value).toLocaleString('es-PE');
-const readingDate = value => value ? value.split('-').reverse().join('/') : '';
-function publicDonationMarkup(id) {
-  const row = communityData?.donations.find(r => r.memberId === id);
-  return `<small class="member-donation">${row?.total != null ? `Rcoin: <strong>${rcoinNumber(row.total)}</strong><time datetime="${escapeHtml(row.readingOn)}">${escapeHtml(readingDate(row.readingOn))}</time>` : 'Rcoin: sin registro'}</small>`;
+function publicDonationFor(id) {
+  return communityData ? communityData.donations.find(r => r.memberId === id) || { memberId: id, total: null, readingOn: null } : null;
 }
 function rankingCard(member, position, content) {
   return `<article class="ranking-card ${member.goldEffect ? 'gold-active' : ''}" style="--mist-color: ${memberFogColor(member)}">
@@ -115,14 +112,14 @@ function renderCommunityRankings() {
   const members = [...state.elite, ...state.members], byId = new Map(members.map(m => [m.id, m]));
   $('[data-community-section]').hidden = $('[data-global-section]').hidden = !state.settings.membersEnabled;
   const donors = (communityData?.donations || []).filter(r => r.total > 0 && byId.has(r.memberId)).sort((a, b) => b.total - a.total || byId.get(a.memberId).nick.localeCompare(byId.get(b.memberId).nick)).slice(0, 5);
-  $('[data-donor-ranking]').innerHTML = donors.map((r, i) => rankingCard(byId.get(r.memberId), i + 1, `<p class="ranking-value">${rcoinNumber(r.total)} <small>Rcoin</small></p><time class="ranking-date" datetime="${r.readingOn}">Lectura: ${readingDate(r.readingOn)}</time>`)).join('') || '<p class="ranking-empty">Todavia no hay donaciones registradas.</p>';
+  $('[data-donor-ranking]').innerHTML = donors.map((r, i) => rankingCard(byId.get(r.memberId), i + 1, `<p class="ranking-value">${rcoinNumber(r.total)} <small>Rcoin</small></p>`)).join('') || '<p class="ranking-empty">Todavia no hay donaciones registradas.</p>';
   const global = communityData?.global;
   $('[data-global-ranking]').innerHTML = (global?.entries || []).map(r => {
     const own = r.circle?.id === 10 && members.find(m => m.nick.normalize('NFKC').toLowerCase() === r.nick.normalize('NFKC').toLowerCase());
     const member = own || { nick: r.nick, license: r.license, title: '', goldEffect: false };
     return rankingCard(member, r.position, `<p class="ranking-value">Nv ${r.level}</p><p class="ranking-circle">${escapeHtml(r.circle?.name || 'Sin circulo')}</p>`);
   }).join('') || '<p class="ranking-empty">Ranking global pendiente de actualizar.</p>';
-  $('[data-global-note]').textContent = global?.updatedAt ? `Ranking de personajes | ${new Date(global.updatedAt).toLocaleString('es-PE', { timeZone: 'America/Lima' })}${global.stale ? ' | Ultima copia disponible' : ''}` : 'Ranking de personajes del servidor';
+  $('[data-global-note]').textContent = global?.updatedAt ? new Date(global.updatedAt).toLocaleDateString('es-PE', { timeZone: 'America/Lima' }) : '';
   startPerimeterMist($('[data-donor-ranking]')); startPerimeterMist($('[data-global-ranking]'));
 }
 function validCommunity(value) {
@@ -141,7 +138,7 @@ function startCommunity(service) {
   communityService = service;
   const key = `mazino:community:v1:${service}`;
   try { communityData = validCommunity(JSON.parse(localStorage.getItem(key))); } catch { communityData = null; }
-  const render = () => { if (state.settings) { renderCommunityRankings(); renderElite(); renderMembers($('[data-member-search]')?.value || ''); } };
+  const render = () => { if (state.settings) renderCommunityRankings(); if (typeof refreshPrizeDonationPreview === 'function') refreshPrizeDonationPreview(); };
   render(); let busy = false;
   const refresh = async () => {
     if (busy || communityService !== service) return;

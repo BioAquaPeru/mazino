@@ -22,6 +22,16 @@ function renderRewardIdentity() {
   rewardDialog.querySelector("[data-prize-identity]").textContent = rewardSession ? `Sesion: ${rewardSession.member.nick}` : "";
   if (!rewardSession) rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
   if (!rewardSession) rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
+  refreshPrizeDonationPreview();
+}
+function refreshPrizeDonationPreview() {
+  const container = rewardDialog.querySelector('[data-prize-donation-preview]');
+  container.hidden = !rewardDialog.open || !!rewardSession;
+  if (container.hidden) { container.innerHTML = ''; return; }
+  const row = typeof publicDonationFor === 'function' ? publicDonationFor(rewardOwner) : null;
+  const content = !row ? '<p class="muted">Consultando total registrado...</p>' : row.total == null ? '<p class="muted">Sin donaciones registradas para este integrante.</p>'
+    : `<p>Total donado registrado: <strong>${Number(row.total).toLocaleString('es-PE')} Rcoin</strong></p><p class="muted">Fecha: <time datetime="${escapeHtml(row.readingOn)}">${escapeHtml(String(row.readingOn).split('-').reverse().join('/'))}</time></p>`;
+  if (container.innerHTML !== content) container.innerHTML = content;
 }
 
 async function prizeRequest(path, body) {
@@ -151,6 +161,7 @@ document.addEventListener("click", async (event) => {
   rewardDialog.querySelector("[data-prize-events]").innerHTML = "";
   rewardEvents = [];
   rewardDialog.showModal();
+  refreshPrizeDonationPreview();
   try {
     await refreshPrizeDialog();
     if (revision !== rewardDialogRevision || !rewardDialog.open) return;
@@ -166,6 +177,7 @@ rewardDialog.addEventListener("close", () => {
   rewardDialog.querySelector('[name="password"]').value = "";
   rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
   rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
+  refreshPrizeDonationPreview();
   rewardDialog.querySelector("[data-prize-events]").innerHTML = "";
 });
 rewardDialog.querySelector("[data-prize-login]").addEventListener("submit", async (event) => {

@@ -512,25 +512,24 @@ h3 {
   font-weight: 700;
 }
 
-.community-section { padding-top: 32px; padding-bottom: 32px; }
-.community-section h2 { font-size: 1.5rem; }
-.ranking-note, .ranking-date { color: var(--muted); font-size: .8rem; }
-.ranking-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
-.ranking-card { position: relative; isolation: isolate; min-width: 0; min-height: 144px; border: 1px solid #38272e; border-radius: 6px; padding: 14px; background: #0b090a; }
+.community-section { padding-top: 24px; padding-bottom: 24px; }
+.community-section h2 { font-size: 1.25rem; }
+.ranking-note { color: var(--muted); font-size: .75rem; }
+.ranking-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; max-width: 920px; }
+.ranking-card { position: relative; isolation: isolate; min-width: 0; border: 1px solid #38272e; border-radius: 5px; padding: 8px; background: #0b090a; }
 .ranking-card.gold-active { border-color: var(--mist-color); }
 .ranking-card > :not(.solar-mist) { position: relative; z-index: 3; }
-.ranking-card-top { display: flex; align-items: center; justify-content: space-between; min-height: 24px; }
-.ranking-card .license-icon { width: 24px; height: 24px; }
-.ranking-position { color: #e9ba5b; font-weight: 700; font-size: .9rem; }
-.ranking-card h3 { margin: 10px 0 4px; font-family: Rajdhani, sans-serif; font-size: 1.05rem; line-height: 1.2; overflow-wrap: anywhere; }
-.ranking-role { margin: 0; color: var(--muted); min-height: 16px; font-size: .75rem; }
-.ranking-value { margin: 8px 0 2px; font-size: 1rem; font-weight: 700; color: #f2d686; }
-.ranking-value small { font-size: .7rem; font-weight: 500; }
-.ranking-circle { margin: 4px 0 0; color: #89d5cf; font-size: .85rem; overflow-wrap: anywhere; }
+.ranking-card-top { display: flex; align-items: center; justify-content: space-between; min-height: 18px; }
+.ranking-card .license-icon { width: 18px; height: 18px; }
+.ranking-position { color: #e9ba5b; font-weight: 700; font-size: .75rem; }
+.ranking-card h3 { margin: 4px 0 2px; font-family: Rajdhani, sans-serif; font-size: .85rem; line-height: 1.15; overflow-wrap: anywhere; }
+.ranking-role { margin: 0; color: var(--muted); font-size: .65rem; line-height: 1.1; }
+.ranking-value { margin: 4px 0 0; font-size: .85rem; font-weight: 700; color: #f2d686; }
+.ranking-value small { font-size: .6rem; font-weight: 500; }
+.ranking-circle { margin: 3px 0 0; color: #89d5cf; font-size: .7rem; overflow-wrap: anywhere; }
 .ranking-empty { grid-column: 1 / -1; color: var(--muted); }
-.member-donation { display: block; margin-top: 4px; color: #b9d5d0; font-size: .75rem; line-height: 1.25; overflow-wrap: anywhere; }
-.member-donation strong { font-weight: 600; }
-.member-donation time { display: block; font-size: .65rem; color: var(--muted); }
+.prize-donation-preview { margin: 12px 0 16px; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.prize-donation-preview p { margin: 2px 0; font-size: .9rem; overflow-wrap: anywhere; }
 .personal-donations { margin: 16px 0; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .personal-donations h3 { font-size: 1rem; margin: 0 0 12px; overflow-wrap: anywhere; }
 .personal-donations > p small { display: block; color: var(--muted); }
@@ -544,13 +543,10 @@ h3 {
 .prize-dialog .close-button { display: grid; place-items: center; background: #21171b; color: #fff6f3; border: 1px solid #72505b; border-radius: 4px; font-size: 1.1rem; line-height: 1; cursor: pointer; }
 .goal-pending { color: #e1bf71; }
 .goal-result.fulfilled { color: #75ceb3; }
-@media (max-width: 900px) { .ranking-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .ranking-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 640px; } }
 @media (max-width: 560px) {
-  .ranking-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .ranking-card { min-height: 136px; padding: 12px; }
-  .community-section h2 { font-size: 1.25rem; }
-  .member-main .member-donation { font-size: .55rem; }
-  .member-main .member-donation time { font-size: .5rem; }
+  .ranking-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-width: none; }
+  .community-section h2 { font-size: 1.1rem; }
 }
 
 .search-box {
