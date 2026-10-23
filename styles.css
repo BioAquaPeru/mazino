@@ -137,8 +137,6 @@ h3 {
 .circle-progress { max-width: 570px; margin: 18px auto 0; }
 .circle-progress .circle-stats { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin: 0; font-size: 16px; line-height: 1.5; }
 .circle-stats strong { color: #ffda75; font-weight: 800; }
-.circle-stats span { color: #d3f0e9; font-weight: 600; }
-.circle-progress .circle-next { margin: 5px 0 0; color: #d8c9ce; font-size: 13px; line-height: 1.5; }
 @media (max-width: 600px) { .circle-progress { max-width: 330px; margin-top: 16px; } .circle-progress .circle-stats { font-size: 15px; gap: 6px 14px; } }
 
 .hero-actions {

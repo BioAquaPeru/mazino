@@ -14,14 +14,9 @@ function renderCircleProgress() {
   if (!root) return;
   root.hidden = circleSnapshot?.level == null;
   if (root.hidden) return;
-  const circle = circleSnapshot, number = n => n.toLocaleString('es-PE');
+  const circle = circleSnapshot;
   root.querySelector('[data-circle-level]').textContent = `Nivel ${circle.level}`;
-  root.querySelector('[data-circle-exp]').textContent = `${number(circle.exp)} EXP`;
-  root.querySelector('[data-circle-next]').textContent = circle.nextLevel === null ? 'Sin siguiente nivel configurado'
-    : circle.nextExp === null ? `Nivel ${circle.nextLevel}: EXP requerida por confirmar`
-    : circle.remaining > 0 ? `Faltan ${number(circle.remaining)} EXP para el nivel ${circle.nextLevel}`
-    : `EXP para nivel ${circle.nextLevel} alcanzada. Nivel pendiente de actualizar en R2Beat.`;
-  root.title = `EXP total del circulo. Ultima consulta: ${new Date(circle.readingAt).toLocaleString('es-PE', { timeZone: 'America/Lima' })}`;
+  root.title = '';
 }
 function startCircleProgress(service) {
   if (circleService === service) return;
