@@ -21,6 +21,7 @@ function renderRewardIdentity() {
   rewardDialog.querySelector("[data-prize-logout]").hidden = !rewardSession;
   rewardDialog.querySelector("[data-prize-identity]").textContent = rewardSession ? `Sesion: ${rewardSession.member.nick}` : "";
   if (!rewardSession) rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
+  if (!rewardSession) rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
 }
 
 async function prizeRequest(path, body) {
@@ -112,9 +113,11 @@ async function refreshPrizeDialog() {
   if (!rewardDialog.open || revision !== rewardDialogRevision) return;
   const container = rewardDialog.querySelector("[data-personal-prizes]");
   container.innerHTML = "";
+  rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
   if (!rewardSession) return;
   const personal = await prizeRequest("me");
   if (!rewardDialog.open || revision !== rewardDialogRevision || session !== rewardSession?.token) return;
+  renderPersonalDonations(personal.donations, personal.member?.nick || rewardSession.member.nick);
   container.innerHTML = personal.prizes.map((prize) => prize.code ? prizeCodeMarkup(prize, personal.instructions)
     : `<section class="prize-item"><h3>${escapeHtml(prize.label)}</h3><p>Premio personal disponible</p><button class="primary-action small-action" type="button" data-personal-claim="${escapeHtml(prize.id)}">Reclamar cupon</button></section>`).join("")
     || '<p class="muted">No tienes cupones personales pendientes.</p>';
@@ -122,6 +125,14 @@ async function refreshPrizeDialog() {
 
 function prizeCodeMarkup(prize, instructions) {
   return `<section class="prize-item prize-revealed"><h3>${escapeHtml(prize.label)}</h3><p>${escapeHtml(instructions)}</p><code class="prize-code">${escapeHtml(prize.code)}</code><div class="editor-actions"><button class="ghost-button" type="button" data-prize-copy="${escapeHtml(prize.id)}">Copiar codigo</button><button class="primary-action small-action" type="button" data-prize-ack="${escapeHtml(prize.id)}">Ya lo guarde</button></div></section>`;
+}
+function renderPersonalDonations(data, nick) {
+  const container = rewardDialog.querySelector('[data-personal-donations]');
+  if (!data) { container.innerHTML = ''; return; }
+  const number = value => value == null ? 'Pendiente de confirmar' : Number(value).toLocaleString('es-PE');
+  const date = value => value ? String(value).split('-').reverse().join('/') : '';
+  container.innerHTML = `<section class="personal-donations"><h3>Mis donaciones: ${escapeHtml(nick)}</h3><p>Total registrado: <strong>${number(data.total)}${data.total != null ? ' Rcoin' : ''}</strong>${data.readingOn ? ` <small>Lectura: ${escapeHtml(date(data.readingOn))}</small>` : ''}</p>
+    ${(data.goals || []).map(g => `<div class="personal-goal"><h4>${escapeHtml(g.title)}</h4><p class="muted">${escapeHtml(date(g.start))} al ${escapeHtml(date(g.end))}</p><dl><div><dt>Meta</dt><dd>${number(g.target)} Rcoin</dd></div><div><dt>Donado en el plazo</dt><dd>${number(g.donated)}${g.donated != null ? ' Rcoin' : ''}</dd></div><div><dt>Te falta</dt><dd>${number(g.remaining)}${g.remaining != null ? ' Rcoin' : ''}</dd></div></dl>${g.status === 'missing' ? '<p class="goal-pending">Faltan lecturas confirmadas para calcular esta meta. Consulta con el lider.</p>' : `<progress aria-label="Avance de la meta ${escapeHtml(g.title)}" max="${Number(g.target)}" value="${Math.max(0, Math.min(Number(g.target), Number(g.donated)))}"></progress><p class="goal-result ${g.status === 'fulfilled' ? 'fulfilled' : ''}">${g.status === 'fulfilled' ? 'Meta cumplida' : 'Meta en seguimiento'}</p>`}${g.effectiveStart && g.effectiveStart !== g.start ? `<small>Cuenta desde tu ingreso: ${escapeHtml(date(g.effectiveStart))}</small>` : ''}</div>`).join('') || '<p class="muted">No tienes metas activas en este momento.</p>'}</section>`;
 }
 
 document.addEventListener("click", async (event) => {
@@ -136,6 +147,7 @@ document.addEventListener("click", async (event) => {
   rewardDialog.querySelector('[name="nick"]').value = rewardSession?.member.nick || name;
   rewardDialog.querySelector("[data-prize-status]").textContent = "Cargando premios...";
   rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
+  rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
   rewardDialog.querySelector("[data-prize-events]").innerHTML = "";
   rewardEvents = [];
   rewardDialog.showModal();
@@ -153,6 +165,7 @@ rewardDialog.addEventListener("close", () => {
   rewardDialogRevision++; rewardPublicRevision++;
   rewardDialog.querySelector('[name="password"]').value = "";
   rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
+  rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
   rewardDialog.querySelector("[data-prize-events]").innerHTML = "";
 });
 rewardDialog.querySelector("[data-prize-login]").addEventListener("submit", async (event) => {

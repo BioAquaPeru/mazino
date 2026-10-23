@@ -22,6 +22,7 @@ function memberCardMarkup(member) {
       <div class="member-main">
         <b><button class="member-name" type="button" data-prize-open="${escapeHtml(member.id)}">${escapeHtml(member.nick)}</button></b>
         <span>${escapeHtml(member.title || member.rank || "Miembro")}</span>
+        ${typeof publicDonationMarkup === 'function' ? publicDonationMarkup(member.id) : ''}
       </div>
       <span class="member-level">Nv ${escapeHtml(member.level)}</span>
     </article>`;

@@ -32,6 +32,7 @@ function renderElite() {
         <h3><button class="member-name" type="button" data-prize-open="${escapeHtml(member.id)}">${escapeHtml(member.nick)}</button></h3>
         <p class="elite-level">Nv ${escapeHtml(member.level)}</p>
         <p class="elite-title">${escapeHtml(member.title || "Sublider")}</p>
+        ${publicDonationMarkup(member.id)}
       </div>
     </article>
   `).join("");
@@ -86,6 +87,7 @@ function renderPublic(data) {
 
   renderElite();
   renderMembers($("[data-member-search]")?.value || "");
+  renderCommunityRankings();
   updateFloatingButton();
 }
 
@@ -94,6 +96,72 @@ function buildWhatsAppUrl(nick) {
   const template = state.settings.whatsappTemplate || "Hola, quiero unirme a Mazino. Mi nick en R2Beat es: [NICK].";
   const message = template.replace("[NICK]", nick);
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+}
+
+let communityData = null, communityService = '';
+const rcoinNumber = value => Number(value).toLocaleString('es-PE');
+const readingDate = value => value ? value.split('-').reverse().join('/') : '';
+function publicDonationMarkup(id) {
+  const row = communityData?.donations.find(r => r.memberId === id);
+  return `<small class="member-donation">${row?.total != null ? `Rcoin: <strong>${rcoinNumber(row.total)}</strong><time datetime="${escapeHtml(row.readingOn)}">${escapeHtml(readingDate(row.readingOn))}</time>` : 'Rcoin: sin registro'}</small>`;
+}
+function rankingCard(member, position, content) {
+  return `<article class="ranking-card ${member.goldEffect ? 'gold-active' : ''}" style="--mist-color: ${memberFogColor(member)}">
+    ${perimeterMist(member)}<div class="ranking-card-top"><span class="ranking-position">#${position}</span>${licenseBadge(member)}</div>
+    <h3>${escapeHtml(member.nick)}</h3><p class="ranking-role">${escapeHtml(member.title || member.rank || '')}</p>${content}</article>`;
+}
+function renderCommunityRankings() {
+  if (!state.settings) return;
+  const members = [...state.elite, ...state.members], byId = new Map(members.map(m => [m.id, m]));
+  $('[data-community-section]').hidden = $('[data-global-section]').hidden = !state.settings.membersEnabled;
+  const donors = (communityData?.donations || []).filter(r => r.total > 0 && byId.has(r.memberId)).sort((a, b) => b.total - a.total || byId.get(a.memberId).nick.localeCompare(byId.get(b.memberId).nick)).slice(0, 5);
+  $('[data-donor-ranking]').innerHTML = donors.map((r, i) => rankingCard(byId.get(r.memberId), i + 1, `<p class="ranking-value">${rcoinNumber(r.total)} <small>Rcoin</small></p><time class="ranking-date" datetime="${r.readingOn}">Lectura: ${readingDate(r.readingOn)}</time>`)).join('') || '<p class="ranking-empty">Todavia no hay donaciones registradas.</p>';
+  const global = communityData?.global;
+  $('[data-global-ranking]').innerHTML = (global?.entries || []).map(r => {
+    const own = r.circle?.id === 10 && members.find(m => m.nick.normalize('NFKC').toLowerCase() === r.nick.normalize('NFKC').toLowerCase());
+    const member = own || { nick: r.nick, license: r.license, title: '', goldEffect: false };
+    return rankingCard(member, r.position, `<p class="ranking-value">Nv ${r.level}</p><p class="ranking-circle">${escapeHtml(r.circle?.name || 'Sin circulo')}</p>`);
+  }).join('') || '<p class="ranking-empty">Ranking global pendiente de actualizar.</p>';
+  $('[data-global-note]').textContent = global?.updatedAt ? `Ranking de personajes | ${new Date(global.updatedAt).toLocaleString('es-PE', { timeZone: 'America/Lima' })}${global.stale ? ' | Ultima copia disponible' : ''}` : 'Ranking de personajes del servidor';
+  startPerimeterMist($('[data-donor-ranking]')); startPerimeterMist($('[data-global-ranking]'));
+}
+function validCommunity(value) {
+  if (!Number.isSafeInteger(value?.asOf) || value.asOf <= 0 || !Array.isArray(value.donations) || value.donations.length > 200) return null;
+  const date = v => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v);
+  if (value.donations.some(r => !r || typeof r.memberId !== 'string' || !r.memberId || (r.total !== null && (!Number.isSafeInteger(r.total) || r.total < 0 || r.total > 1e12 || !date(r.readingOn))))
+    || new Set(value.donations.map(r => r.memberId)).size !== value.donations.length) return null;
+  const global = value.global;
+  if (!global || !Array.isArray(global.entries) || ![0, 5].includes(global.entries.length) || (global.entries.length && (!Number.isSafeInteger(global.updatedAt) || global.updatedAt <= 0))) return null;
+  if (global.entries.some((r, i) => r.position !== i + 1 || typeof r.nick !== 'string' || !r.nick || !Number.isInteger(r.level) || r.level < 1 || r.level > 999 || (r.circle !== null && (!Number.isInteger(r.circle?.id) || r.circle.id < 1 || typeof r.circle.name !== 'string')))) return null;
+  return { asOf: value.asOf, donations: value.donations.map(r => ({ memberId: r.memberId, total: r.total, readingOn: r.total === null ? null : r.readingOn })),
+    global: { entries: global.entries.map(r => ({ position: r.position, nick: r.nick, level: r.level, license: r.license, circle: r.circle ? { id: r.circle.id, name: r.circle.name } : null })), updatedAt: global.updatedAt || null, stale: !!global.stale } };
+}
+function startCommunity(service) {
+  if (communityService === service) return;
+  communityService = service;
+  const key = `mazino:community:v1:${service}`;
+  try { communityData = validCommunity(JSON.parse(localStorage.getItem(key))); } catch { communityData = null; }
+  const render = () => { if (state.settings) { renderCommunityRankings(); renderElite(); renderMembers($('[data-member-search]')?.value || ''); } };
+  render(); let busy = false;
+  const refresh = async () => {
+    if (busy || communityService !== service) return;
+    busy = true;
+    try {
+      const response = await fetch(`${service}/api/community`, { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+      if (!response.ok) return;
+      const next = validCommunity(await response.json());
+      if (!next || communityService !== service || (communityData && next.asOf <= communityData.asOf)) return;
+      if (communityData?.global.entries.length && (!next.global.entries.length || next.global.updatedAt < communityData.global.updatedAt)) next.global = { ...communityData.global, stale: true };
+      communityData = next;
+      try { localStorage.setItem(key, JSON.stringify(next)); } catch { /* Public totals also work with blocked storage. */ }
+      render();
+    } catch { /* Keep rankings and totals without touching member presentation or sessions. */ }
+    finally { busy = false; }
+  };
+  refresh();
+  setInterval(() => { if (!document.hidden) refresh(); }, 60000);
+  window.addEventListener('online', refresh);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
 }
 
 const PUBLIC_SNAPSHOT_KEY = "mazino:public-snapshot:v1";
@@ -158,6 +226,7 @@ async function loadPublic() {
       finally { refreshing = false; }
     };
     // A new device checks the live service before displaying the static backup.
+    if (typeof startCommunity === 'function') startCommunity(service);
     await refresh();
     if (snapshotVersion(saved) > snapshotVersion(latest)) accept(saved);
     setInterval(() => { if (!document.hidden) refresh(); }, 60000);

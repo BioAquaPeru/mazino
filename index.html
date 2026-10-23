@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=44" />
+    <link rel="stylesheet" href="./styles.css?v=45" />
   </head>
   <body>
     <div class="site-shell">
@@ -41,6 +41,14 @@
       </header>
 
       <main data-public-content hidden>
+        <section class="section-block community-section" aria-labelledby="donor-ranking-title" data-community-section hidden>
+          <div class="section-head compact-head"><div><p class="section-kicker">RCOIN DEL CIRCULO</p><h2 id="donor-ranking-title">TOP DONADORES</h2><p class="ranking-note" data-donor-note>Ultimos totales registrados</p></div></div>
+          <div class="ranking-grid" data-donor-ranking></div>
+        </section>
+        <section class="section-block community-section" aria-labelledby="global-ranking-title" data-global-section hidden>
+          <div class="section-head compact-head"><div><p class="section-kicker">R2BEAT LATINO</p><h2 id="global-ranking-title">TOP 5 GLOBAL</h2><p class="ranking-note" data-global-note>Ranking de personajes del servidor</p></div></div>
+          <div class="ranking-grid" data-global-ranking></div>
+        </section>
         <section class="section-block" aria-labelledby="elite-title" data-elite-section hidden>
           <div class="section-head">
             <div>
@@ -105,6 +113,7 @@
           <button class="primary-action small-action" type="submit">Desbloquear premios</button>
         </form>
         <p class="form-status" role="status" data-prize-status></p>
+        <div data-personal-donations></div>
         <div data-personal-prizes></div>
         <div data-prize-events></div>
         <button class="ghost-button" type="button" data-prize-logout hidden>Cerrar sesion de premios</button>
@@ -149,8 +158,8 @@
       </div>
     </dialog>
     <script src="./member-badge.js?v=22" defer></script>
-    <script src="./member-pairs.js?v=30" defer></script>
-    <script src="./prizes.js?v=38" defer></script>
-    <script src="./app.js?v=42" defer></script>
+    <script src="./member-pairs.js?v=31" defer></script>
+    <script src="./prizes.js?v=39" defer></script>
+    <script src="./app.js?v=43" defer></script>
   </body>
 </html>
