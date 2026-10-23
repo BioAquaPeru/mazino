@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=48" />
+    <link rel="stylesheet" href="./styles.css?v=49" />
   </head>
   <body>
     <div class="site-shell">
@@ -22,6 +22,10 @@
           <section class="hero-copy" aria-labelledby="hero-title">
             <p class="eyebrow">CIRCULO</p>
             <h1 id="hero-title">MAZINO</h1>
+            <div class="circle-progress" data-circle-progress role="group" aria-label="Nivel y experiencia del circulo" hidden>
+              <p class="circle-stats"><strong data-circle-level></strong><span data-circle-exp></span></p>
+              <p class="circle-next" data-circle-next></p>
+            </div>
             <p class="hero-phrase" data-field="heroPhrase">Cargando identidad...</p>
             <div class="hero-actions">
               <button class="primary-action" type="button" data-join-open>
@@ -174,6 +178,7 @@
     <script src="./member-pairs.js?v=32" defer></script>
     <script src="./event-board.js?v=1" defer></script>
     <script src="./prizes.js?v=41" defer></script>
-    <script src="./app.js?v=45" defer></script>
+    <script src="./circle-progress.js?v=1" defer></script>
+    <script src="./app.js?v=46" defer></script>
   </body>
 </html>

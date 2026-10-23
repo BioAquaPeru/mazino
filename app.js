@@ -246,6 +246,7 @@ async function loadPublic() {
     };
     // A new device checks the live service before displaying the static backup.
     if (typeof startCommunity === 'function') startCommunity(service);
+    if (typeof startCircleProgress === 'function') startCircleProgress(service);
     await refresh();
     if (snapshotVersion(saved) > snapshotVersion(latest)) accept(saved);
     setInterval(() => { if (!document.hidden) refresh(); }, 60000);
