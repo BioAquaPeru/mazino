@@ -23,13 +23,16 @@ let refreshMemberAccess;
     const matches = requestForNick();
     rewardDialog.querySelector('[data-prize-login]').hidden = !!rewardSession || !!matches;
     node('start').hidden = !!rewardSession || !!matches;
+    node('recover').hidden = !!rewardSession || !!matches;
     node('change').hidden = !rewardSession || changing;
     node('pending').hidden = !!rewardSession || !matches || pending.status === 'approved';
     form.hidden = !changing && (!!rewardSession || !matches || pending?.status !== 'approved');
     node('current-row').hidden = !changing;
     form.currentPassword.required = changing;
-    node('password-title').textContent = changing ? `Cambiar clave de ${rewardSession?.member.nick || ''}` : `Crea tu clave: ${pending?.nick || ''}`;
-    node('title').textContent = `Verifica tu personaje: ${pending?.nick || ''}`;
+    const recovering = pending?.purpose === 'recover';
+    node('password-title').textContent = changing ? `Cambiar clave de ${rewardSession?.member.nick || ''}` : `${recovering ? 'Crea tu nueva clave' : 'Crea tu clave'}: ${pending?.nick || ''}`;
+    node('title').textContent = `${recovering ? 'Recuperar acceso' : 'Verifica tu personaje'}: ${pending?.nick || ''}`;
+    node('recovery-note').hidden = !recovering || !matches || !!rewardSession;
     node('code').textContent = pending?.code || '';
     for (const button of root.querySelectorAll('button')) button.disabled = busy;
     if (matches && !rewardSession && rewardDialog.open && !document.hidden && !busy) timer = setTimeout(check,15000);
@@ -50,19 +53,21 @@ let refreshMemberAccess;
     } finally { busy = false; render(); }
   }
   refreshMemberAccess = () => { revision++; changing = false; clearPasswords(); message(''); render(); if (requestForNick() && !rewardSession && rewardDialog.open) check(); };
-  node('start').addEventListener('click',async () => {
+  async function start(purpose = 'enroll') {
     if (busy || rewardSession) return;
     const nick = rewardDialog.querySelector('[data-prize-login]').nick.value.trim();
     if (!nick) { message('Escribe tu nick de R2Beat en el formulario de acceso.'); return; }
     const version = ++revision;
     busy = true; message('Creando solicitud privada...'); render();
     try {
-      const result = await accessApi('request',{nick});
+      const result = await accessApi('request',purpose === 'recover' ? {nick,purpose} : {nick});
       if (!valid(version,undefined)) return;
-      pending = result; save(); clearPasswords(); message('Envia el codigo en el juego. Nadie debe pedirte tu contraseña de R2Beat.');
+      pending = result; save(); clearPasswords(); message(purpose === 'recover' ? 'Envia el codigo desde tu personaje en R2Beat. Espera la aprobacion para crear tu nueva clave. Tu clave actual sigue vigente.' : 'Envia el codigo en el juego. Nadie debe pedirte tu contraseña de R2Beat.');
     } catch (error) { if (valid(version,undefined)) message(error.message); }
     finally { busy = false; render(); }
-  });
+  }
+  node('start').addEventListener('click',() => start());
+  node('recover').addEventListener('click',() => start('recover'));
   node('check').addEventListener('click',check);
   node('forget').addEventListener('click',() => { revision++; pending = null; save(); clearPasswords(); message('Solicitud olvidada en este dispositivo. Si hace falta, puedes crear otra.'); render(); });
   node('change').addEventListener('click',() => { if (!rewardSession || busy) return; revision++; changing = true; clearPasswords(); message('Al guardar se cerraran tus sesiones de premios. Tu acceso de sublider, si tienes uno, sigue igual.'); render(); form.currentPassword.focus(); });
@@ -75,12 +80,13 @@ let refreshMemberAccess;
     if (ownChange && !session || !ownChange && !requestToken) return;
     busy = true; message('Guardando tu clave...'); render();
     try {
+      const recovering = !ownChange && pending?.purpose === 'recover';
       if (ownChange) await prizeRequest('password-change',{currentPassword:form.currentPassword.value,password,confirmPassword});
       else await accessApi('finish',{token:requestToken,password,confirmPassword});
       if (!valid(version,session)) return;
       if (ownChange) { rewardSession = null; saveRewardSession(); }
       pending = null; save(); changing = false; clearPasswords(); renderRewardIdentity();
-      message('Clave guardada. Ahora inicia sesion con tu nueva clave.');
+      message(recovering ? 'Acceso recuperado. Se cerraron tus sesiones anteriores de premios. Inicia sesion con tu nueva clave.' : 'Clave guardada. Ahora inicia sesion con tu nueva clave.');
       rewardDialog.querySelector('[data-prize-login] [name="password"]').value = '';
       rewardDialog.querySelector('[data-prize-login] [name="password"]').focus();
     } catch (error) { if (valid(version,session)) { clearPasswords(); message(error.message); } }

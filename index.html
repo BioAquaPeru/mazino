@@ -130,6 +130,7 @@
         </form>
         <section class="member-access" data-member-access aria-label="Mi acceso al circulo">
           <button class="ghost-button" type="button" data-access-start>Solicitar mi acceso</button>
+          <button class="ghost-button" type="button" data-access-recover>Olvide mi clave · Recuperar acceso</button>
           <button class="ghost-button" type="button" data-access-change hidden>Cambiar mi clave</button>
           <div data-access-pending hidden>
             <h3 data-access-title>Verifica tu personaje</h3>
@@ -139,6 +140,7 @@
             <button class="ghost-button" type="button" data-access-check>Consultar aprobacion</button>
             <button class="ghost-button" type="button" data-access-forget>Olvidar solicitud en este dispositivo</button>
           </div>
+          <p class="muted" data-access-recovery-note hidden>Tu clave actual sigue funcionando hasta que termines. Al guardar la nueva, se cerraran tus sesiones de premios. La clave del panel de sublider no cambia.</p>
           <form class="prize-login" data-access-password hidden>
             <h3 data-access-password-title>Crea tu clave privada</h3>
             <label data-access-current-row hidden><span>Clave actual del circulo</span><input name="currentPassword" type="password" autocomplete="current-password" maxlength="100" /></label>
@@ -199,7 +201,7 @@
     <script src="./member-pairs.js?v=32" defer></script>
     <script src="./event-board.js?v=1" defer></script>
     <script src="./prizes.js?v=42" defer></script>
-    <script src="./member-access.js?v=1" defer></script>
+    <script src="./member-access.js?v=2" defer></script>
     <script src="./circle-progress.js?v=2" defer></script>
     <script src="./app.js?v=46" defer></script>
   </body>
