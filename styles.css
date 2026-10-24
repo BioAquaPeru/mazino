@@ -1300,3 +1300,12 @@ button:disabled { cursor: wait; opacity: 0.6; }
 }
 .tracking-code { display: block; overflow-wrap: anywhere; word-break: break-all; max-width: 260px; }
 .tracking-dialog { width: min(1100px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); }
+.member-access { margin: 18px 0; padding-top: 16px; border-top: 1px solid #3d292c; min-width: 0; }
+.member-access > button { margin: 0 6px 8px 0; }
+.member-access h3 { font-size: 17px; margin: 12px 0; overflow-wrap: anywhere; }
+.member-access p { font-size: 14px; line-height: 1.6; }
+.member-access [data-access-pending] { background: #211914; border: 1px solid #66502d; padding: 16px; border-radius: 10px; }
+.member-access .prize-code { display: block; font-size: clamp(20px, 5vw, 28px); letter-spacing: .08em; overflow-wrap: anywhere; }
+.member-access [data-access-pending] button { width: 100%; margin-top: 8px; white-space: normal; }
+.member-access input { min-width: 0; width: 100%; }
+.member-access [hidden] { display: none !important; }

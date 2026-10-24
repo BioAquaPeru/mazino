@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=50" />
+    <link rel="stylesheet" href="./styles.css?v=51" />
   </head>
   <body>
     <div class="site-shell">
@@ -128,6 +128,28 @@
           <label><span>Tu clave del c&iacute;rculo</span><input name="password" type="password" autocomplete="current-password" maxlength="100" required /></label>
           <button class="primary-action small-action" type="submit">Desbloquear premios</button>
         </form>
+        <section class="member-access" data-member-access aria-label="Mi acceso al circulo">
+          <button class="ghost-button" type="button" data-access-start>Solicitar mi acceso</button>
+          <button class="ghost-button" type="button" data-access-change hidden>Cambiar mi clave</button>
+          <div data-access-pending hidden>
+            <h3 data-access-title>Verifica tu personaje</h3>
+            <p>Envia este codigo <strong>desde tu personaje dentro de R2Beat</strong> al lider o a un sublider autorizado. Ellos comprobaran tu nick y aprobaran esta solicitud.</p>
+            <code class="prize-code" data-access-code></code>
+            <p class="muted">Conserva esta pestaña: la aprobacion solo permite crear tu clave desde esta solicitud. El codigo no es una clave de acceso.</p>
+            <button class="ghost-button" type="button" data-access-check>Consultar aprobacion</button>
+            <button class="ghost-button" type="button" data-access-forget>Olvidar solicitud en este dispositivo</button>
+          </div>
+          <form class="prize-login" data-access-password hidden>
+            <h3 data-access-password-title>Crea tu clave privada</h3>
+            <label data-access-current-row hidden><span>Clave actual del circulo</span><input name="currentPassword" type="password" autocomplete="current-password" maxlength="100" /></label>
+            <label><span>Nueva clave privada</span><input name="newPassword" type="password" autocomplete="new-password" minlength="15" maxlength="100" required /></label>
+            <p class="muted">Usa una frase de 15 a 100 caracteres, facil de recordar para ti. Puedes usar espacios. El lider y los sublideres no podran verla.</p>
+            <label><span>Repite la nueva clave</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="15" maxlength="100" required /></label>
+            <button class="primary-action small-action" type="submit">Guardar mi clave</button>
+            <button class="ghost-button" type="button" data-access-cancel>Cancelar</button>
+          </form>
+          <p class="form-status" role="status" aria-live="polite" data-access-message></p>
+        </section>
         <p class="form-status" role="status" data-prize-status></p>
         <div data-personal-donations></div>
         <div data-personal-prizes></div>
@@ -176,7 +198,8 @@
     <script src="./member-badge.js?v=22" defer></script>
     <script src="./member-pairs.js?v=32" defer></script>
     <script src="./event-board.js?v=1" defer></script>
-    <script src="./prizes.js?v=41" defer></script>
+    <script src="./prizes.js?v=42" defer></script>
+    <script src="./member-access.js?v=1" defer></script>
     <script src="./circle-progress.js?v=2" defer></script>
     <script src="./app.js?v=46" defer></script>
   </body>

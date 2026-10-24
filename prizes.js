@@ -23,6 +23,7 @@ function renderRewardIdentity() {
   if (!rewardSession) rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
   if (!rewardSession) rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
   refreshPrizeDonationPreview();
+  if (typeof refreshMemberAccess === 'function') refreshMemberAccess();
 }
 function refreshPrizeDonationPreview() {
   const container = rewardDialog.querySelector('[data-prize-donation-preview]');
