@@ -819,6 +819,12 @@ dialog::backdrop {
   display: grid;
   gap: 14px;
 }
+.join-dialog { width:min(460px,calc(100% - 28px)); max-width:calc(100% - 28px); max-height:calc(100dvh - 28px); overflow:auto; }
+.join-dialog .join-card { width:100%; min-width:0; }
+.join-dialog h2 { padding-right:24px; font-size:clamp(1.2rem,5vw,1.6rem); line-height:1.5; overflow-wrap:anywhere; }
+.join-dialog label { min-width:0; }
+.join-dialog input { min-width:0; width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:#171114; color:inherit; }
+.join-dialog .close-button { display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; background:#21151b; color:#fff; cursor:pointer; }
 
 .join-card label,
 .vault-card label,
