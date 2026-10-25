@@ -55,13 +55,14 @@ function renderMembers(filter = "") {
 }
 
 function renderPublic(data) {
-  state.settings = data.settings;
-  configurePrizes(data.settings);
+  const settings=typeof circleContactSettings==='function'?circleContactSettings(data.settings,data.branding):data.settings;
+  state.settings = settings;
+  configurePrizes(settings);
   state.elite = data.elite;
   state.members = data.members;
   state.totalMembers = data.totalMembers ?? (state.members.length + state.elite.length);
-  const showElite = data.settings.eliteEnabled !== false;
-  const showMembers = data.settings.membersEnabled !== false;
+  const showElite = settings.eliteEnabled !== false;
+  const showMembers = settings.membersEnabled !== false;
   $("[data-elite-section]").hidden = !showElite;
   $("[data-members-section]").hidden = !showMembers;
   $("[data-public-content]").hidden = !showElite && !showMembers;
@@ -71,7 +72,7 @@ function renderPublic(data) {
 
   $$("[data-field]").forEach((node) => {
     const key = node.dataset.field;
-    node.textContent = data.settings[key] || "";
+    node.textContent = settings[key] || "";
   });
 
   if (data.settings.logoUrl) {
@@ -80,11 +81,14 @@ function renderPublic(data) {
   if(typeof applyCircleTheme==='function')applyCircleTheme(data.settings,data.branding);
 
   $$("[data-join-open]").forEach((button) => {
-    button.hidden = window.mazinoSpaceKind === 'group';
-    button.disabled = !data.settings.joinEnabled;
+    button.hidden = window.mazinoSpaceKind === 'group'&&!settings.whatsappUrl;
+    button.disabled = !settings.joinEnabled;
     button.classList.toggle("disabled", button.disabled);
-    if (button.disabled) button.querySelector("span").textContent = "SOLICITUDES PAUSADAS";
+    if (button.disabled) button.querySelector("span").textContent = settings.whatsappUrl=== ''?'WHATSAPP NO CONFIGURADO':'SOLICITUDES PAUSADAS';
   });
+  const welcome=$('[data-field="heroPhrase"]');if(welcome)welcome.hidden=!settings.heroPhrase?.trim();
+  const contactTitle=$('[data-join-title]');if(contactTitle)contactTitle.textContent=(settings.contactMode==='contact'?'Contactar al lider de ':'Unirme a ')+(settings.contactName||settings.siteName);
+  const contactKicker=$('[data-join-kicker]');if(contactKicker)contactKicker.textContent=settings.contactMode==='contact'?'CONTACTO':'SOLICITUD';
 
   renderElite();
   const eyebrow=document.querySelector('.hero .eyebrow');if(eyebrow)eyebrow.textContent=window.mazinoSpaceKind==='group'?'GRUPO DE INVITADOS':'CIRCULO';
@@ -94,6 +98,7 @@ function renderPublic(data) {
 }
 
 function buildWhatsAppUrl(nick) {
+  if(typeof circleWhatsAppLink==='function')return circleWhatsAppLink(state.settings,nick);
   const phone = String(state.settings.whatsappNumber || "").replace(/[^\d]/g, "");
   const template = state.settings.whatsappTemplate || "Hola, quiero unirme a Mazino. Mi nick en R2Beat es: [NICK].";
   const message = template.replace("[NICK]", nick);
@@ -192,6 +197,9 @@ function publicBranding(value) {
   const result={spaceId:value.spaceId,name:value.name,revision:value.revision};
   for(const field of ['tabColor','pageColor','pageBackground']){const color=value[field]||'';if(typeof color!=='string'||(color&&!/^#[a-f0-9]{6}$/i.test(color)))return null;result[field]=color;}
   for(const field of ['logoUrl','pageLogoUrl']){const logo=value[field]||'';if(typeof logo!=='string'||logo.length>(field==='logoUrl'?60000:240000)||(!/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(logo)&&!/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(logo)&&logo!==''))return null;result[field]=logo;}
+  if(typeof value.welcomeMessage==='string'&&value.welcomeMessage.length<=500)result.welcomeMessage=value.welcomeMessage;
+  if(typeof value.whatsappUrl==='string'&&value.whatsappUrl.length<=1500)result.whatsappUrl=value.whatsappUrl;
+  if(['join','contact'].includes(value.contactMode))result.contactMode=value.contactMode;
   return result;
 }
 function snapshotIsNewer(next,previous){return snapshotVersion(next)>snapshotVersion(previous)||(snapshotVersion(next)===snapshotVersion(previous)&&(next?.branding?.revision||0)>(previous?.branding?.revision||0));}
@@ -299,11 +307,12 @@ function wireJoinDialog() {
       form.nick.focus();
       return;
     }
-    if (!String(state.settings.whatsappNumber || "").replace(/[^\d]/g, "")) {
-      status.textContent = "El numero de WhatsApp aun no esta configurado.";
+    const whatsappUrl=buildWhatsAppUrl(nick);
+    if (!whatsappUrl||(typeof circleWhatsAppLink!=='function'&&!String(state.settings.whatsappNumber||'').replace(/[^\d]/g,''))) {
+      status.textContent = "El WhatsApp de este circulo aun no esta configurado.";
       return;
     }
-    window.open(buildWhatsAppUrl(nick), "_blank", "noopener,noreferrer");
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
     dialog.close();
   });
 }
@@ -333,10 +342,11 @@ let guideTrigger = null;
 
 function updateGuideContact() {
   const phone = String(state.settings?.whatsappNumber || "").replace(/[^\d]/g, "");
+  const whatsappUrl=typeof circleWhatsAppLink==='function'?circleWhatsAppLink(state.settings,'____',true):phone?`https://wa.me/${phone}?text=${encodeURIComponent("Hola, soy integrante de MAZINO. Mi nick en R2Beat es: ____. Necesito mi clave del circulo para reclamar mis premios.")}`:'';
   const link = $("[data-guide-contact]");
-  link.hidden = !phone;
-  $("[data-guide-no-contact]").hidden = Boolean(phone);
-  if (phone) link.href = `https://wa.me/${phone}?text=${encodeURIComponent("Hola, soy integrante de MAZINO. Mi nick en R2Beat es: ____. Necesito mi clave del circulo para reclamar mis premios.")}`;
+  link.hidden = !whatsappUrl;
+  $("[data-guide-no-contact]").hidden = Boolean(whatsappUrl);
+  if (whatsappUrl) link.href = whatsappUrl;
   else link.removeAttribute("href");
 }
 

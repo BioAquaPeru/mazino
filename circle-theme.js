@@ -1,8 +1,44 @@
 // Public presentation only. Member effects, sessions, links and permissions stay scoped as before.
-function applyCircleTheme(settings,branding) {
+function selectedCircleBrand(branding) {
   const id=window.mazinoSpaceId||'main',catalog=window.mazinoSpaceBrand;
   let brand=branding?.spaceId===id?branding:null;
   if(catalog?.spaceId===id&&(!brand||catalog.revision>brand.revision))brand=catalog;
+  return brand;
+}
+function circleWhatsAppUrl(value) {
+  if(typeof value!=='string'||value.length>1500||!value.trim())return '';
+  try{const url=new URL(value.trim());if(url.protocol!=='https:'||url.username||url.password||url.hash||url.port)return '';
+    const phone=/^\/\+?([1-9]\d{7,14})\/?$/.exec(url.pathname);
+    if(url.hostname==='wa.me'&&phone)url.pathname='/'+phone[1];
+    else if(url.hostname==='api.whatsapp.com'&&url.pathname==='/send'&&/^[1-9]\d{7,14}$/.test(url.searchParams.get('phone')||'')){}
+    else if(url.hostname==='chat.whatsapp.com'&&/^\/[a-zA-Z0-9_-]{10,100}\/?$/.test(url.pathname)){}
+    else return '';
+    if([...url.searchParams.keys()].some(k=>!['text','phone','mode','app_absent'].includes(k)))return '';
+    return url.href;
+  }catch{return '';}
+}
+function circleContactSettings(settings,branding) {
+  const brand=selectedCircleBrand(branding),result={...settings};
+  if(typeof brand?.welcomeMessage==='string')result.heroPhrase=brand.welcomeMessage;
+  const legacyPhone=String(settings.whatsappNumber||'').replace(/[^\d]/g,'');
+  result.whatsappUrl=circleWhatsAppUrl(typeof brand?.whatsappUrl==='string'?brand.whatsappUrl:legacyPhone?'https://wa.me/'+legacyPhone:'');
+  result.contactMode=['join','contact'].includes(brand?.contactMode)?brand.contactMode:window.mazinoSpaceKind==='group'?'contact':'join';
+  result.contactName=brand?.name||settings.siteName||'este circulo';
+  if(result.contactMode==='contact'){result.joinButtonText='CONTACTAR AL LIDER';result.joinEnabled=!!result.whatsappUrl;}
+  else {result.joinEnabled=!!result.whatsappUrl&&settings.joinEnabled;if(window.mazinoSpaceKind==='group')result.joinButtonText='UNIRME AL GRUPO';}
+  return result;
+}
+function circleWhatsAppLink(settings,nick,help=false) {
+  const phone=String(settings?.whatsappNumber||'').replace(/[^\d]/g,'');
+  const value=typeof settings?.whatsappUrl==='string'?settings.whatsappUrl:phone?'https://wa.me/'+phone:'';
+  const safe=circleWhatsAppUrl(value);if(!safe)return '';
+  const url=new URL(safe);if(url.hostname==='chat.whatsapp.com')return safe;
+  const name=settings.contactName||settings.siteName||'este circulo';
+  const template=help?'Hola, soy integrante de [CIRCULO]. Mi nick en R2Beat es: [NICK]. Necesito mi clave del circulo para reclamar mis premios.':url.searchParams.get('text')||((window.mazinoSpaceId||'main')==='main'&&settings.whatsappTemplate?settings.whatsappTemplate:settings.contactMode==='contact'?'Hola, quiero contactar al lider de [CIRCULO]. Mi nick de R2Beat es: [NICK].':'Hola, quiero unirme a [CIRCULO]. Mi nick de R2Beat es: [NICK].');
+  url.searchParams.set('text',template.replaceAll('[NICK]',()=>nick).replaceAll('[CIRCULO]',()=>name));return url.href;
+}
+function applyCircleTheme(settings,branding) {
+  const id=window.mazinoSpaceId||'main',brand=selectedCircleBrand(branding);
   const extra=id!=='main',valid=value=>/^#[a-f0-9]{6}$/i.test(value||'');
   const custom=!!(brand&&(brand.pageLogoUrl||brand.logoUrl||brand.pageColor||brand.pageBackground||(brand.tabColor&&brand.tabColor!=='#ff506a')));
   const active=extra||custom,body=document.body;
