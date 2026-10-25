@@ -79,12 +79,14 @@ function renderPublic(data) {
   }
 
   $$("[data-join-open]").forEach((button) => {
+    button.hidden = window.mazinoSpaceKind === 'group';
     button.disabled = !data.settings.joinEnabled;
     button.classList.toggle("disabled", button.disabled);
     if (button.disabled) button.querySelector("span").textContent = "SOLICITUDES PAUSADAS";
   });
 
   renderElite();
+  const eyebrow=document.querySelector('.hero .eyebrow');if(eyebrow)eyebrow.textContent=window.mazinoSpaceKind==='group'?'GRUPO DE INVITADOS':'CIRCULO';
   renderMembers($("[data-member-search]")?.value || "");
   renderCommunityRankings();
   updateFloatingButton();
@@ -158,7 +160,7 @@ document.addEventListener('click', event => {
 function startCommunity(service) {
   if (communityService === service) return;
   communityService = service;
-  const key = `mazino:community:v1:${service}`;
+  const key = typeof spaceStorageKey==='function'?spaceStorageKey(`mazino:community:v1:${service}`):`mazino:community:v1:${service}`;
   try { communityData = validCommunity(JSON.parse(localStorage.getItem(key))); } catch { communityData = null; }
   const render = () => { if (state.settings) renderCommunityRankings(); if (typeof refreshPrizeDonationPreview === 'function') refreshPrizeDonationPreview(); };
   render(); let busy = false;
@@ -166,7 +168,7 @@ function startCommunity(service) {
     if (busy || communityService !== service) return;
     busy = true;
     try {
-      const response = await fetch(`${service}/api/community`, { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+      const response = await fetch(typeof spaceApiUrl==='function'?spaceApiUrl(`${service}/api/community`):`${service}/api/community`, { cache: 'no-store', signal: AbortSignal.timeout(15000) });
       if (!response.ok) return;
       const next = validCommunity(await response.json());
       if (!next || communityService !== service || (communityData && next.asOf <= communityData.asOf)) return;
@@ -183,7 +185,7 @@ function startCommunity(service) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
 }
 
-const PUBLIC_SNAPSHOT_KEY = "mazino:public-snapshot:v1";
+const PUBLIC_SNAPSHOT_KEY = typeof spaceStorageKey==='function'?spaceStorageKey("mazino:public-snapshot:v1"):"mazino:public-snapshot:v1";
 function publicSnapshot(value) {
   if (!value?.settings || !Array.isArray(value.members) || !Array.isArray(value.elite)) return null;
   const textFields = ['siteName', 'heroPhrase', 'joinButtonText', 'whatsappNumber', 'whatsappTemplate', 'logoUrl', 'membersTitle', 'eliteTitle', 'rewardsServiceUrl'];
@@ -216,7 +218,8 @@ async function loadPublic() {
     const next = JSON.stringify({ settings: data.settings, members: data.members, elite: data.elite, totalMembers: data.totalMembers });
     if (next !== signature) { renderPublic(data); signature = next; }
   };
-  if (latest) show(latest);
+  const extraCircle=typeof window.mazinoSpaceId==='string' && window.mazinoSpaceId!=='main';
+  if (latest && !extraCircle) show(latest);
   let saved = null;
   try {
     const endpoint = document.documentElement.hasAttribute('data-static') ? './site-data.json' : './api/public';
@@ -224,6 +227,8 @@ async function loadPublic() {
     if (response.ok) saved = publicSnapshot(await response.json());
   } catch { /* A verified browser snapshot also survives failure of the static bootstrap. */ }
   const service = saved?.settings.rewardsServiceUrl || latest?.settings.rewardsServiceUrl;
+  if(service && typeof initializePublicSpaces==='function')await initializePublicSpaces(service);
+  if(extraCircle){saved=null;if(latest)show(latest);}
   if (service && /^https:\/\/[a-z0-9.-]+$/i.test(service)) {
     let refreshing = false;
     const accept = data => {
@@ -239,7 +244,7 @@ async function loadPublic() {
       if (refreshing) return;
       refreshing = true;
       try {
-        const response = await fetch(`${service}/api/site`, { cache: 'no-store', signal: AbortSignal.timeout(20000) });
+        const response = await fetch(typeof spaceApiUrl==='function'?spaceApiUrl(`${service}/api/site`):`${service}/api/site`, { cache: 'no-store', signal: AbortSignal.timeout(20000) });
         if (response.ok) accept(publicSnapshot(await response.json()));
       } catch { /* Keep the last verified version on timeouts, errors and malformed replies. */ }
       finally { refreshing = false; }

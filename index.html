@@ -13,15 +13,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=51" />
+    <link rel="stylesheet" href="./styles.css?v=52" />
   </head>
   <body>
     <div class="site-shell">
+<nav class="circle-public-selector" data-circle-selector aria-label="Elegir circulo o grupo" hidden><label>Elige tu circulo o grupo<select aria-label="Circulo o grupo"></select></label><p role="status" data-circle-selector-status></p></nav>
+    <div class="guest-participation"><button type="button" class="primary-action" data-guest-access data-prize-open="guest" data-prize-nick="" hidden>Solicitar participacion en este grupo</button></div>
       <header class="hero" id="inicio">
         <div class="hero-inner">
           <section class="hero-copy" aria-labelledby="hero-title">
             <p class="eyebrow">CIRCULO</p>
-            <h1 id="hero-title">MAZINO</h1>
+            <h1 id="hero-title" data-field="siteName">MAZINO</h1>
             <div class="circle-progress" data-circle-progress role="group" aria-label="Nivel del circulo" hidden>
               <p class="circle-stats"><strong data-circle-level></strong></p>
             </div>
@@ -43,7 +45,7 @@
         </div>
       </header>
 
-      <main data-public-content hidden>
+          <main data-public-content hidden>
         <section class="section-block community-section" aria-labelledby="donor-ranking-title" data-community-section hidden>
           <div class="section-head compact-head"><div><p class="section-kicker">RCOIN DEL CIRCULO</p><h2 id="donor-ranking-title">TOP DONADORES</h2><p class="ranking-note" data-donor-note>Total acumulado registrado</p></div>
             <div class="ranking-modes" role="group" aria-label="Periodo del top de donadores"><button type="button" data-donor-mode="general" aria-pressed="true">General</button><button type="button" data-donor-mode="weekly" aria-pressed="false">Semana</button></div>
@@ -197,12 +199,13 @@
         <details class="rcoin-text"><summary>Pasos en texto</summary><ol><li>Abre <strong>Mensajer&iacute;a</strong>.</li><li>Selecciona <strong>C&iacute;rculo</strong> y luego <strong>Sala de conversaci&oacute;n en c&iacute;rculos</strong>.</li><li>Dentro de la sala, abre <strong>Men&uacute; de C&iacute;rculo</strong> y elige <strong>Dinero de C&iacute;rculo</strong>.</li><li>Pulsa <strong>Donar Rcoin</strong>.</li><li>Escribe la cantidad que deseas donar, rev&iacute;sala y pulsa <strong>Aceptar</strong>.</li></ol><p>La donaci&oacute;n se realiza dentro de R2Beat, no en esta p&aacute;gina. Las cantidades de la imagen son ejemplos de referencia.</p></details>
       </div>
     </dialog>
+    <script src="./space-context.js?v=1" defer></script>
     <script src="./member-badge.js?v=22" defer></script>
     <script src="./member-pairs.js?v=32" defer></script>
-    <script src="./event-board.js?v=1" defer></script>
-    <script src="./prizes.js?v=42" defer></script>
-    <script src="./member-access.js?v=2" defer></script>
-    <script src="./circle-progress.js?v=2" defer></script>
-    <script src="./app.js?v=46" defer></script>
+    <script src="./event-board.js?v=2" defer></script>
+    <script src="./prizes.js?v=43" defer></script>
+    <script src="./member-access.js?v=3" defer></script>
+    <script src="./circle-progress.js?v=3" defer></script>
+    <script src="./app.js?v=47" defer></script>
   </body>
 </html>

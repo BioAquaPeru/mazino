@@ -21,14 +21,14 @@ function renderCircleProgress() {
 function startCircleProgress(service) {
   if (circleService === service) return;
   circleService = service; circleSnapshot = null;
-  const key = `mazino:circle-progress:v1:${service}`;
+  const key = typeof spaceStorageKey==='function'?spaceStorageKey(`mazino:circle-progress:v1:${service}`):`mazino:circle-progress:v1:${service}`;
   try { circleSnapshot = validCircleProgress(JSON.parse(localStorage.getItem(key))); } catch { /* Storage may be blocked. */ }
   renderCircleProgress(); let busy = false;
   const refresh = async () => {
     if (busy || circleService !== service) return;
     busy = true;
     try {
-      const response = await fetch(`${service}/api/circle`, { cache: 'no-store', signal: AbortSignal.timeout(20000) });
+      const response = await fetch(typeof spaceApiUrl==='function'?spaceApiUrl(`${service}/api/circle`):`${service}/api/circle`, { cache: 'no-store', signal: AbortSignal.timeout(20000) });
       if (!response.ok) return;
       const next = validCircleProgress(await response.json());
       if (!next || circleService !== service || (circleSnapshot && (next.asOf <= circleSnapshot.asOf || next.revision < circleSnapshot.revision

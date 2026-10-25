@@ -70,7 +70,7 @@ const eventBoardRuntime = (() => {
     if (!api || busy || document.hidden) return;
     const source = api; busy = true;
     try {
-      const response = await fetch(`${source}/api/public`, { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+      const response = await fetch(typeof spaceApiUrl==='function'?spaceApiUrl(`${source}/api/public`):`${source}/api/public`, { cache: 'no-store', signal: AbortSignal.timeout(15000) });
       if (!response.ok) throw Error('Unavailable');
       accept(await response.json(), source);
     } catch {

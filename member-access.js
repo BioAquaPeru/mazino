@@ -3,7 +3,7 @@ let refreshMemberAccess;
   const root = rewardDialog.querySelector('[data-member-access]');
   if (!root) return;
   const node = name => root.querySelector(`[data-access-${name}]`);
-  const form = node('password'), storageKey = 'mazino-access-request-v1';
+  const form = node('password'), storageKey = typeof spaceStorageKey==='function'?spaceStorageKey('mazino-access-request-v1'):'mazino-access-request-v1';
   let pending = null, timer, revision = 0, busy = false, changing = false;
   try { const saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null'); if (saved?.expiresAt > Date.now() && /^[a-f0-9]{64}$/.test(saved.token)) pending = saved; } catch { /* Private request still works without storage. */ }
   const message = text => { node('message').textContent = text; };
@@ -13,7 +13,7 @@ let refreshMemberAccess;
   const valid = (version, session) => rewardDialog.open && revision === version && rewardSession?.token === session;
   async function accessApi(action, body) {
     if (!rewardApi) throw new Error('El servicio de acceso aun no esta disponible.');
-    const response = await fetch(`${rewardApi}/api/access/${action}`, { method: 'POST', cache: 'no-store', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body), signal: AbortSignal.timeout(20000) });
+    const response = await fetch(typeof spaceApiUrl==='function'?spaceApiUrl(`${rewardApi}/api/access/${action}`):`${rewardApi}/api/access/${action}`, { method: 'POST', cache: 'no-store', headers: {'Content-Type':'application/json'}, body: JSON.stringify(body), signal: AbortSignal.timeout(20000) });
     const result = await response.json();
     if (!response.ok) throw Object.assign(new Error(result.error || 'No se pudo consultar tu solicitud.'), {status:response.status});
     return result;

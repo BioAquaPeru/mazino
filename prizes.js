@@ -11,8 +11,8 @@ const rewardDialog = document.querySelector("[data-prize-dialog]");
 
 function saveRewardSession() {
   try {
-    if (rewardSession) sessionStorage.setItem("mazino-prizes-session", JSON.stringify(rewardSession));
-    else sessionStorage.removeItem("mazino-prizes-session");
+    if (rewardSession) sessionStorage.setItem(typeof spaceStorageKey==='function'?spaceStorageKey("mazino-prizes-session"):"mazino-prizes-session", JSON.stringify(rewardSession));
+    else sessionStorage.removeItem(typeof spaceStorageKey==='function'?spaceStorageKey("mazino-prizes-session"):"mazino-prizes-session");
   } catch { /* Login also works when browser storage is unavailable. */ }
 }
 
@@ -38,7 +38,7 @@ function refreshPrizeDonationPreview() {
 async function prizeRequest(path, body) {
   if (!rewardApi) throw new Error("Los premios aun no estan disponibles.");
   const requestToken = rewardSession?.token;
-  const response = await fetch(`${rewardApi}/api/${path}`, {
+  const response = await fetch(typeof spaceApiUrl==='function'?spaceApiUrl(`${rewardApi}/api/${path}`):`${rewardApi}/api/${path}`, {
     method: body === undefined ? "GET" : "POST", cache: "no-store",
     headers: { "Content-Type": "application/json", ...(rewardSession ? { Authorization: `Bearer ${rewardSession.token}` } : {}) },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
@@ -54,7 +54,7 @@ function configurePrizes(settings) {
   rewardApi = /^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(value) ? value : "";
   if (typeof configureEventBoard === 'function') configureEventBoard(settings);
   try {
-    const saved = JSON.parse(sessionStorage.getItem("mazino-prizes-session") || "null");
+    const saved = JSON.parse(sessionStorage.getItem(typeof spaceStorageKey==='function'?spaceStorageKey("mazino-prizes-session"):"mazino-prizes-session") || "null");
     if (saved?.expiresAt > Date.now() && saved.token && saved.member) rewardSession = saved;
   } catch { rewardSession = null; saveRewardSession(); }
 }
@@ -156,8 +156,9 @@ document.addEventListener("click", async (event) => {
   rewardDialogRevision++; rewardPublicRevision++;
   const revision = rewardDialogRevision;
   rewardOwner = trigger.dataset.prizeOpen;
-  const name = trigger.dataset.prizeNick || trigger.textContent.trim();
-  rewardDialog.querySelector("[data-prize-heading]").textContent = `Premios de ${name}`;
+  const guest=trigger.dataset.guestAccess !== undefined;
+  const name = guest ? "" : trigger.dataset.prizeNick || trigger.textContent.trim();
+  rewardDialog.querySelector("[data-prize-heading]").textContent = guest?"Participacion en este grupo":`Premios de ${name}`;
   rewardDialog.querySelector("[data-prize-login]").reset();
   rewardDialog.querySelector('[name="nick"]').value = rewardSession?.member.nick || name;
   rewardDialog.querySelector("[data-prize-status]").textContent = "Cargando premios...";
