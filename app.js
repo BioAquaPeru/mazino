@@ -77,6 +77,7 @@ function renderPublic(data) {
   if (data.settings.logoUrl) {
     $("[data-logo]").src = publicAssetUrl(data.settings.logoUrl);
   }
+  if(typeof applyCircleTheme==='function')applyCircleTheme(data.settings,data.branding);
 
   $$("[data-join-open]").forEach((button) => {
     button.hidden = window.mazinoSpaceKind === 'group';
@@ -186,6 +187,14 @@ function startCommunity(service) {
 }
 
 const PUBLIC_SNAPSHOT_KEY = typeof spaceStorageKey==='function'?spaceStorageKey("mazino:public-snapshot:v1"):"mazino:public-snapshot:v1";
+function publicBranding(value) {
+  if(!value||value.spaceId!==(window.mazinoSpaceId||'main')||!Number.isSafeInteger(value.revision)||value.revision<1||typeof value.name!=='string'||!value.name||value.name.length>60)return null;
+  const result={spaceId:value.spaceId,name:value.name,revision:value.revision};
+  for(const field of ['tabColor','pageColor','pageBackground']){const color=value[field]||'';if(typeof color!=='string'||(color&&!/^#[a-f0-9]{6}$/i.test(color)))return null;result[field]=color;}
+  for(const field of ['logoUrl','pageLogoUrl']){const logo=value[field]||'';if(typeof logo!=='string'||logo.length>(field==='logoUrl'?60000:240000)||(!/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(logo)&&!/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(logo)&&logo!==''))return null;result[field]=logo;}
+  return result;
+}
+function snapshotIsNewer(next,previous){return snapshotVersion(next)>snapshotVersion(previous)||(snapshotVersion(next)===snapshotVersion(previous)&&(next?.branding?.revision||0)>(previous?.branding?.revision||0));}
 function publicSnapshot(value) {
   if (!value?.settings || !Array.isArray(value.members) || !Array.isArray(value.elite)) return null;
   const textFields = ['siteName', 'heroPhrase', 'joinButtonText', 'whatsappNumber', 'whatsappTemplate', 'logoUrl', 'membersTitle', 'eliteTitle', 'rewardsServiceUrl'];
@@ -203,7 +212,8 @@ function publicSnapshot(value) {
   for (const k of flags) settings[k] = value.settings[k];
   const member = m => Object.fromEntries(['id', 'nick', 'level', 'rank', 'title', 'license', 'goldEffect', 'fogColor', 'pairColor', 'partnerId'].map(k => [k, m[k]]));
   const lastSyncAt = Number.isFinite(Date.parse(value.sync?.lastSyncAt)) ? value.sync.lastSyncAt : null;
-  return { settings, elite: value.elite.map(member), members: value.members.map(member), totalMembers: total, sync: { lastSyncAt } };
+  const branding=publicBranding(value.branding);
+  return { settings, elite: value.elite.map(member), members: value.members.map(member), totalMembers: total, sync: { lastSyncAt },...(branding?{branding}:{}) };
 }
 function snapshotVersion(data) { return Date.parse(data?.sync?.lastSyncAt) || 0; }
 function readPublicSnapshot() {
@@ -215,7 +225,7 @@ function readPublicSnapshot() {
 async function loadPublic() {
   let latest = readPublicSnapshot(), signature = '';
   const show = data => {
-    const next = JSON.stringify({ settings: data.settings, members: data.members, elite: data.elite, totalMembers: data.totalMembers });
+    const next = JSON.stringify({ settings: data.settings, members: data.members, elite: data.elite, totalMembers: data.totalMembers,branding:data.branding });
     if (next !== signature) { renderPublic(data); signature = next; }
   };
   const extraCircle=typeof window.mazinoSpaceId==='string' && window.mazinoSpaceId!=='main';
@@ -235,8 +245,9 @@ async function loadPublic() {
       if (!data || data.settings.rewardsServiceUrl !== service || snapshotVersion(data) <= 0) return;
       // Another tab may have saved a newer version while this request was in flight.
       const cached = readPublicSnapshot();
-      if (cached?.settings.rewardsServiceUrl === service && snapshotVersion(cached) > snapshotVersion(latest)) { latest = cached; show(latest); }
-      if (latest?.settings.rewardsServiceUrl === service && snapshotVersion(data) <= snapshotVersion(latest)) return;
+      if (cached?.settings.rewardsServiceUrl === service && snapshotIsNewer(cached,latest)) { latest = cached; show(latest); }
+      if(latest?.branding&&(!data.branding||latest.branding.revision>data.branding.revision))data={...data,branding:latest.branding};
+      if (latest?.settings.rewardsServiceUrl === service && !snapshotIsNewer(data,latest)) return;
       latest = data; show(data);
       try { localStorage.setItem(PUBLIC_SNAPSHOT_KEY, JSON.stringify(data)); } catch { /* Private mode and full storage must not break the page. */ }
     };
@@ -253,7 +264,7 @@ async function loadPublic() {
     if (typeof startCommunity === 'function') startCommunity(service);
     if (typeof startCircleProgress === 'function') startCircleProgress(service);
     await refresh();
-    if (snapshotVersion(saved) > snapshotVersion(latest)) accept(saved);
+    if (snapshotIsNewer(saved,latest)) accept(saved);
     setInterval(() => { if (!document.hidden) refresh(); }, 60000);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
     window.addEventListener('online', refresh);

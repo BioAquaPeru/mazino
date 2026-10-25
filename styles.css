@@ -1347,3 +1347,21 @@ button:disabled { cursor: wait; opacity: 0.6; }
 @media(prefers-reduced-motion:reduce) { .circle-drawer[open] { animation: none; } }
 .hero h1 { overflow-wrap: anywhere; }
 .hero-actions:has(> [hidden]) { display: none; }
+body.circle-themed { --red:var(--circle-page-accent); --muted:var(--circle-page-muted); background:var(--circle-page-bg); color:var(--circle-page-text); }
+.circle-themed .hero { background:var(--circle-page-bg); border-color:rgba(var(--circle-page-rgb),.3); }
+.circle-themed .hero::before { background:linear-gradient(180deg,transparent 40%,var(--circle-page-bg) 78%); }
+.circle-themed .hero h1 { color:var(--circle-page-text); text-shadow:0 0 22px rgba(var(--circle-page-rgb),.65); }
+.circle-themed :is(.eyebrow,.section-kicker,.section-head h2) { color:var(--circle-page-heading); }
+.circle-themed :is(.hero-phrase,.ranking-note,.member-count,.empty-state,.section-head p) { color:var(--circle-page-muted); }
+.circle-themed :is(.primary-action,.floating-join) { background:var(--circle-page-accent); color:var(--circle-page-on-accent); box-shadow:0 0 24px rgba(var(--circle-page-rgb),.32); }
+.circle-themed :is(.member-card,.elite-card,.ranking-card,.guest-participation,.prize-card,.join-card) { background:var(--circle-page-panel); color:var(--circle-page-text); border-color:var(--circle-page-line); }
+.circle-themed :is(.member-search input,.prize-login input,.member-access input,.join-card input) { background:var(--circle-page-panel); color:var(--circle-page-text); border-color:var(--circle-page-line); }
+.circle-themed :is(.prize-card,.join-card) .muted { color:var(--circle-page-muted); }
+.circle-custom-logo .logo-frame { top:30%; width:min(600px,76%); height:min(40svh,340px); aspect-ratio:auto; transform:translate(-50%,-50%); mask-image:none; animation:none; overflow:visible; }
+.circle-custom-logo .logo-frame img { filter:none; object-fit:contain; }
+.circle-custom-logo .hero-copy { max-width:100%; }
+.circle-custom-logo .hero h1 { white-space:normal; font-size:clamp(2.2rem,6vw,5.5rem); line-height:1.1; }
+.circle-custom-logo .eye-glow { display:none; }
+.circle-custom-logo .logo-stage { background:radial-gradient(ellipse at 50% 30%,rgba(var(--circle-page-rgb),.12),transparent 54%); }
+.circle-emblem { display:grid; place-items:center; width:min(240px,100%); height:min(240px,100%); aspect-ratio:1; margin:0 auto; border:2px solid var(--circle-page-accent); border-radius:50%; background:var(--circle-page-panel); color:var(--circle-page-heading); font:800 clamp(60px,18vw,110px)/1 'Orbitron',sans-serif; box-shadow:0 0 60px rgba(var(--circle-page-rgb),.2); }
+@media(max-width:600px) { .circle-custom-logo .logo-frame { top:28%; width:80%; height:min(32svh,260px); } .circle-themed .hero::before { background:linear-gradient(180deg,transparent 42%,var(--circle-page-bg) 70%); } }

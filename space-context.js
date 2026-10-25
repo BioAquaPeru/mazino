@@ -3,7 +3,7 @@ window.mazinoSpaceId='main';
 try{const saved=sessionStorage.getItem('mazino-selected-circle');if(/^[a-f0-9]{32}$/.test(saved||''))window.mazinoSpaceId=saved;}catch{}
 function spaceStorageKey(key){return window.mazinoSpaceId==='main'?key:`${key}:circle:${window.mazinoSpaceId}`;}
 function spaceApiUrl(url){if(window.mazinoSpaceId==='main')return url;return `${url}${url.includes('?')?'&':'?'}circle=${window.mazinoSpaceId}`;}
-function publicSpaceLogo(value){return typeof value==='string'&&value.length<=60000&&(/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(value)||/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(value))?value:'';}
+function publicSpaceLogo(value,limit=60000){return typeof value==='string'&&value.length<=limit&&(/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(value)||/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(value))?value:'';}
 async function initializePublicSpaces(service) {
   const root=document.querySelector('[data-circle-selector]');if(!root)return;
   let spaces=[];
@@ -36,6 +36,7 @@ async function initializePublicSpaces(service) {
     if(logo){const image=document.createElement('img');image.src=logo;image.alt='';image.width=28;image.height=28;image.decoding='async';image.referrerPolicy='no-referrer';image.addEventListener('error',()=>{icon.innerHTML=icons[space.kind];},{once:true});icon.replaceChildren(image);}
   };
   const current=spaces.find(space=>space.id===window.mazinoSpaceId);
+  window.mazinoSpaceBrand={...current,spaceId:current.id,revision:current.version||1};
   appearance(trigger,current);fillIcon(root.querySelector('[data-circle-current-icon]'),current);
   root.querySelector('[data-circle-current-name]').textContent=current.name;
   trigger.setAttribute('aria-label',`Cambiar de circulo o grupo. Actual: ${current.name}`);
