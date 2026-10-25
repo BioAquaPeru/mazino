@@ -3,6 +3,7 @@ window.mazinoSpaceId='main';
 try{const saved=sessionStorage.getItem('mazino-selected-circle');if(/^[a-f0-9]{32}$/.test(saved||''))window.mazinoSpaceId=saved;}catch{}
 function spaceStorageKey(key){return window.mazinoSpaceId==='main'?key:`${key}:circle:${window.mazinoSpaceId}`;}
 function spaceApiUrl(url){if(window.mazinoSpaceId==='main')return url;return `${url}${url.includes('?')?'&':'?'}circle=${window.mazinoSpaceId}`;}
+function publicSpaceLogo(value){return typeof value==='string'&&value.length<=60000&&(/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(value)||/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(value))?value:'';}
 async function initializePublicSpaces(service) {
   const root=document.querySelector('[data-circle-selector]');if(!root)return;
   let spaces=[];
@@ -16,8 +17,12 @@ async function initializePublicSpaces(service) {
   const icons={circle:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M6 12s2-4 6-4 6 4 6 4-2 4-6 4-6-4-6-4Z"/><circle cx="12" cy="12" r="1.5"/></svg>',group:'<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M21 20v-2a6 6 0 0 0-4-5"/></svg>'};
   tabs.replaceChildren(...spaces.map(space=>{
     const button=document.createElement('button');button.type='button';button.className='circle-tab';
+    const color=/^#[a-f0-9]{6}$/i.test(space.tabColor||'')?space.tabColor:'#ff506a';
+    button.style.setProperty('--circle-color',color);button.style.setProperty('--circle-rgb',[1,3,5].map(i=>parseInt(color.slice(i,i+2),16)).join(','));
     if(space.id===window.mazinoSpaceId)button.setAttribute('aria-current','page');
     const icon=document.createElement('span');icon.className='circle-tab-icon';icon.innerHTML=icons[space.kind];
+    const logo=publicSpaceLogo(space.logoUrl);
+    if(logo){const image=document.createElement('img');image.src=logo;image.alt='';image.width=28;image.height=28;image.decoding='async';image.referrerPolicy='no-referrer';image.addEventListener('error',()=>{icon.innerHTML=icons[space.kind];},{once:true});icon.replaceChildren(image);}
     const name=document.createElement('span');name.className='circle-tab-name';name.textContent=space.name;
     button.append(icon,name);
     button.addEventListener('click',()=>{
@@ -28,4 +33,5 @@ async function initializePublicSpaces(service) {
     return button;
   }));
   const join=document.querySelector('[data-guest-access]');if(join){join.hidden=window.mazinoSpaceKind!=='group';}
+  const guestSection=document.querySelector('[data-guest-section]');if(guestSection)guestSection.hidden=window.mazinoSpaceKind!=='group';
 }

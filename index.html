@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=53" />
+    <link rel="stylesheet" href="./styles.css?v=54" />
   </head>
   <body>
     <div class="site-shell">
@@ -21,7 +21,7 @@
         <div class="circle-tabs" data-circle-tabs></div>
         <p class="circle-selector-status" role="status" aria-live="polite" data-circle-selector-status></p>
       </nav>
-    <div class="guest-participation"><button type="button" class="primary-action" data-guest-access data-prize-open="guest" data-prize-nick="" hidden>Solicitar participacion en este grupo</button></div>
+
       <header class="hero" id="inicio">
         <div class="hero-inner">
           <section class="hero-copy" aria-labelledby="hero-title">
@@ -47,6 +47,7 @@
           </section>
         </div>
       </header>
+      <section class="guest-participation" data-guest-section aria-labelledby="guest-title" hidden><p class="section-kicker">ABIERTO A JUGADORES DE OTROS CIRCULOS</p><h2 id="guest-title">Participa como invitado</h2><p>No necesitas pertenecer a Mazino. Solicita tu registro con tu nick exacto de R2Beat, envia el codigo desde tu personaje al organizador y espera su aprobacion. Despues crearas tu clave privada.</p><div class="guest-actions"><button type="button" class="primary-action" data-guest-access data-prize-open="guest" data-prize-nick="">Solicitar registro</button><button type="button" class="ghost-button" data-guest-access data-prize-open="guest" data-prize-nick="">Ya tengo clave · Ingresar</button></div></section>
 
           <main data-public-content hidden>
         <section class="section-block community-section" aria-labelledby="donor-ranking-title" data-community-section hidden>
@@ -128,9 +129,10 @@
         <h2 id="prize-title" data-prize-heading>Premios</h2>
         <div class="prize-donation-preview" data-prize-donation-preview role="status" hidden></div>
         <p class="muted" data-prize-identity></p>
+        <p class="guest-access-note" data-guest-access-note hidden>Si es tu primera vez, escribe tu nick y pulsa Solicitar registro. Aun no necesitas una clave. La identidad se verifica dentro del juego.</p>
         <form class="prize-login" data-prize-login>
           <label><span>Tu nick de R2Beat</span><input name="nick" maxlength="40" autocomplete="username" required /></label>
-          <label><span>Tu clave del c&iacute;rculo</span><input name="password" type="password" autocomplete="current-password" maxlength="100" required /></label>
+          <label><span data-prize-password-label>Tu clave del c&iacute;rculo</span><input name="password" type="password" autocomplete="current-password" maxlength="100" required /></label>
           <button class="primary-action small-action" type="submit">Desbloquear premios</button>
         </form>
         <section class="member-access" data-member-access aria-label="Mi acceso al circulo">
@@ -202,12 +204,12 @@
         <details class="rcoin-text"><summary>Pasos en texto</summary><ol><li>Abre <strong>Mensajer&iacute;a</strong>.</li><li>Selecciona <strong>C&iacute;rculo</strong> y luego <strong>Sala de conversaci&oacute;n en c&iacute;rculos</strong>.</li><li>Dentro de la sala, abre <strong>Men&uacute; de C&iacute;rculo</strong> y elige <strong>Dinero de C&iacute;rculo</strong>.</li><li>Pulsa <strong>Donar Rcoin</strong>.</li><li>Escribe la cantidad que deseas donar, rev&iacute;sala y pulsa <strong>Aceptar</strong>.</li></ol><p>La donaci&oacute;n se realiza dentro de R2Beat, no en esta p&aacute;gina. Las cantidades de la imagen son ejemplos de referencia.</p></details>
       </div>
     </dialog>
-    <script src="./space-context.js?v=2" defer></script>
+    <script src="./space-context.js?v=3" defer></script>
     <script src="./member-badge.js?v=22" defer></script>
     <script src="./member-pairs.js?v=32" defer></script>
     <script src="./event-board.js?v=2" defer></script>
-    <script src="./prizes.js?v=43" defer></script>
-    <script src="./member-access.js?v=3" defer></script>
+    <script src="./prizes.js?v=44" defer></script>
+    <script src="./member-access.js?v=4" defer></script>
     <script src="./circle-progress.js?v=3" defer></script>
     <script src="./app.js?v=47" defer></script>
   </body>

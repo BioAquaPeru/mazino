@@ -157,6 +157,8 @@ document.addEventListener("click", async (event) => {
   const revision = rewardDialogRevision;
   rewardOwner = trigger.dataset.prizeOpen;
   const guest=trigger.dataset.guestAccess !== undefined;
+  const guestNote=rewardDialog.querySelector('[data-guest-access-note]');if(guestNote)guestNote.hidden=!guest;
+  const passwordLabel=rewardDialog.querySelector('[data-prize-password-label]');if(passwordLabel)passwordLabel.textContent=guest?'Tu clave de este grupo':'Tu clave del círculo';
   const name = guest ? "" : trigger.dataset.prizeNick || trigger.textContent.trim();
   rewardDialog.querySelector("[data-prize-heading]").textContent = guest?"Participacion en este grupo":`Premios de ${name}`;
   rewardDialog.querySelector("[data-prize-login]").reset();

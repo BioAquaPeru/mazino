@@ -20,6 +20,7 @@ let refreshMemberAccess;
   }
   function render() {
     clearTimeout(timer);
+    node('start').textContent=typeof window!=='undefined'&&window.mazinoSpaceKind==='group'?'Solicitar registro':'Solicitar mi acceso';
     const matches = requestForNick();
     rewardDialog.querySelector('[data-prize-login]').hidden = !!rewardSession || !!matches;
     node('start').hidden = !!rewardSession || !!matches;
