@@ -13,13 +13,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="./styles.css?v=54" />
+    <link rel="stylesheet" href="./styles.css?v=55" />
   </head>
   <body>
     <div class="site-shell">
       <nav class="circle-public-selector" data-circle-selector aria-label="Elegir circulo o grupo" hidden>
-        <div class="circle-tabs" data-circle-tabs></div>
-        <p class="circle-selector-status" role="status" aria-live="polite" data-circle-selector-status></p>
+        <button class="circle-menu-trigger" type="button" data-circle-menu-open aria-haspopup="dialog" aria-controls="circle-navigation" aria-expanded="false">
+          <span class="circle-tab-icon" data-circle-current-icon aria-hidden="true"></span>
+          <span class="circle-menu-name" data-circle-current-name></span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <dialog class="circle-drawer" id="circle-navigation" data-circle-drawer aria-labelledby="circle-navigation-title">
+          <div class="circle-drawer-header"><div><p class="section-kicker">NUESTRA COMUNIDAD</p><h2 id="circle-navigation-title">Circulos y grupos</h2></div><button class="circle-menu-close" type="button" data-circle-menu-close aria-label="Cerrar menu de circulos" autofocus>×</button></div>
+          <p class="circle-drawer-hint">Elige donde quieres participar.</p>
+          <div class="circle-tabs" data-circle-tabs></div>
+          <p class="circle-selector-status" role="status" aria-live="polite" data-circle-selector-status></p>
+        </dialog>
       </nav>
 
       <header class="hero" id="inicio">
@@ -204,7 +213,7 @@
         <details class="rcoin-text"><summary>Pasos en texto</summary><ol><li>Abre <strong>Mensajer&iacute;a</strong>.</li><li>Selecciona <strong>C&iacute;rculo</strong> y luego <strong>Sala de conversaci&oacute;n en c&iacute;rculos</strong>.</li><li>Dentro de la sala, abre <strong>Men&uacute; de C&iacute;rculo</strong> y elige <strong>Dinero de C&iacute;rculo</strong>.</li><li>Pulsa <strong>Donar Rcoin</strong>.</li><li>Escribe la cantidad que deseas donar, rev&iacute;sala y pulsa <strong>Aceptar</strong>.</li></ol><p>La donaci&oacute;n se realiza dentro de R2Beat, no en esta p&aacute;gina. Las cantidades de la imagen son ejemplos de referencia.</p></details>
       </div>
     </dialog>
-    <script src="./space-context.js?v=3" defer></script>
+    <script src="./space-context.js?v=4" defer></script>
     <script src="./member-badge.js?v=22" defer></script>
     <script src="./member-pairs.js?v=32" defer></script>
     <script src="./event-board.js?v=2" defer></script>
