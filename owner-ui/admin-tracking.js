@@ -1,0 +1,142 @@
+let trackingOffset = 0;
+let trackingRevision = 0;
+let trackingBusy = false;
+let trackingQueued = false;
+let trackingDialogRevision = 0;
+let trackingTimer;
+let trackingHistory = null;
+const trackingNames = { inside: "Dentro", outside: "Fuera del circulo", renamed: "Cambio confirmado", historical: "Solo historial", unlinked: "Sin destinatario" };
+const trackingActions = { imported: "Cupon cargado", assigned: "Asignado", unassigned: "Asignacion retirada", claimed: "Reclamado", saved: "Jugador confirmo que lo guardo", event_reserved: "Reservado para evento", event_released: "Liberado del evento", label_changed: "Nombre del premio cambiado", archived: "Archivado", pool_reserved: "Reservado para sublider", pool_returned: "Cupo devuelto", joined: "Primera aparicion registrada", left: "Salida detectada", returned: "Reaparicion del registro", nick_changed: "Nick del registro actualizado", alias_confirmed: "Cambio de nick confirmado por administrador", alias_removed: "Relacion de nicks retirada", baseline_inside: "Dentro segun registro anterior", baseline_outside: "Fuera segun registro anterior", baseline_assigned: "Asignacion anterior observada", baseline_claimed: "Reclamacion anterior observada", baseline_available: "Disponible al iniciar seguimiento", baseline_archived: "Archivado al iniciar seguimiento" };
+Object.assign(trackingActions, { transferred_out: "Premio pasado a otro integrante", transferred_in: "Premio recibido por correccion" });
+const trackingTime = (n) => n ? new Date(n).toLocaleString("es-PE", { timeZone: "America/Lima" }) : "Sin registro anterior";
+const trackingApi = (action, body = {}) => api(`/api/admin/rewards/${action}`, { method: "POST", body: JSON.stringify(body) });
+const trackingStatus = (value) => { $("[data-tracking-status]").textContent = value; };
+let rosterTrackingOffset = 0, rosterTrackingRevision = 0;
+let rosterTrackingBusy = false, rosterTrackingQueued = false, rosterTrackingTimer;
+async function refreshRosterTracking() {
+  if ($("[data-dashboard]").hidden) return;
+  if (rosterTrackingBusy) { rosterTrackingQueued = true; return; }
+  rosterTrackingBusy = true;
+  const revision = rosterTrackingRevision;
+  try {
+    const result = await trackingApi("tracking-members", { view: $("[data-roster-tracking-view]").value || "outside", query: $("[data-roster-tracking-search]").value, offset: rosterTrackingOffset });
+    if (revision !== rosterTrackingRevision || $("[data-dashboard]").hidden) return;
+    rosterTrackingOffset = result.offset;
+    $("[data-roster-tracking-count]").textContent = `Dentro del circulo: ${result.counts.inside} | Fuera: ${result.counts.outside} | Cambios de nick confirmados: ${result.counts.renamed} | ${result.total} resultados`;
+    $("[data-roster-tracking-sync]").textContent = `Ultima consulta correcta: ${trackingTime(result.lastSyncAt)} | En esa consulta: ${result.counts.latestLeft} salidas y ${result.counts.latestJoined} entradas${result.lastError ? ` | ${result.lastError}` : ""}`;
+    $("[data-roster-tracking-page]").textContent = `Pagina ${Math.floor(result.offset / 25) + 1}`;
+    $("[data-roster-tracking-prev]").disabled = result.offset === 0;
+    $("[data-roster-tracking-next]").disabled = result.offset + 25 >= result.total;
+    const changes = { joined: "Nuevo registro", returned: "Reaparicion", left: "Salida detectada", nick_changed: "Nick actualizado" };
+    $("[data-roster-tracking-table]").innerHTML = result.entries.map(m => `<tr><td><button class="member-profile-link" type="button" data-member-profile="${escapeHtml(m.id)}">${escapeHtml(m.nick)}</button></td><td>${escapeHtml(trackingNames[m.membership] || m.membership)}${m.latestChange ? `<br><span class="muted">${escapeHtml(changes[m.latestChange] || m.latestChange)}</span>` : ""}</td><td>${escapeHtml(m.currentNick || "-")}</td><td>${trackingTime(m.last_seen_at)}</td><td>${trackingTime(m.left_at)}</td><td>${m.pending}</td><td>${m.claimed}</td><td><button class="mini-button" type="button" data-tracking-member="${escapeHtml(m.id)}">Ver historial</button></td></tr>`).join("") || '<tr><td colspan="8" class="muted">Sin integrantes con estos filtros.</td></tr>';
+    $("[data-roster-tracking-status]").textContent = "";
+  } catch (error) {
+    if (revision === rosterTrackingRevision) $("[data-roster-tracking-status]").textContent = error.message;
+  } finally {
+    rosterTrackingBusy = false;
+    if (rosterTrackingQueued) { rosterTrackingQueued = false; refreshRosterTracking(); }
+  }
+}
+$("[data-rewards-subsection=\"roster-tracking\"]").addEventListener("toggle", event => { if (event.target.open) refreshRosterTracking(); });
+$("[data-roster-tracking-refresh]").addEventListener("click", refreshRosterTracking);
+$("[data-roster-tracking-open]").addEventListener("click", () => {
+  if (typeof selectAdminSection === "function") selectAdminSection("departures");
+  const section = $("[data-rewards-subsection=\"roster-tracking\"]"); section.open = true;
+  section.scrollIntoView?.({ behavior: "smooth", block: "start" }); refreshRosterTracking();
+});
+$("[data-roster-tracking-view]").addEventListener("change", () => { rosterTrackingOffset = 0; rosterTrackingRevision++; refreshRosterTracking(); });
+$("[data-roster-tracking-search]").addEventListener("input", () => {
+  clearTimeout(rosterTrackingTimer); rosterTrackingOffset = 0; rosterTrackingRevision++;
+  rosterTrackingTimer = setTimeout(refreshRosterTracking, 250);
+});
+for (const [selector, delta] of [["[data-roster-tracking-prev]", -25], ["[data-roster-tracking-next]", 25]]) $(selector).addEventListener("click", () => { rosterTrackingOffset = Math.max(0, rosterTrackingOffset + delta); refreshRosterTracking(); });
+if (typeof setInterval === "function") setInterval(() => {
+  if (!document.hidden && !$("[data-dashboard]").hidden && $("[data-rewards-subsection=\"roster-tracking\"]").open && !rosterTrackingBusy) refreshRosterTracking();
+}, 60000);
+async function refreshTracking() {
+  if ($("[data-dashboard]").hidden) return;
+  if (trackingBusy) { trackingQueued = true; return; }
+  trackingBusy = true;
+  const revision = trackingRevision;
+  try {
+    const result = await trackingApi("tracking", { query: $("[data-tracking-search]").value, membership: $("[data-tracking-membership]").value || "outside", status: $("[data-tracking-state]").value || "all", offset: trackingOffset });
+    if (revision !== trackingRevision || $("[data-dashboard]").hidden) return;
+    trackingOffset = result.offset;
+    $("[data-tracking-count]").textContent = `Cupones de retirados: ${result.counts.pendingOutside} pendientes y ${result.counts.claimedOutside} reclamados | ${result.counts.confirmedNames} relaciones de nicks | ${result.total} cupones con estos filtros`;
+    $("[data-tracking-page]").textContent = `Pagina ${Math.floor(result.offset / 25) + 1}`;
+    $("[data-tracking-prev]").disabled = result.offset === 0; $("[data-tracking-next]").disabled = result.offset + 25 >= result.total;
+    $("[data-tracking-table]").innerHTML = result.entries.map((c) => `<tr><td><code class="tracking-code">${escapeHtml(c.code)}</code></td><td>${escapeHtml(c.label)}</td><td>${escapeHtml(c.originalNick || "-")}${c.memberId ? `<button class="mini-button" type="button" data-tracking-member="${escapeHtml(c.memberId)}">Ver integrante</button>` : ""}</td><td>${escapeHtml(c.currentNick || "-")}${c.pendingPreviousNick ? '<br><span class="muted">Pendiente en su registro anterior</span>' : ""}</td><td>${escapeHtml(trackingNames[c.membership] || c.membership)}</td><td>${escapeHtml(rewardStates[c.status] || c.status)}</td><td>${trackingTime(c.lastSeenAt)}</td><td>${trackingTime(c.leftAt)}</td><td><button class="mini-button" type="button" data-tracking-coupon="${escapeHtml(c.id)}">Ver recorrido</button>${c.status === "assigned" && c.assigned_member_id && !c.event_id ? `<button class="mini-button" type="button" data-unassign-coupon="${escapeHtml(c.id)}">Quitar premio</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="9" class="muted">Sin cupones con estos filtros.</td></tr>';
+    for (const [selector, active] of [["[data-tracking-old]", false], ["[data-tracking-new]", true]]) {
+      const select = $(selector), selected = select.value;
+      const linked = new Set(result.aliases.map((a) => a.from_id));
+      select.innerHTML = '<option value="">Elige integrante</option>' + result.members.filter((m) => Boolean(m.active) === active && (active || !linked.has(m.id))).map((m) => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.nick)} | ref. ${escapeHtml(m.id.slice(-6))}${!active && m.left_at ? ` | ${trackingTime(m.left_at)}` : ""}</option>`).join("");
+      select.value = selected;
+    }
+    $("[data-tracking-alias-table]").innerHTML = result.aliases.map((a) => `<tr><td>${escapeHtml(a.fromNick)}</td><td>${escapeHtml(a.toNick)}</td><td>${escapeHtml(a.note)}</td><td>${trackingTime(a.created_at)}</td><td><button class="mini-button" type="button" data-tracking-unlink="${escapeHtml(a.id)}">Retirar relacion</button></td></tr>`).join("") || '<tr><td colspan="5" class="muted">Sin cambios de nick confirmados.</td></tr>';
+  } catch (error) { if (revision === trackingRevision) trackingStatus(error.message); }
+  finally { trackingBusy = false; if (trackingQueued) { trackingQueued = false; refreshTracking(); } }
+}
+async function showTrackingHistory(kind, id, offset = 0) {
+  const revision = trackingRevision;
+  const dialogRevision = ++trackingDialogRevision;
+  const result = await trackingApi(kind === "coupon" ? "tracking-coupon" : "tracking-member", { ...(kind === "coupon" ? { couponId: id } : { memberId: id }), offset });
+  if (revision !== trackingRevision || dialogRevision !== trackingDialogRevision || $("[data-dashboard]").hidden) return;
+  trackingHistory = { kind, id, offset };
+  $("[data-tracking-dialog-title]").textContent = kind === "coupon" ? "Recorrido del cupon" : `Historial de ${result.member.nick}`;
+  $("[data-tracking-dialog-info]").innerHTML = kind === "coupon" ? `<p>${escapeHtml(result.coupon.label)} | ${escapeHtml(rewardStates[result.coupon.status])}</p><code class="tracking-code">${escapeHtml(result.coupon.code)}</code>` : `<p>Referencia: ${escapeHtml(result.member.id)} | ${result.member.active ? "Dentro del circulo" : "Retirado"}</p><p>Ultima vez visto: ${trackingTime(result.member.last_seen_at)} | Salida detectada: ${trackingTime(result.member.left_at)}</p>`;
+  $("[data-tracking-history]").innerHTML = result.entries.map((h) => `<tr><td>${trackingTime(h.created_at)}</td><td>${escapeHtml(trackingActions[h.action] || h.action)}${h.source === "baseline" ? '<br><span class="muted">Estado inicial observado; fecha original no disponible</span>' : ""}</td><td>${escapeHtml(h.previous_nick ? `${h.previous_nick} > ${h.nick}` : h.nick || "Sin destinatario")}</td><td>${escapeHtml([h.label, h.event_title, h.note, h.relatedNick ? `Relacionado con ${h.relatedNick}` : ""].filter(Boolean).join(" | "))}</td><td>${escapeHtml(h.actor_nick || (h.source === "admin" ? "Administrador" : h.source === "baseline" ? "Registro anterior" : "Sincronizacion"))}</td></tr>`).join("") || '<tr><td colspan="5" class="muted">Sin movimientos registrados.</td></tr>';
+  $("[data-tracking-history-page]").textContent = `Pagina ${Math.floor(offset / 25) + 1} | ${result.total} registros`;
+  $("[data-tracking-history-prev]").disabled = offset === 0; $("[data-tracking-history-next]").disabled = offset + 25 >= result.total;
+  const dialog = $("[data-tracking-dialog]"); if (!dialog.open) dialog.showModal();
+}
+function resetTrackingDialog() {
+  trackingDialogRevision++;
+  trackingHistory = null;
+  $("[data-tracking-history]").innerHTML = ""; $("[data-tracking-dialog-info]").innerHTML = "";
+}
+$("[data-rewards-subsection=\"tracking\"]").addEventListener("toggle", (event) => { if (event.target.open) refreshTracking(); });
+$("[data-tracking-refresh]").addEventListener("click", refreshTracking);
+for (const selector of ["[data-tracking-membership]", "[data-tracking-state]"]) $(selector).addEventListener("change", () => { trackingOffset = 0; trackingRevision++; refreshTracking(); });
+$("[data-tracking-search]").addEventListener("input", () => {
+  clearTimeout(trackingTimer); trackingOffset = 0; trackingRevision++;
+  trackingTimer = setTimeout(refreshTracking, 250);
+});
+$("[data-tracking-prev]").addEventListener("click", () => { trackingOffset = Math.max(0, trackingOffset - 25); refreshTracking(); });
+$("[data-tracking-next]").addEventListener("click", () => { trackingOffset += 25; refreshTracking(); });
+document.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-tracking-coupon],[data-tracking-member],[data-tracking-unlink]");
+  if (!button || trackingBusy) return;
+  button.disabled = true;
+  try {
+    if (button.hasAttribute("data-tracking-unlink")) {
+      if (!confirm("Retirar esta relacion de nicks? No se moveran premios ni accesos; la correccion quedara en el historial.")) return;
+      await trackingApi("tracking-unlink", { aliasId: button.dataset.trackingUnlink }); await refreshTracking(); trackingStatus("Relacion retirada. El historial se conserva.");
+    } else await showTrackingHistory(button.hasAttribute("data-tracking-coupon") ? "coupon" : "member", button.dataset.trackingCoupon || button.dataset.trackingMember);
+  } catch (error) { trackingStatus(error.message); }
+  finally { button.disabled = false; }
+});
+$("[data-tracking-alias-form]").addEventListener("submit", async (event) => {
+  event.preventDefault(); if (trackingBusy) return;
+  const fields = event.target.elements;
+  try {
+    if (!confirm("Confirmar que ambos registros pertenecen a la misma persona? Solo cambia el seguimiento; NO transfiere premios ni claves.")) return;
+    trackingBusy = true;
+    await trackingApi("tracking-alias", { fromId: fields.namedItem("fromId").value, toId: fields.namedItem("toId").value, note: fields.namedItem("note").value, confirmed: fields.namedItem("confirmed").checked });
+    event.target.reset(); trackingStatus("Cambio de nick confirmado. Los premios pendientes anteriores conservan su asignacion hasta que tu decidas corregirla.");
+  } catch (error) { trackingStatus(error.message); }
+  finally { trackingBusy = false; await refreshTracking(); }
+});
+for (const [selector, delta] of [["[data-tracking-history-prev]", -25], ["[data-tracking-history-next]", 25]]) $(selector).addEventListener("click", async () => {
+  if (!trackingHistory) return;
+  try { await showTrackingHistory(trackingHistory.kind, trackingHistory.id, Math.max(0, trackingHistory.offset + delta)); } catch (error) { trackingStatus(error.message); }
+});
+$("[data-tracking-close]").addEventListener("click", () => $("[data-tracking-dialog]").close());
+$("[data-tracking-dialog]").addEventListener("close", resetTrackingDialog);
+$("[data-logout]").addEventListener("click", () => {
+  clearTimeout(rosterTrackingTimer); rosterTrackingRevision++; rosterTrackingQueued = false; rosterTrackingOffset = 0;
+  $("[data-roster-tracking-table]").innerHTML = ""; $("[data-roster-tracking-count]").textContent = ""; $("[data-roster-tracking-sync]").textContent = ""; $("[data-roster-tracking-status]").textContent = "";
+  clearTimeout(trackingTimer); trackingRevision++; trackingQueued = false; trackingOffset = 0; resetTrackingDialog();
+  if ($("[data-tracking-dialog]").open) $("[data-tracking-dialog]").close();
+  for (const selector of ["[data-tracking-table]", "[data-tracking-alias-table]", "[data-tracking-old]", "[data-tracking-new]"]) $(selector).innerHTML = "";
+  $("[data-tracking-count]").textContent = "";
+});

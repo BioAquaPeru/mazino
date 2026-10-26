@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://mazino-premios.amused-field-8941.chatgpt.site; worker-src 'self' blob:; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MAZINO · Administrador</title><meta name="referrer" content="no-referrer" />
+    <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48" href="/assets/brand/mazino-eyes-526d3ccffaa6.ico" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/mazino-eyes-526d3ccffaa6-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/mazino-eyes-526d3ccffaa6-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/assets/brand/mazino-eyes-526d3ccffaa6-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/mazino-eyes-526d3ccffaa6-180.png" />
+    <meta name="robots" content="noindex,nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/owner-ui/styles.css?v=ab0c400e402f2381" />
+    <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
+    <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
+    <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=f7b504adeed05399" />
+  <link rel="stylesheet" href="/owner-ui/owner-cloud.css?v=ef67548d58cd87eb" /></head>
+  <body class="admin-body owner-cloud-body">
+    <main class="admin-shell">
+      <section class="login-view" data-login-view>
+        <div class="vault-card">
+          <p class="section-kicker">MAZINO VAULT</p>
+          <h1>Acceso privado</h1>
+          <form data-setup-form hidden>
+            <p class="muted">Primera instalacion: crea el unico administrador.</p>
+            <label><span>Usuario</span><input name="username" autocomplete="username" required minlength="3" /></label>
+            <label><span>Contrasena</span><input name="password" type="password" autocomplete="new-password" required minlength="10" /></label>
+            <button class="primary-action" type="submit">Crear administrador</button>
+          </form>
+          <form data-login-form hidden>
+            <label><span>Usuario</span><input name="username" autocomplete="username" required /></label>
+            <label><span>Contrasena</span><input name="password" type="password" autocomplete="current-password" required /></label>
+            <button class="primary-action" type="submit">Ingresar</button>
+          </form>
+          <p class="form-status" data-auth-status role="status"></p>
+        </div>
+      </section>
+
+      <section class="dashboard" data-dashboard hidden>
+        <aside class="access-notice" data-cloud-workspace-conflict hidden><div><strong>Hay cambios nuevos o un borrador en conflicto.</strong><p>Actualiza para revisar la version actual antes de guardar. No se reemplazo la publicacion.</p></div><button type="button" class="ghost-button" data-cloud-refresh>Actualizar panel</button><button type="button" class="ghost-button" data-cloud-discard-draft hidden>Usar publicacion actual</button></aside>
+        <header class="admin-topbar">
+          <div>
+            <p class="section-kicker">PANEL PRIVADO</p>
+            <h1>MAZINO</h1><label class="admin-circle-context"><span>Administrando: <strong data-admin-circle-label>Mazino</strong></span><select data-admin-circle-select aria-label="Circulo o grupo a administrar"><option value="main">Mazino</option></select></label>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-button" type="button" data-admin-help aria-haspopup="dialog" aria-controls="admin-help"><img src="/assets/admin/help.svg" width="18" height="18" alt="" />Ayuda</button>
+            <button class="ghost-button" type="button" data-preview>Vista previa</button>
+            <button class="primary-action small-action" type="button" data-publish>Guardar y publicar</button>
+            <button class="ghost-button" type="button" data-logout>Salir</button>
+          </div>
+        </header>
+
+        <div class="admin-layout">
+          <nav class="admin-navigation" aria-label="Secciones del administrador">
+            <label class="admin-mobile-navigation"><span>Seccion</span><select data-admin-nav-select><option value="home">Inicio</option><option value="members">Integrantes</option><option value="prizes">Premios</option><option value="events">Eventos</option><option value="donations">Donaciones</option><option value="staff">Sublideres</option><option value="spaces">Circulos y grupos</option><option value="settings">Configuracion</option><option value="circle">Nivel y EXP</option></select></label>
+            <div class="admin-navigation-links">
+              <button type="button" data-admin-nav="home" aria-current="page"><img src="/assets/admin/home.svg" alt="" />Inicio</button>
+              <button type="button" data-admin-nav="members"><img src="/assets/admin/users.svg" alt="" />Integrantes</button>
+              <button type="button" data-admin-nav="prizes"><img src="/assets/admin/ticket.svg" alt="" />Premios</button>
+              <button type="button" data-admin-nav="donations"><img src="/assets/admin/activity.svg" alt="" />Donaciones</button>
+              <button type="button" data-admin-nav="events"><img src="/assets/admin/zap.svg" alt="" />Eventos</button>
+              <span class="admin-nav-caption">Administracion</span>
+              <button type="button" data-admin-nav="staff"><img src="/assets/admin/shield.svg" alt="" />Sublideres</button>
+              <button type="button" data-admin-nav="spaces"><img src="/assets/admin/users.svg" alt="" />Circulos y grupos</button>
+              <button type="button" data-admin-nav="settings"><img src="/assets/admin/settings.svg" alt="" />Configuracion</button>
+              <button type="button" data-admin-nav="circle"><img src="/assets/admin/activity.svg" alt="" />Nivel y EXP</button>
+            </div>
+            <button class="admin-help-access" type="button" data-admin-help aria-label="Ayuda del panel" title="Ayuda del panel" aria-haspopup="dialog" aria-controls="admin-help"><img src="/assets/admin/help.svg" width="18" height="18" alt="" /><span>Ayuda del panel</span></button>
+          </nav>
+          <div class="admin-content">
+          <aside class="access-notice" data-access-notice aria-label="Solicitudes pendientes" hidden>
+            <div><strong role="status" aria-live="polite" data-access-notice-counts>Consultando solicitudes...</strong><small data-access-notice-status>Actualizacion automatica cada 30 segundos.</small></div>
+            <div class="access-notice-actions"><button class="ghost-button" type="button" data-admin-open="accessRequests">Revisar solicitudes</button><button class="ghost-button" type="button" data-access-notice-refresh>Actualizar aviso</button></div>
+          </aside>
+          <header class="admin-workspace-head"><h2 data-workspace-title>Inicio</h2><nav class="admin-task-navigation" data-admin-task-navigation aria-label="Tareas de la seccion"></nav></header>
+          <section class="admin-home" data-admin-home aria-labelledby="admin-home-title">
+            <h2 id="admin-home-title">Estado del circulo</h2>
+            <div class="admin-quick-actions" aria-label="Acciones frecuentes">
+              <button type="button" data-admin-open="prizes"><img src="/assets/admin/ticket.svg" alt="" />Entregar premio</button>
+              <button type="button" data-admin-open="pending"><img src="/assets/admin/activity.svg" alt="" />Ver pendientes</button>
+              <button type="button" data-admin-open="events"><img src="/assets/admin/zap.svg" alt="" />Crear evento</button>
+              <button type="button" data-admin-open="donationUpload"><img src="/assets/admin/upload.svg" alt="" />Cargar donaciones</button>
+            </div>
+            <dl class="admin-overview"><div><dt>Integrantes en el borrador</dt><dd data-home-members>-</dd></div><div><dt>Ultima sincronizacion local</dt><dd data-home-sync>-</dd></div><div><dt>Publicacion automatica</dt><dd data-home-publishing>-</dd></div></dl>
+            <details class="admin-subsection" data-owner-summary open>
+              <summary>Resumen del dia</summary>
+              <form class="rewards-toolbar" data-daily-form><label><span>Dia (Peru)</span><input type="date" data-daily-date required /></label><button class="ghost-button" type="submit">Actualizar resumen</button><button class="ghost-button" type="button" data-daily-today>Hoy</button></form>
+              <p class="muted" role="status" data-daily-status></p>
+              <dl class="admin-overview"><div><dt>Premios asignados ese dia</dt><dd data-daily-assigned>-</dd></div><div><dt>Reclamados ese dia</dt><dd data-daily-claimed>-</dd></div><div><dt>Traspasos ese dia</dt><dd data-daily-transfers>-</dd></div><div><dt>Pendientes actuales</dt><dd data-daily-pending>-</dd></div><div><dt>Libres en tu inventario ahora</dt><dd data-daily-free>-</dd></div><div><dt>Libres en cupos de sublideres ahora</dt><dd data-daily-staff-free>-</dd></div></dl>
+              <details class="admin-subsection"><summary>Actividad por responsable</summary><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Responsable</th><th>Asignados</th><th>Ganadores de sus eventos</th><th>Traspasos</th></tr></thead><tbody data-daily-actors></tbody></table></div></details>
+              <details class="admin-subsection"><summary>Ganadores de eventos <span data-daily-winners-total></span></summary><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha (Peru)</th><th>Ganador</th><th>Evento</th><th>Premio</th><th>Organizador</th></tr></thead><tbody data-daily-winners></tbody></table></div><div class="rewards-toolbar"><button class="ghost-button" type="button" data-daily-prev disabled>Anterior</button><span data-daily-page></span><button class="ghost-button" type="button" data-daily-next disabled>Siguiente</button></div></details>
+            </details>
+          </section>
+          <div class="admin-grid">
+          <details class="admin-panel" data-admin-section="donations">
+            <summary class="admin-section-title"><h2>Donaciones</h2></summary>
+            <p class="form-status" role="status" aria-live="polite" data-donation-status></p>
+            <p class="muted" role="status" data-donation-auto-status></p>
+            <p class="muted">Las lecturas anteriores se conservan. Un nuevo ingreso sin historial previo cuenta desde 0 en su fecha de ingreso. Las reincorporaciones mantienen periodos separados.</p>
+            <details class="admin-subsection" data-donation-auto-review hidden><summary>Consultas automaticas por revisar</summary><div data-donation-auto-issues></div></details>
+            <details class="admin-subsection" data-donation-task="rankings" data-ranking-panel><summary>Exclusiones de los tops</summary>
+              <p class="muted">Solo cambia su aparicion en los tops de mazino.lat. No cambia miembros, donaciones, metas ni accesos. El top global conserva los puestos oficiales de R2Beat.</p>
+              <div class="rewards-toolbar"><label><span>Buscar integrante</span><input type="search" maxlength="80" placeholder="Nick" data-ranking-search /></label><button class="ghost-button" type="button" data-ranking-refresh><img src="/assets/admin/refresh.svg" width="16" height="16" alt="" />Actualizar lista</button></div>
+              <form class="settings-grid" data-ranking-form>
+                <label class="wide"><span>Integrante</span><select required data-ranking-member><option value="">Elige integrante</option></select></label>
+                <label class="switch-row"><input type="checkbox" data-ranking-donors /><span>Excluir de donadores: general y semana</span></label>
+                <label class="switch-row"><input type="checkbox" data-ranking-global /><span>Excluir del top global de Mazino</span></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit" data-ranking-save disabled>Guardar exclusion</button></div>
+              </form>
+              <p role="status" data-ranking-status></p>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante excluido</th><th>Donadores</th><th>Top global</th><th>Ultimo cambio (Peru)</th><th></th></tr></thead><tbody data-ranking-rows></tbody></table></div>
+            </details>
+            <details class="admin-subsection" data-donation-task="members"><summary>Integrantes y cambios</summary>
+              <div class="rewards-toolbar">
+                <label><span>Buscar integrante</span><input type="search" maxlength="80" data-donation-directory-search /></label>
+                <label><span>Situacion del integrante</span><select data-donation-directory-filter><option value="all">Todos</option><option value="new">Nuevos / sin base</option><option value="outside">Retirados</option><option value="returned">Reincorporados</option><option value="doubtful">Por confirmar</option><option value="inside">En el circulo</option></select></label>
+                <button type="button" class="ghost-button" data-donation-directory-refresh>Actualizar lista</button>
+              </div>
+              <p class="muted" role="status" data-donation-directory-count></p>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Situacion</th><th>Ultimo total</th><th>Ultima revision</th><th>Ultimo cambio (Peru)</th><th>Acciones</th></tr></thead><tbody data-donation-directory-rows></tbody></table></div>
+              <div class="editor-actions"><button type="button" class="ghost-button" data-donation-directory-prev>Anterior</button><span data-donation-directory-page></span><button type="button" class="ghost-button" data-donation-directory-next>Siguiente</button></div>
+            </details>
+            <details class="admin-subsection" data-donation-upload data-donation-task="upload">
+              <summary>Cargar totales del juego</summary>
+              <div class="editor-actions"><button type="button" class="ghost-button" data-donation-members-refresh>Actualizar integrantes</button></div><p class="muted" role="status" data-donation-roster-status></p>
+              <div class="editor-actions donation-source" role="group" aria-label="Origen de las donaciones"><button type="button" class="ghost-button" data-donation-source="excel" aria-pressed="true">Excel</button><button type="button" class="ghost-button" data-donation-source="captures" aria-pressed="false">Capturas</button></div>
+              <form class="settings-grid" data-donation-file-form>
+                <label><span>Fecha de revision (Peru)</span><input type="date" required data-donation-date /></label>
+                <div class="editor-actions"><button class="ghost-button" type="button" data-donation-template><img src="/assets/admin/download.svg" width="16" height="16" alt="" />Descargar plantilla Excel</button></div>
+                <label data-donation-excel><span>Plantilla completada (.xlsx)</span><input type="file" accept=".xlsx" required data-donation-file /></label>
+                <label><span>Nota de la carga</span><input maxlength="200" data-donation-note placeholder="Ej.: revision al finalizar la meta" /></label>
+                <label class="check-label"><input type="checkbox" data-donation-replace />Corregir totales ya registrados en esta fecha</label>
+                <div class="editor-actions" data-donation-excel-action><button class="ghost-button" type="submit" data-donation-preview-button><img src="/assets/admin/upload.svg" width="16" height="16" alt="" />Revisar archivo</button></div>
+              </form>
+              <div data-donation-capture-host hidden></div>
+              <section data-donation-preview hidden>
+                <h3>Revision antes de guardar</h3><p role="status" data-donation-preview-summary></p>
+                <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Anterior</th><th>Nuevo total</th><th>Diferencia</th><th>Revision</th></tr></thead><tbody data-donation-preview-rows></tbody></table></div>
+                <div class="editor-actions"><button class="primary-action small-action" type="button" data-donation-save disabled>Guardar totales revisados</button><button class="ghost-button" type="button" data-donation-cancel>Cancelar carga</button></div>
+              </section>
+            </details>
+            <details class="admin-subsection" data-donation-task="capture-blocks" data-donation-capture-block-panel>
+              <summary>Cargas por captura</summary>
+              <div class="rewards-toolbar"><label><span>Bloque guardado</span><select data-donation-capture-block-select></select></label><button type="button" class="ghost-button" data-donation-capture-block-refresh>Actualizar cargas</button></div>
+              <p role="status" data-donation-capture-block-status></p><p data-donation-capture-block-info></p>
+              <nav class="saved-capture-tabs" role="tablist" aria-label="Paginas del bloque guardado" data-donation-capture-block-pages></nav>
+              <section data-donation-capture-block-content hidden role="tabpanel"><h3 class="saved-capture-name" data-donation-capture-block-title></h3><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fila</th><th>Integrante registrado</th><th>Total anterior</th><th>Total del juego</th><th>Donado desde anterior</th><th>Revision</th></tr></thead><tbody data-donation-capture-block-rows></tbody></table></div></section>
+              <div class="editor-actions"><button type="button" class="ghost-button" data-donation-capture-block-prev>Cargas mas recientes</button><span data-donation-capture-block-count></span><button type="button" class="ghost-button" data-donation-capture-block-next>Cargas anteriores</button></div>
+            </details>
+            <details class="admin-subsection" data-donation-results data-donation-task="results">
+              <summary>Metas y resultados</summary>
+              <form class="rewards-toolbar" data-donation-report-form>
+                <label><span>Meta guardada</span><select data-donation-goal><option value="">Consulta entre fechas</option></select></label>
+                <label><span>Inicio</span><input type="date" required data-donation-start /></label>
+                <button class="ghost-button" type="button" data-donation-seven>7 dias</button>
+                <label><span>Final</span><input type="date" required data-donation-end /></label>
+                <label><span>Meta por integrante</span><input type="number" min="1" max="1000000000000" step="1" value="50000" required data-donation-target /></label>
+                <label><span>Buscar integrante</span><input type="search" maxlength="80" placeholder="Nick" data-donation-search /></label>
+                <label><span>Resultado</span><select data-donation-filter><option value="all">Todos</option><option value="fulfilled">Cumplieron</option><option value="shortfall">No cumplieron al cierre</option><option value="progress">Aun les falta / falta cierre</option><option value="missing">Sin registros suficientes</option></select></label>
+                <label><span>Situacion</span><select data-donation-membership><option value="all">Todos</option><option value="inside">Dentro del circulo</option><option value="outside">Retirados</option><option value="new">Nuevos / sin base</option><option value="returned">Reincorporados</option></select></label>
+                <button class="ghost-button" type="submit">Consultar donaciones</button>
+                <button class="ghost-button" type="button" data-donation-clear-filters><img src="/assets/admin/refresh.svg" alt="" />Ver todos</button>
+              </form>
+              <dl class="admin-overview"><div><dt>Cumplieron</dt><dd data-donation-fulfilled>-</dd></div><div><dt>No cumplieron al cierre</dt><dd data-donation-shortfall>-</dd></div><div><dt>Aun les falta / falta cierre</dt><dd data-donation-progress>-</dd></div><div><dt>Sin registros suficientes</dt><dd data-donation-missing>-</dd></div></dl>
+              <p class="muted" role="status" data-donation-report-status></p>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Total inicial</th><th>Ultimo total</th><th>Donado en el plazo</th><th>Le falta</th><th>Resultado</th><th>Ultima revision</th><th></th></tr></thead><tbody data-donation-report-rows></tbody></table></div>
+            </details>
+              <details class="admin-subsection" data-donation-task="goal-create"><summary>Crear una meta</summary><form class="settings-grid" data-donation-goal-form>
+                <label><span>Nombre</span><input maxlength="80" required data-donation-goal-title placeholder="Ej.: Donaciones de la semana" /></label>
+                <label><span>Inicio</span><input type="date" required data-donation-goal-start /></label>
+                <label><span>Duracion</span><select data-donation-duration><option value="7">7 dias</option><option value="custom">Entre fechas</option></select></label>
+                <label><span>Final</span><input type="date" required data-donation-goal-end /></label>
+                <label><span>Meta por integrante</span><input type="number" min="1" max="1000000000000" step="1" value="50000" required data-donation-goal-target /></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit">Crear meta</button></div>
+              </form></details>
+              <details class="admin-subsection" data-donation-task="goals"><summary>Metas creadas y responsables</summary>
+                <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Meta</th><th>Inicio</th><th>Final</th><th>Objetivo por integrante</th><th>Creada por</th><th>Creacion (Peru)</th><th></th></tr></thead><tbody data-donation-goal-rows></tbody></table></div>
+              </details>
+            <details class="admin-subsection" data-donation-history-panel data-donation-task="history"><summary>Historial del integrante</summary>
+              <label><span>Integrante</span><select data-donation-history-member><option value="">Elige integrante</option></select></label>
+              <h3 data-donation-history-title></h3><p class="muted" data-donation-history-status></p>
+              <div data-donation-history-movements></div>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha de revision</th><th>Total del juego</th><th>Donado desde la revision anterior</th><th>Registrado (Peru)</th></tr></thead><tbody data-donation-history-rows></tbody></table></div>
+            </details>
+            <details class="admin-subsection" data-donation-task="imports"><summary>Ultimas 30 cargas y correcciones</summary>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Registrado (Peru)</th><th>Fecha de revision</th><th>Responsable</th><th>Integrantes</th><th>Nota</th><th>Cambios</th></tr></thead><tbody data-donation-import-rows></tbody></table></div>
+            </details>
+          <dialog class="admin-help-dialog" data-donation-review-dialog aria-labelledby="donation-review-title">
+            <header><div><p>Donaciones</p><h2 id="donation-review-title" data-donation-review-title>Revisar inicio</h2></div><button type="button" aria-label="Cerrar revision" title="Cerrar revision" data-donation-review-close autofocus><img src="/assets/admin/close.svg" alt="" width="20" height="20" /></button></header>
+            <div class="admin-help-content">
+              <p data-donation-review-info></p><p role="status" data-donation-review-message></p>
+              <form class="settings-grid donation-identity-confirm" data-donation-identity-form hidden>
+                <h3 data-donation-identity-title></h3>
+                <label><span>Historial anterior</span><select data-donation-identity-previous><option value="">Es nuevo: no vincular historiales</option></select></label>
+                <label><span>Como verificaste su identidad</span><input required minlength="3" maxlength="200" data-donation-identity-note /></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit">Confirmar identidad</button><button class="ghost-button" type="button" data-donation-identity-cancel>Cancelar</button></div>
+              </form>
+              <form class="settings-grid" data-donation-zero-form hidden>
+                <h3 data-donation-zero-title></h3><p data-donation-zero-caption></p>
+                <label class="switch-row"><input type="checkbox" required data-donation-zero-verified /><span>Verifique que comenzo con 0 Rcoin en este ingreso</span></label>
+                <label class="switch-row" data-donation-zero-return-row hidden><input type="checkbox" data-donation-zero-return /><span>Confirmo la nueva base de reincorporacion; no sumar el historial anterior</span></label>
+                <label><span>Como comprobaste el cero</span><input required minlength="3" maxlength="150" data-donation-zero-note /></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit">Confirmar inicio en cero</button><button class="ghost-button" type="button" data-donation-zero-cancel>Cancelar</button></div>
+              </form>
+            </div>
+          </dialog>
+          </details>
+          <details class="admin-panel" data-admin-section="rewards">
+            <summary class="admin-section-title"><h2 id="rewards-title">Cupones y premios</h2></summary>
+            <div class="panel-head"><button class="ghost-button" type="button" data-rewards-refresh>Actualizar premios</button></div>
+            <p class="form-status" role="status" data-rewards-status>Cargando servicio...</p>
+            <p class="muted" data-rewards-count></p>
+            <details class="admin-subsection" data-rewards-subsection="pending">
+              <summary>Premios pendientes de reclamar</summary>
+              <form class="rewards-toolbar" data-pending-form>
+                <label><span>Integrante o premio</span><input type="search" data-pending-search placeholder="Nick o nombre del premio" maxlength="120" /></label>
+                <label><span>Sin reclamar desde hace (dias)</span><input type="number" data-pending-days min="0" max="100000" step="1" placeholder="Todos" /></label>
+                <label><span>Situacion del integrante</span><select data-pending-membership><option value="all">Todos</option><option value="inside">Dentro del circulo</option><option value="outside">Fuera del circulo</option></select></label>
+                <button class="ghost-button" type="submit">Buscar pendientes</button><button class="ghost-button" type="button" data-pending-clear>Limpiar filtros</button>
+              </form>
+              <p class="muted" role="status" aria-live="polite" data-pending-status></p>
+              <p class="form-status" role="status" data-pending-action-status></p>
+              <form class="settings-grid" data-pending-transfer-form hidden>
+                <h3 class="wide" data-pending-transfer-caption></h3>
+                <label><span>Buscar nuevo destinatario</span><input type="search" data-pending-transfer-search placeholder="Nick" /></label>
+                <label><span>Nuevo destinatario</span><select data-pending-transfer-recipient required><option value="">Elige integrante</option></select></label>
+                <label class="wide"><span>Motivo del traspaso</span><input data-pending-transfer-reason maxlength="200" required placeholder="Ej.: destinatario equivocado" /></label>
+                <div class="editor-actions wide"><button class="primary-action small-action" type="submit" data-pending-transfer-submit disabled>Confirmar traspaso</button><button class="ghost-button" type="button" data-pending-transfer-cancel>Cancelar</button></div>
+              </form>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Premio</th><th>Asignado (Peru)</th><th>Dias sin reclamar</th><th>Asignado por</th><th>Situacion</th><th>Acciones</th></tr></thead><tbody data-pending-rows></tbody></table></div>
+              <div class="rewards-toolbar"><button class="ghost-button" type="button" data-pending-prev disabled>Anterior</button><span data-pending-page></span><button class="ghost-button" type="button" data-pending-next disabled>Siguiente</button></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="events">
+            <summary>Eventos relampago</summary>
+            <form class="settings-grid" data-reward-event-form>
+              <label><span>Nombre del evento</span><input name="title" maxlength="80" required /></label>
+              <label><span>Nick donde aparece</span><select name="ownerId" data-reward-owner required></select></label>
+              <label><span>Premio</span><select data-event-item required><option value="">Elige un item disponible</option></select></label>
+              <label><span>Cantidad de ganadores</span><input type="number" min="1" max="50" step="1" value="1" data-event-quantity required /></label>
+              <label><span>Apertura</span><select data-event-mode><option value="now">Ahora</option><option value="scheduled">Fecha y hora</option></select></label>
+              <label data-event-start-row hidden><span>Fecha y hora (Peru)</span><input name="startsAt" type="datetime-local" /></label>
+              <label><span>Fecha y hora de termino (Peru)</span><input name="endsAt" type="datetime-local" data-event-end required /></label>
+              <p class="wide delivery-summary" role="status" data-event-summary></p>
+              <div class="editor-actions"><button class="primary-action small-action" type="submit" data-event-submit>Crear evento y generar clave</button></div>
+              <p class="wide form-status" role="status" data-event-status></p>
+            </form>
+            <div class="rewards-toolbar" data-event-created hidden>
+              <p data-event-created-title></p>
+              <label><span>Clave del evento</span><input readonly data-event-key-output autocomplete="off" /></label>
+              <button class="ghost-button" type="button" data-event-copy-key>Copiar clave</button>
+            </div>
+            <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Evento</th><th>Nick</th><th>Apertura (Peru)</th><th>Termino (Peru)</th><th>Entregados</th><th>Estado</th><th>Acciones</th></tr></thead><tbody data-reward-events-table></tbody></table></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="delivery">
+            <summary>Entregar un premio</summary>
+            <form class="settings-grid" data-personal-delivery>
+              <label><span>1. Premio que entregaras</span><select data-delivery-item required><option value="">Elige un item disponible</option></select></label>
+              <div class="partner-picker">
+                <label><span>2. Buscar destinatario</span><input type="search" data-reward-member-search placeholder="Nick del integrante" autocomplete="off" /></label>
+                <label><span>Entregar a</span><select data-reward-member required></select></label>
+              </div>
+              <label><span>3. Cantidad de cupones</span><input type="number" min="1" max="50" step="1" value="1" data-delivery-quantity required /></label>
+              <p class="wide delivery-summary" role="status" data-delivery-summary></p>
+              <div class="editor-actions"><button class="primary-action small-action" type="submit" data-delivery-submit disabled>Elige un premio y destinatario</button></div>
+              <p class="wide form-status" role="status" data-delivery-status></p>
+            </form>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="bulk">
+              <summary>Reparto por lotes</summary>
+              <div class="panel-head"><button class="ghost-button" type="button" data-bulk-refresh>Actualizar lotes e historial</button></div>
+              <form class="settings-grid" data-bulk-form>
+                <label><span>Nombre unico del reparto</span><input name="title" maxlength="80" required placeholder="Ej. Antiguos - octubre 2026" /></label>
+                <label><span>Lote y premio</span><select name="sourceKey" data-bulk-source required></select></label>
+                <label><span>Cupones por integrante</span><input name="perMember" type="number" min="1" max="10" step="1" value="1" required /></label>
+                <label><span>Ingreso desde (opcional)</span><input name="from" type="date" /></label>
+                <label><span>Ingreso hasta (opcional)</span><input name="to" type="date" /></label>
+                <label><span>Antiguedad minima en dias</span><input name="minDays" type="number" min="0" max="20000" step="1" value="0" /></label>
+                <label><span>Premios anteriores (pendientes y reclamados)</span><select name="rewardRule"><option value="same_item" selected>Excluir quienes ya tienen este premio (recomendado)</option><option value="any_prize">Excluir quienes ya tienen cualquier premio</option><option value="none">No excluir por premios anteriores</option></select></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit" data-bulk-preview>Revisar destinatarios</button></div>
+              </form>
+              <p class="form-status" role="status" data-bulk-status></p>
+              <div data-bulk-candidates hidden>
+                <p class="delivery-summary" data-bulk-summary></p>
+                <label><span>Buscar destinatario</span><input type="search" data-bulk-search /></label>
+                <div class="rewards-toolbar"><button class="ghost-button" type="button" data-bulk-eligible>Seleccionar segun filtros</button><button class="ghost-button" type="button" data-bulk-none>Quitar seleccion</button><button class="ghost-button" type="button" data-bulk-member-prev>Anterior</button><span data-bulk-member-page></span><button class="ghost-button" type="button" data-bulk-member-next>Siguiente</button></div>
+                <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Incluir</th><th>Integrante</th><th>Ingreso</th><th>Antiguedad</th><th>Acceso de premios</th><th>Observacion</th></tr></thead><tbody data-bulk-members></tbody></table></div>
+                <button class="primary-action small-action" type="button" data-bulk-confirm disabled>Confirmar reparto</button>
+              </div>
+              <details class="admin-subsection" data-bulk-history-section><summary>Historial de repartos</summary>
+                <div class="rewards-toolbar"><button class="ghost-button" type="button" data-bulk-prev>Anterior</button><span data-bulk-page></span><button class="ghost-button" type="button" data-bulk-next>Siguiente</button></div>
+                <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Reparto</th><th>Premio / lote</th><th>Entregado por</th><th>Fecha (Peru)</th><th>Cupones</th><th>Estado</th><th></th></tr></thead><tbody data-bulk-history></tbody></table></div>
+                <div data-bulk-detail></div>
+              </details>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="access-requests">
+              <summary>Solicitudes de acceso</summary>
+              <p>Verifica dentro de R2Beat que el codigo lo envio el personaje indicado. Solo despues aprueba esa misma solicitud. El integrante creara su clave privada desde su pestaña.</p>
+              <button class="ghost-button" type="button" data-requests-refresh>Actualizar solicitudes</button>
+              <p class="form-status" role="status" data-requests-status></p>
+              <details class="admin-subsection" data-access-history>
+                <summary>Historial de aprobaciones y rechazos</summary>
+                <p>Ves todas las decisiones del administrador y sublideres. Se conservan aunque venza la solicitud o el integrante se retire. Aprobada indica identidad verificada; no confirma que haya creado su clave.</p>
+                <form class="settings-grid" data-access-history-form>
+                  <label>Tipo<select name="purpose"><option value="all">Todos</option><option value="enroll">Primer acceso</option><option value="recover">Recuperacion</option></select></label>
+                  <label>Decision<select name="decision"><option value="all">Todas</option><option value="approved">Aprobadas</option><option value="rejected">Rechazadas</option></select></label>
+                  <label>Buscar nick o responsable<input name="search" type="search" maxlength="120" /></label>
+                  <label>Desde (Peru)<input name="from" type="date" /></label>
+                  <label>Hasta (Peru)<input name="to" type="date" /></label>
+                  <div class="editor-actions wide"><button class="ghost-button" type="submit">Consultar historial</button><button class="ghost-button" type="button" data-access-history-reset>Ver todo</button></div>
+                </form>
+                <p role="status" aria-live="polite" data-access-history-status></p>
+                <div class="access-history-list" data-access-history-rows></div>
+                <div class="editor-actions"><button class="ghost-button" type="button" data-access-history-prev disabled>Anterior</button><span data-access-history-page></span><button class="ghost-button" type="button" data-access-history-next disabled>Siguiente</button></div>
+              </details>
+              <div data-access-requests></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="access">
+            <summary data-reward-access-title>Accesos de integrantes</summary>
+            <div class="rewards-toolbar">
+              <label><span>Buscar integrante</span><input type="search" data-access-search placeholder="Nick" /></label>
+              <label><span>Estado de la clave</span><select data-access-filter><option value="all">Todos</option><option value="missing">Sin clave generada</option><option value="generated">Con clave generada</option><option value="paused">Clave generada, acceso pausado</option></select></label>
+              <label><span>Integrante</span><select data-access-member></select></label>
+            </div>
+            <div class="rewards-toolbar">
+              <button class="ghost-button" type="button" data-reward-password>Generar clave de 6 digitos</button>
+              <button class="ghost-button" type="button" data-reward-view-password>Ver contrasena</button>
+              <button class="ghost-button" type="button" data-reward-disable>Pausar acceso</button>
+              <button class="ghost-button" type="button" data-reward-sync>Actualizar integrantes</button>
+            </div>
+            <div class="rewards-toolbar" data-reward-credential hidden>
+              <label><span>Nick</span><input readonly data-reward-secret-nick autocomplete="off" spellcheck="false" /></label>
+              <label><span>Clave de premios</span><input readonly data-reward-secret autocomplete="off" spellcheck="false" /></label>
+              <button class="ghost-button" type="button" data-reward-copy-secret>Copiar acceso</button>
+              <button class="ghost-button" type="button" data-reward-clear-secret>Ocultar acceso</button>
+            </div>
+            <p class="muted" data-access-summary role="status"></p>
+            <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Clave</th><th>Acceso</th><th></th></tr></thead><tbody data-access-rows></tbody></table></div>
+            <div class="editor-actions"><button class="ghost-button" type="button" data-access-prev>Anterior</button><span data-access-page></span><button class="ghost-button" type="button" data-access-next>Siguiente</button></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="assignments">
+            <summary>A quien entregaste cada premio</summary>
+            <div class="rewards-toolbar">
+              <label><span>Buscar entregas</span><input type="search" data-assignment-search placeholder="Nick, premio o evento" /></label>
+              <label><span>Mostrar</span><select data-assignment-status><option value="all">Todas las entregas</option><option value="winners">Ganadores de eventos</option><option value="assigned">Pendientes de reclamar</option><option value="claimed">Todas las reclamadas</option></select></label>
+              <label><span>Evento</span><select data-assignment-event><option value="">Todos los eventos y entregas</option></select></label>
+              <button class="ghost-button" type="button" data-assignment-refresh>Actualizar resultados</button>
+            </div>
+            <p class="muted" role="status" data-assignment-count></p>
+            <p class="form-status" role="status" data-assignment-feedback></p>
+            <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Premio</th><th>Evento / entrega</th><th>Estado</th><th>Cupon</th><th>Reclamado el (Peru)</th><th>Acciones</th></tr></thead><tbody data-assignment-table></tbody></table></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="tracking">
+              <summary>Seguimiento de cupones y retirados</summary>
+              <button class="ghost-button" type="button" data-roster-tracking-open>Ver quienes salieron del circulo</button>
+              <div class="rewards-toolbar">
+                <label><span>Buscar codigo, premio o nick</span><input type="search" data-tracking-search autocomplete="off" /></label>
+                <label><span>Situacion del destinatario</span><select data-tracking-membership><option value="outside">Fuera del circulo</option><option value="all">Todos</option><option value="inside">Dentro del circulo</option><option value="renamed">Cambio de nick confirmado</option><option value="historical">Sin destinatario actual, con historial</option><option value="unlinked">Sin entregas registradas</option></select></label>
+                <label><span>Estado del cupon</span><select data-tracking-state><option value="all">Todos</option><option value="assigned">Pendiente</option><option value="claimed">Reclamado</option><option value="available">Disponible</option><option value="archived">Archivado</option></select></label>
+                <button class="ghost-button" type="button" data-tracking-refresh>Actualizar seguimiento</button>
+              </div>
+              <p class="muted" data-tracking-count></p><p class="form-status" role="status" data-tracking-status></p>
+              <div class="rewards-toolbar"><button class="ghost-button" type="button" data-tracking-prev>Anterior</button><span data-tracking-page></span><button class="ghost-button" type="button" data-tracking-next>Siguiente</button></div>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Cupon</th><th>Premio</th><th>Destinatario registrado</th><th>Nick actual confirmado</th><th>Situacion</th><th>Estado</th><th>Ultima vez visto (Peru)</th><th>Salida detectada (Peru)</th><th></th></tr></thead><tbody data-tracking-table></tbody></table></div>
+              <details class="admin-subsection" data-tracking-alias-section>
+                <summary>Confirmar o corregir cambios de nick</summary>
+                <p class="muted">R2Beat no proporciona un identificador permanente. Confirma la identidad antes de vincular nicks. Esta relacion solo sirve para seguimiento: no mueve premios ni comparte contrasenas.</p>
+                <form class="settings-grid" data-tracking-alias-form>
+                  <label><span>Registro anterior retirado</span><select name="fromId" data-tracking-old required></select></label>
+                  <label><span>Integrante actual</span><select name="toId" data-tracking-new required></select></label>
+                  <label class="wide"><span>Como verificaste el cambio</span><input name="note" minlength="3" maxlength="200" required /></label>
+                  <label class="switch-row"><input type="checkbox" name="confirmed" required /><span>Confirme que es la misma persona</span></label>
+                  <div class="editor-actions"><button class="primary-action small-action" type="submit">Confirmar relacion de nicks</button></div>
+                </form>
+                <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Anterior</th><th>Actual confirmado</th><th>Verificacion</th><th>Confirmado el (Peru)</th><th></th></tr></thead><tbody data-tracking-alias-table></tbody></table></div>
+              </details>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="roster-tracking">
+              <summary>Entradas y salidas del circulo</summary>
+              <div class="rewards-toolbar">
+                <label><span>Mostrar integrantes</span><select data-roster-tracking-view><option value="outside">Quienes salieron</option><option value="latest">Cambios de la ultima actualizacion</option><option value="all">Todos los registros</option></select></label>
+                <label><span>Buscar nick (opcional)</span><input type="search" data-roster-tracking-search autocomplete="off" /></label>
+                <button class="ghost-button" type="button" data-roster-tracking-refresh>Actualizar seguimiento</button>
+              </div>
+              <p class="muted" data-roster-tracking-count role="status"></p>
+              <p class="muted" data-roster-tracking-sync></p>
+              <p class="muted">Una salida significa que ese nick dejo de aparecer en la lista consultada; no confirma una expulsion ni un cambio de nick.</p>
+              <p class="form-status" data-roster-tracking-status role="status"></p>
+              <div class="rewards-toolbar"><button class="ghost-button" type="button" data-roster-tracking-prev>Anterior</button><span data-roster-tracking-page></span><button class="ghost-button" type="button" data-roster-tracking-next>Siguiente</button></div>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Nick registrado</th><th>Situacion</th><th>Nick actual confirmado</th><th>Ultima vez visto (Peru)</th><th>Salida detectada (Peru)</th><th>Cupones pendientes</th><th>Reclamados</th><th></th></tr></thead><tbody data-roster-tracking-table></tbody></table></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="import">
+            <summary>Cargar nuevos cupones</summary>
+            <form class="settings-grid" data-coupon-import>
+              <label><span>Nombre del premio</span><input name="label" maxlength="80" placeholder="Ej. Mascota, traje o monedas" required /></label>
+              <label><span>Nombre del lote (opcional)</span><input name="batchName" maxlength="80" placeholder="Ej. Mascotas de octubre" /></label>
+              <label class="wide"><span>Cupones (uno por linea)</span><textarea name="codes" rows="3" required autocomplete="off" spellcheck="false"></textarea></label>
+              <div class="editor-actions"><button class="primary-action small-action" type="submit">Cargar cupones</button></div>
+            </form>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="rename-batch">
+              <summary>Renombrar premios por lote</summary>
+              <form class="settings-grid" data-label-batch-form>
+                <label><span>Lote de carga</span><select required data-label-batch-batch></select></label>
+                <label><span>Premio actual</span><select data-label-batch-old><option value="">Todos los premios del lote</option></select></label>
+                <label><span>Nuevo nombre del premio</span><input required maxlength="80" data-label-batch-name /></label>
+                <button class="ghost-button" type="submit">Revisar cambio de nombres</button>
+              </form>
+              <p class="form-status" data-label-batch-status role="status"></p>
+              <div data-label-batch-review hidden><p data-label-batch-summary></p><p class="muted" data-label-batch-names></p><div class="editor-actions"><button class="primary-action small-action" type="button" data-label-batch-save disabled>Confirmar cambio de nombres</button><button class="ghost-button" type="button" data-label-batch-cancel>Cancelar</button></div></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="inventory">
+            <summary>Inventario de cupones</summary>
+            <div class="rewards-toolbar">
+              <label><span>Destinatario para los seleccionados</span><select data-inventory-member><option value="">Elige integrante</option></select></label>
+              <label><span>Estado de cupones</span><select data-coupon-filter><option value="available">Disponibles</option><option value="assigned">Asignados</option><option value="claimed">Reclamados</option><option value="all">Todos</option></select></label>
+              <label><span>Item / premio</span><select data-coupon-item-filter><option value="">Todos los items</option></select></label>
+              <button class="ghost-button" type="button" data-coupon-assign>Asignar seleccionados</button>
+              <button class="ghost-button" type="button" data-coupon-release>Quitar asignacion</button>
+              <button class="ghost-button" type="button" data-coupon-archive>Archivar seleccionados</button>
+            </div>
+            <p class="muted" role="status" data-coupon-visible-count></p>
+            <div class="rewards-toolbar"><button class="ghost-button" type="button" data-coupon-prev>Anterior</button><span data-coupon-page></span><button class="ghost-button" type="button" data-coupon-next>Siguiente</button></div>
+            <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th><input type="checkbox" aria-label="Seleccionar cupones visibles" data-coupon-select-all /></th><th>Cupon</th><th>Nombre del premio</th><th>Estado</th><th>Integrante / evento</th><th>Reclamado</th><th></th></tr></thead><tbody data-coupon-table></tbody></table></div>
+            </details>
+          </details>
+          <details class="admin-panel" data-admin-section="staff">
+            <summary class="admin-section-title"><h2>Sublideres y permisos</h2></summary>
+            <div class="panel-head"><a class="github-link" data-staff-panel-link target="_blank" rel="noopener noreferrer" hidden>Panel de sublideres</a><button class="ghost-button" type="button" data-staff-refresh>Actualizar</button></div>
+            <p class="form-status" role="status" data-staff-status></p>
+            <details class="admin-subsection" data-staff-group="accounts">
+              <summary>Cuentas y permisos</summary>
+              <form class="settings-grid" data-staff-account-form>
+                <label><span>Buscar integrante</span><input type="search" data-staff-search placeholder="Nick" /></label>
+                <label><span>Sublider</span><select name="memberId" data-staff-member required></select></label>
+                <label class="switch-row"><input type="checkbox" name="enabled" /><span>Acceso activo</span></label>
+                <label class="switch-row"><input type="checkbox" name="can_assign" /><span>Asignar cupones, individuales y por lotes</span></label>
+                <label class="switch-row"><input type="checkbox" name="can_events" /><span>Crear eventos</span></label>
+                <label class="switch-row"><input type="checkbox" name="can_release" /><span>Quitar sus entregas pendientes</span></label>
+                <label class="switch-row"><input type="checkbox" name="can_donations" /><span>Cargar donaciones (sin corregir totales existentes)</span></label>
+                <label class="switch-row"><input type="checkbox" name="can_donation_goals" /><span>Crear metas de donaciones</span></label>
+                <label class="switch-row"><input type="checkbox" name="can_access" /><span>Verificar en el juego y aprobar nuevos accesos</span></label>
+                <label class="switch-row"><input type="checkbox" name="can_close" /><span>Cerrar sus eventos</span></label>
+                <label><span>Maximo por dia (Peru)</span><input name="dailyLimit" type="number" min="0" max="1000" step="1" value="5" required /></label>
+                <label><span>Maximo por semana (lunes a domingo)</span><input name="weeklyLimit" type="number" min="0" max="5000" step="1" value="20" required /></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit">Guardar permisos</button><button class="ghost-button" type="button" data-staff-password>Generar acceso</button><button class="ghost-button" type="button" data-staff-reveal>Ver acceso</button></div>
+              </form>
+              <div class="rewards-toolbar" data-staff-credential hidden>
+                <label><span>Nick</span><input readonly data-staff-secret-nick autocomplete="off" /></label><label><span>Clave del panel</span><input readonly data-staff-secret autocomplete="off" /></label>
+                <button class="ghost-button" type="button" data-staff-copy>Copiar acceso y enlace</button><button class="ghost-button" type="button" data-staff-hide>Ocultar</button>
+              </div>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Sublider</th><th>Acceso</th><th>Hoy</th><th>Semana</th><th>Cupones libres de su cupo</th><th></th></tr></thead><tbody data-staff-accounts></tbody></table></div>
+            </details>
+            <details class="admin-subsection" data-staff-group="pool">
+              <summary>Cupones que puede repartir cada sublider</summary>
+              <form class="settings-grid" data-staff-pool-form>
+                <label><span>Sublider</span><select name="memberId" data-staff-pool-member required></select></label>
+                <label><span>Operacion</span><select name="mode" data-staff-pool-mode><option value="add">Reservar cupones para su cupo</option><option value="return">Devolver cupones libres al inventario general</option></select></label>
+                <label><span>Premio</span><select name="itemKey" data-staff-pool-item required></select></label>
+                <label><span>Cantidad</span><input name="quantity" type="number" min="1" max="300" step="1" value="1" required /></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit">Aplicar al cupo</button></div>
+              </form>
+              <p class="muted">Los limites cuentan al asignar o reservar premios para eventos. Cancelar no devuelve el limite diario o semanal; los cupones pendientes si vuelven a su cupo.</p>
+            </details>
+            <details class="admin-subsection" data-staff-group="transfers">
+              <summary>Traspasos de premios</summary>
+              <form class="rewards-toolbar" data-transfers-form>
+                <label><span>Quien hizo el traspaso</span><select data-transfers-actor><option value="">Todos</option><option value="staff">Solo sublideres</option><option value="admin">Administrador</option></select></label>
+                <label><span>Premio o integrante</span><input type="search" data-transfers-search placeholder="Premio, origen o destino" maxlength="120" /></label>
+                <label><span>Desde (Peru)</span><input type="date" data-transfers-from /></label>
+                <label><span>Hasta (Peru)</span><input type="date" data-transfers-to /></label>
+                <button class="ghost-button" type="submit">Filtrar traspasos</button>
+                <button class="ghost-button" type="button" data-transfers-clear>Limpiar filtros</button>
+              </form>
+              <p class="muted" role="status" aria-live="polite" data-transfers-status></p>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha (Peru)</th><th>Quien lo paso</th><th>Premio</th><th>De integrante</th><th>A integrante</th><th>Motivo</th></tr></thead><tbody data-transfers-rows></tbody></table></div>
+              <div class="rewards-toolbar"><button class="ghost-button" type="button" data-transfers-prev disabled>Anterior</button><span data-transfers-page></span><button class="ghost-button" type="button" data-transfers-next disabled>Siguiente</button></div>
+            </details>
+            <details class="admin-subsection" data-staff-group="audit">
+              <summary>Historial de actividad</summary>
+              <div class="rewards-toolbar"><label><span>Integrante</span><select data-staff-audit-member><option value="">Todos</option></select></label><button class="ghost-button" type="button" data-staff-audit-prev>Anterior</button><span data-staff-audit-page></span><button class="ghost-button" type="button" data-staff-audit-next>Siguiente</button></div>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha (Peru)</th><th>Quien</th><th>Accion</th><th>Detalle</th><th>Cantidad</th></tr></thead><tbody data-staff-audit></tbody></table></div>
+            </details>
+          </details>
+          <details class="admin-panel" data-admin-section="github">
+            <summary class="admin-section-title">
+              <h2 id="github-title">Publicacion en GitHub</h2>
+              <span class="github-badge" data-github-badge>Sin conectar</span>
+            </summary>
+            <form class="settings-grid" data-github-form>
+              <label><span>Usuario de GitHub</span><input name="owner" value="BioAquaPeru" required autocomplete="off" /></label>
+              <label><span>Repositorio</span><input name="repo" value="mazino" required autocomplete="off" /></label>
+              <label><span>Rama</span><input name="branch" value="main" required autocomplete="off" /></label>
+              <div class="editor-actions">
+                <button class="ghost-button" type="submit" data-github-connect>Conectar GitHub</button>
+                <button class="ghost-button" type="button" data-github-disable hidden>Desactivar</button>
+                <a class="github-link" data-github-repository target="_blank" rel="noopener noreferrer" hidden>Ver repositorio</a>
+              </div>
+            </form>
+            <p class="form-status github-status" data-github-status role="status">GitHub sin conectar.</p>
+          </details>
+
+          <details class="admin-panel" data-admin-section="spaces">
+ <summary>Circulos y grupos</summary>
+ <div class="space-category-heading"><div><h3>Tus circulos y grupos</h3><p>Crea un espacio oculto, personalizalo y revisa su vista previa antes de mostrarlo.</p></div><div class="space-actions"><button type="button" class="primary-action small-action" data-space-create-open>+ Crear circulo o grupo</button><button type="button" class="ghost-button" data-spaces-refresh>Actualizar</button></div></div>
+ <div class="space-summary" aria-label="Estado de tus espacios"><span><b data-space-visible-count>0</b> Visibles</span><span><b data-space-hidden-count>0</b> Ocultos</span><span><b data-space-deleted-count>0</b> Eliminados</span></div>
+ <p role="status" aria-live="polite" class="form-status" data-spaces-status></p>
+ <details class="admin-subsection space-create-box" data-space-create-box><summary>Crear un nuevo espacio</summary><p>Se crea oculto. Solo aparecera en mazino.lat cuando elijas Mostrar.</p><form class="settings-grid" data-space-create><label>Nombre<input name="name" required maxlength="60" placeholder="Ejemplo: Mazino Girls"></label><label>Tipo<select name="kind"><option value="circle">Circulo de R2Beat</option><option value="group">Grupo de invitados</option></select></label><label class="wide">Enlace del circulo en R2Beat<input name="sourceUrl" type="url" required placeholder="https://r2beatlatino.com/circulos/ver/?id=..."></label><div class="space-actions wide"><button type="submit" class="primary-action small-action">Crear oculto y personalizar</button><button type="button" class="ghost-button" data-space-create-cancel>Cancelar</button></div></form></details>
+ <div class="space-list-tools"><label>Buscar circulo o grupo<input type="search" placeholder="Nombre..." data-spaces-search></label><label>Mostrar<select data-spaces-filter><option value="all">Todos</option><option value="visible">Visibles</option><option value="hidden">Ocultos</option></select></label><span data-spaces-result-count></span></div>
+ <div class="space-card-grid" data-spaces-list></div>
+ <section data-space-detail hidden>
+  <div class="space-category-heading"><div><p class="space-editor-kicker">EDITAR ESPACIO</p><h3 data-space-detail-name></h3><p data-space-detail-source></p><p data-space-detail-count></p></div><button type="button" class="ghost-button" data-space-edit-close>Cerrar editor</button></div>
+  <p class="space-edit-status" data-space-edit-status role="status"></p>
+  <form class="settings-grid" data-space-edit>
+   <details class="space-editor-fold wide" open><summary>1. Nombre, visibilidad y logo del menu</summary><div class="settings-grid">
+                <label>Nombre publico<input name="name" maxlength="60" required></label><label class="switch-row"><input type="checkbox" name="enabled"><span>Mostrar en la pagina principal</span></label>
+                <label>Color de su pestaña<input type="color" name="tabColor" value="#ff506a"></label>
+                <label>Subir logo de la pestaña<input type="file" accept="image/png,image/jpeg,image/webp" data-space-logo-file><small>PNG, JPG o WebP. Se prepara una copia pequeña para la pestaña.</small></label>
+                <input name="logoUrl" type="hidden"><label class="wide">O usar enlace de una imagen<input name="logoLink" placeholder="https://..." maxlength="1500"></label>
+                <div class="space-logo-editor wide"><img data-space-logo-preview alt="Vista previa del logo de la pestaña" width="56" height="56" hidden><span data-space-logo-label>Sin logo personalizado</span><button type="button" class="ghost-button" data-space-logo-clear>Quitar logo</button></div>
+                </div></details>
+   <details class="space-editor-fold wide"><summary>2. Colores y logo de portada</summary><fieldset class="settings-grid wide space-page-editor"><legend>Apariencia de su pagina</legend>
+                  <p class="wide">Se aplica a la portada, titulos, botones y fondo de este circulo. Los colores propios de los integrantes se conservan.</p>
+                  <label>Color principal de la pagina<input type="color" name="pageColor" value="#df101f"></label><label>Color de fondo<input type="color" name="pageBackground" value="#000000"></label>
+                  <label class="wide">Subir logo de portada<input type="file" accept="image/png,image/jpeg,image/webp" data-space-page-logo-file><small>PNG, JPG o WebP de hasta 5 MB. Se conserva una copia de mayor calidad para PC y movil.</small></label>
+                  <input name="pageLogoUrl" type="hidden"><label class="wide">O enlace del logo de portada<input name="pageLogoLink" placeholder="https://..." maxlength="1500"></label>
+                  <div class="space-logo-editor wide"><button type="button" class="ghost-button" data-space-page-logo-clear>Usar el logo del menu en la portada</button><small>Si no hay un logo propio, los circulos adicionales muestran su inicial.</small></div>
+                  <div class="space-page-sample wide" data-space-page-sample><img data-space-page-logo-preview width="96" height="96" alt="Vista previa de la portada" hidden><strong data-space-page-name></strong><span>Vista previa de su pagina</span><b data-space-page-action>Premios y eventos</b></div>
+                </fieldset>
+                </details>
+   <details class="space-editor-fold wide"><summary>3. Bienvenida y WhatsApp</summary><fieldset class="settings-grid wide space-page-editor"><legend>Bienvenida y WhatsApp de este circulo</legend>
+                  <label class="wide">Mensaje de bienvenida<textarea name="welcomeMessage" maxlength="500" rows="3" placeholder="Bienvenido a nuestro circulo..."></textarea><small>Aparece debajo del nombre del circulo. Dejalo vacio si no quieres mostrar un mensaje.</small></label>
+                  <label class="wide">Enlace de WhatsApp del lider o del grupo<input type="url" name="whatsappUrl" maxlength="1500" placeholder="https://wa.me/519XXXXXXXX"><small>Usa wa.me con codigo de pais, api.whatsapp.com/send o una invitacion chat.whatsapp.com. Si lo dejas vacio, el boton de WhatsApp queda desactivado.</small></label>
+                  <label>Accion del boton<select name="contactMode"><option value="join">Unirse al circulo</option><option value="contact">Contactar al lider</option></select></label>
+                  <p class="wide">Este contacto tambien se usa en las guias para pedir la clave. Las solicitudes de acceso y su verificacion en el juego siguen igual.</p>
+                  <p class="wide space-welcome-sample" data-space-welcome-preview></p><small class="wide" data-space-contact-preview></small>
+                </fieldset>
+                </details>
+   <div class="space-editor-footer wide"><button type="button" class="ghost-button" data-space-preview-editor>Vista previa PC / movil</button><button type="submit" class="primary-action small-action">Guardar cambios</button><button type="button" class="ghost-button" data-space-save-show>Guardar y mostrar</button></div>
+  </form>
+  <details class="space-editor-fold" data-space-access-section><summary>Responsables y permisos</summary><p>Usan su acceso habitual. Los permisos y cupos de este espacio se mantienen separados de los demas.</p><div class="access-history-list" data-space-grants></div><form class="settings-grid" data-space-grant>
+                <label>Sublider existente<select name="memberId" required></select></label><label class="switch-row"><input name="enabled" type="checkbox" checked><span>Delegacion activa</span></label>
+                <div class="settings-grid wide" data-space-permissions></div>
+                <label>Cupo diario<input type="number" name="dailyLimit" value="5" min="0" max="1000" required></label><label>Cupo semanal<input type="number" name="weeklyLimit" value="20" min="0" max="5000" required></label>
+                <button type="submit" class="primary-action small-action">Guardar delegacion</button>
+              </form></details>
+  <details class="space-editor-fold" data-space-tools><summary>Integrantes y eliminacion</summary><p>Eliminar retira el espacio de la web. Su historial se conserva y puedes restaurarlo.</p><div class="space-actions"><button type="button" class="ghost-button" data-space-sync>Actualizar integrantes desde R2Beat</button><button type="button" class="ghost-button space-danger" data-space-delete>Eliminar este circulo o grupo</button></div></details>
+ </section>
+ <details class="admin-subsection" data-space-trash><summary>Eliminados (<span data-space-trash-count>0</span>)</summary><p>Sus integrantes, cupones e historiales se conservan. Al restaurar vuelven ocultos.</p><div class="space-card-grid" data-space-trash-list></div></details>
+</details>
+          <details class="admin-panel" data-admin-section="settings">
+            <summary class="admin-section-title"><h2>Configuracion general</h2></summary>
+            <p data-save-status class="form-status"></p>
+            <form class="settings-grid" data-settings-form>
+              <label><span>Numero WhatsApp internacional</span><input name="whatsappNumber" placeholder="51999999999" /></label>
+              <label><span>Ruta privada</span><input name="adminPath" placeholder="/mz-vault-x7q9/" /></label>
+              <label><span>Frase principal</span><input name="heroPhrase" maxlength="160" /></label>
+              <label><span>Texto boton</span><input name="joinButtonText" maxlength="40" /></label>
+              <label class="wide"><span>Mensaje WhatsApp ([NICK])</span><textarea name="whatsappTemplate" rows="2"></textarea></label>
+              <label class="switch-row"><input name="eliteEnabled" type="checkbox" checked /> <span>Mostrar seccion destacada</span></label>
+              <label><span>Nombre de la seccion destacada</span><input name="eliteTitle" /></label>
+              <label class="switch-row"><input name="membersEnabled" type="checkbox" checked /> <span>Mostrar miembros</span></label>
+              <label><span>Nombre de la seccion de miembros</span><input name="membersTitle" /></label>
+              <label class="wide"><span>URL del logo</span><input name="logoUrl" /></label>
+              <label class="switch-row"><input name="joinEnabled" type="checkbox" /> <span>Solicitudes activas</span></label>
+              <button class="ghost-button wide" type="submit">Guardar cambios en borrador</button>
+            </form>
+          </details>
+
+          <details class="admin-panel" data-admin-section="circle" data-circle-panel>
+            <summary class="admin-section-title"><h2>Nivel y EXP del circulo</h2></summary>
+            <div class="panel-head"><p class="muted" data-circle-admin-summary>Pendiente de consulta</p><button class="ghost-button" type="button" data-circle-admin-refresh><img src="/assets/admin/refresh.svg" alt="" width="16" height="16" />Actualizar</button></div>
+            <p class="muted">EXP total acumulada necesaria para alcanzar cada nivel, no EXP adicional. El nivel y la EXP actuales vienen de R2Beat.</p>
+            <form class="settings-grid" data-circle-admin-form>
+              <label><span>Nivel destino</span><input type="number" min="2" max="999" step="1" value="3" required data-circle-admin-level /></label>
+              <label><span>EXP total requerida</span><input type="number" min="1" max="1000000000000" step="1" required inputmode="numeric" placeholder="Cantidad exacta, sin decimales" data-circle-admin-exp /></label>
+              <div class="editor-actions wide"><button class="primary-action small-action" type="submit">Guardar requisito</button></div>
+            </form>
+            <p class="form-status" role="status" aria-live="polite" data-circle-admin-status></p>
+            <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Nivel</th><th>EXP total requerida</th><th></th></tr></thead><tbody data-circle-admin-rows></tbody></table></div>
+          </details>
+          <details class="admin-panel" data-admin-section="sync">
+            <summary class="admin-section-title"><h2>Sincronizacion R2Beat</h2></summary>
+            <div class="panel-head"><button class="ghost-button" type="button" data-sync>Sincronizar ahora</button></div>
+            <p class="muted">Iguala el roster con R2Beat: agrega integrantes y retira a quienes ya no aparecen. Conserva tus textos, destacados, colores y niebla.</p>
+            <form class="sync-controls" data-sync-form>
+              <label class="switch-row"><input type="checkbox" name="enabled" data-sync-enabled checked /> <span>Consulta automatica en linea</span></label>
+              <label><span>Intervalo de consulta con visitas</span><select name="intervalMinutes" data-sync-interval><option value="15" selected>Cada 15 minutos</option><option value="30">Cada 30 minutos</option><option value="60">Cada hora</option></select></label>
+              <button class="ghost-button" type="submit">Guardar sincronizacion</button>
+            </form>
+            <p class="sync-status" data-sync-status></p>
+            <p class="sync-status" data-cloud-sync-status></p>
+            <p class="muted">Comprobacion automatica sin visitas: cada hora, incluso con tu PC apagada.</p>
+            <p class="muted" data-sync-schedule></p>
+            <p class="form-status" role="status" data-sync-settings-status></p>
+          </details>
+
+          <details class="admin-panel" data-admin-section="members">
+            <summary class="admin-section-title"><h2>Integrantes</h2></summary>
+            <div class="panel-head"><button class="primary-action small-action" type="button" data-new-member>Agregar</button></div>
+            <div class="admin-member-tools">
+              <label class="search-box"><span>Buscar integrantes</span><input type="search" placeholder="Nick, rango o pareja" autocomplete="off" aria-controls="admin-members-table" data-admin-member-search /></label>
+              <label class="admin-date-filter"><span>Ingreso desde</span><input type="date" data-member-joined-from /></label>
+              <label class="admin-date-filter"><span>Ingreso hasta</span><input type="date" data-member-joined-to /></label>
+              <label class="admin-date-filter"><span>Orden</span><select data-member-sort><option value="default">Orden habitual</option><option value="oldest">Mas antiguos primero</option><option value="newest">Mas recientes primero</option></select></label>
+              <p class="muted" role="status" data-admin-member-count></p>
+            </div>
+            <div class="member-editor" data-member-editor hidden>
+              <form data-member-form>
+                <input name="id" type="hidden" />
+                <label><span>Nick</span><input name="nick" required /></label>
+                <label><span>Nivel</span><input name="level" type="number" min="1" max="999" required /></label>
+                <label><span>Rango de R2Beat</span><input name="rank" /></label>
+                <label><span>Texto debajo del nombre</span><input name="title" maxlength="40" placeholder="Miembro" /></label>
+                <label><span>Licencia R2Beat</span><select name="license"><option value="sol">Sol</option><option value="luna">Luna</option><option value="estrella">Estrella</option></select></label>
+                <label class="switch-row"><input name="featured" type="checkbox" /> <span>Destacado</span></label>
+                <label class="switch-row"><input name="goldEffect" type="checkbox" /> <span>Niebla activa</span></label>
+                <label><span>Color de la niebla</span><input name="fogColor" type="color" value="#ffd45c" /></label>
+                <div class="partner-picker">
+                  <label><span>Buscar pareja</span><input type="search" placeholder="Nick de la pareja" autocomplete="off" aria-controls="partner-options" data-partner-search /></label>
+                  <label><span>Pareja</span><select name="partnerId" id="partner-options"><option value="">Sin pareja</option></select></label>
+                  <p class="form-status" role="status" data-partner-search-status></p>
+                </div>
+                <label><span>Color de la union</span><input name="pairColor" type="color" value="#ef8fb5" /></label>
+                <div class="editor-actions">
+                  <button class="primary-action small-action" type="submit">Guardar integrante</button>
+                  <button class="ghost-button" type="button" data-cancel-member>Cancelar</button>
+                </div>
+                <p class="form-status" role="status" data-member-status></p>
+              </form>
+            </div>
+            <div class="admin-table-wrap">
+              <table class="admin-table" id="admin-members-table">
+                <thead>
+                  <tr>
+                    <th>Nick</th>
+                    <th>Nivel</th>
+                    <th>Miembro desde</th>
+                    <th>Rango R2Beat</th>
+                    <th>Texto publicado</th>
+                    <th>Pareja</th>
+                    <th>Destacado</th>
+                    <th>Niebla</th>
+                    <th>Color</th>
+                    <th>Orden</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody data-members-table></tbody>
+              </table>
+            </div>
+          </details>
+
+          <details class="admin-panel" data-admin-section="security">
+            <summary class="admin-section-title"><h2>Acceso y seguridad</h2></summary>
+            <section data-local-cloud-access>
+              <h3>Acceso al administrador en la nube</h3>
+              <p>Entra desde PC o celular aunque esta computadora este apagada. La primera vez configura el segundo paso con una aplicacion autenticadora.</p>
+              <p class="form-status" data-cloud-access-status role="status">Entra a tu panel para consultar el acceso remoto.</p>
+              <div class="button-row"><a class="primary-action" data-cloud-open href="https://mazino.lat/mz-vault-x7q9/" target="_blank" rel="noopener noreferrer">Abrir administrador en la nube</a><button class="ghost-button" type="button" data-cloud-activate hidden>Configurar verificacion en dos pasos</button><button class="ghost-button" type="button" data-cloud-renew hidden>Renovar enlace de configuracion</button></div>
+              <p class="muted">Tu acceso local se conserva como respaldo. El enlace de configuracion es privado y vence; no lo compartas. El administrador remoto requiere tu clave y un codigo de tu autenticador.</p>
+            </section>
+            <form class="password-form" data-password-form>
+              <label><span>Actual</span><input name="currentPassword" type="password" autocomplete="current-password" required /></label>
+              <label><span>Nueva</span><input name="nextPassword" type="password" autocomplete="new-password" minlength="10" required /></label>
+              <button class="ghost-button" type="submit">Actualizar contrasena</button>
+            </form>
+            <p class="form-status" data-password-status></p>
+          </details>
+          </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="admin-help-dialog" id="admin-help" data-admin-help-dialog aria-labelledby="admin-help-title">
+      <header><div><p>Administrador</p><h2 id="admin-help-title">Ayuda del panel</h2></div><button type="button" data-admin-help-close aria-label="Cerrar ayuda" title="Cerrar ayuda" autofocus><img src="/assets/admin/close.svg" width="20" height="20" alt="" /></button></header>
+      <div class="admin-help-content">
+        <details><summary>Administrador en la nube y verificacion en dos pasos</summary><ol><li>La primera vez, entra a tu panel local y abre <strong>Configuracion &gt; Acceso y seguridad</strong>. Pulsa <strong>Configurar verificacion en dos pasos</strong>. El enlace es privado y vence en 24 horas; puedes renovarlo desde el mismo lugar.</li><li>Entra con tu usuario y contrasena actuales. Añade el QR a una aplicacion autenticadora en tu celular y escribe su codigo vigente de seis digitos. No compartas el QR ni el enlace de activacion.</li><li>Guarda los diez codigos de recuperacion en un lugar privado. Solo se muestran una vez. Confirma que los guardaste para continuar.</li><li>Despues entra directamente a <strong>mazino.lat/mz-vault-x7q9/</strong>, incluso con tu PC apagada. Usa tu clave y el codigo del autenticador. La sesion dura 30 minutos y termina al cerrar o recargar esta pestaña.</li><li><strong>Guardar y publicar</strong> actualiza la web en la nube. Las entregas, eventos, donaciones y permisos mantienen sus reglas y sus historiales.</li><li>Si pierdes el autenticador, elige <strong>Usar codigo de recuperacion</strong> al entrar; pide tambien tu contrasena. Dentro de <strong>Acceso y seguridad</strong> puedes cambiar de autenticador o renovar tus codigos. Cada codigo de respaldo solo sirve una vez.</li><li>El panel local conserva su acceso como respaldo. Al abrirlo conectado, lee la configuracion de la nube; si la nube falla, permite consultar la ultima copia local sin reemplazar cambios nuevos.</li></ol></details>
+        <details><summary>Logos, colores y eliminacion de circulos</summary><p>Abre <strong>Circulos y grupos &gt; Editar</strong>. Elige su <strong>Color de pestaña</strong> y sube un logo PNG, JPG o WebP (o pega un enlace HTTPS). Pulsa <strong>Guardar cambios</strong> y recarga la principal. El logo del menu se prepara pequeño. En <strong>Apariencia de su pagina</strong> elige el color principal, el fondo y un logo de portada de mayor calidad. Puedes subirlo o pegar su enlace HTTPS. Si no eliges una portada, usa el logo del menu; si tampoco hay uno, los circulos adicionales muestran su inicial. Guarda y recarga la principal; cada circulo conserva su propia apariencia, tambien si falla la conexion. Los efectos de los integrantes se mantienen.</p><p><strong>Eliminar este circulo o grupo</strong> lo retira de la principal y del panel de sublideres. Sus cupones, integrantes y registros se conservan en <strong>Eliminados</strong>. Puedes restaurarlo; vuelve oculto y luego decides si activarlo. Mazino, como principal, conserva su enlace y no se elimina desde esta opcion.</p><p>En un grupo de invitados, cualquier jugador externo puede pulsar <strong>Solicitar registro</strong>, escribir su nick exacto y enviar el codigo desde su personaje en R2Beat. Tu o un sublider con permiso verifican y aprueban antes de que cree su clave. No se copia ningun acceso de otro circulo.</p></details>
+        <details><summary>Bienvenida y WhatsApp por circulo</summary><p>Abre <strong>Circulos y grupos &gt; Editar &gt; Bienvenida y WhatsApp de este circulo</strong>. Escribe la bienvenida, pega el enlace de WhatsApp del lider o una invitacion a su grupo y elige <strong>Unirse al circulo</strong> o <strong>Contactar al lider</strong>. Pulsa <strong>Guardar cambios</strong>. La pagina y las guias usaran solo el contacto del circulo elegido. Si dejas el enlace vacio, no se abre el WhatsApp de otro circulo. Los nuevos espacios empiezan sin contacto hasta que lo configures. No cambian las claves ni el registro verificado en el juego.</p></details>
+        <details><summary>Vista previa, crear y gestionar circulos</summary><ol><li>En <strong>Circulos y grupos</strong>, pulsa <strong>+ Crear circulo o grupo</strong>. Se crea oculto.</li><li>Pulsa <strong>Editar</strong> para cambiar nombre, logos, colores, bienvenida o WhatsApp. Las opciones estan separadas en secciones plegables.</li><li>Pulsa <strong>Vista previa</strong> desde su tarjeta o el editor. Cambia entre <strong>PC</strong> y <strong>Movil</strong>. Puedes revisar cambios sin guardar aunque el espacio siga oculto.</li><li>En la vista previa, pulsa el boton de contacto y <strong>Ver destino de WhatsApp</strong> para comprobar su enlace. No guarda cambios ni activa el espacio.</li><li><strong>Guardar cambios</strong> conserva la visibilidad que hayas elegido. Para publicarlo desde oculto usa <strong>Guardar y mostrar</strong>, o <strong>Mostrar</strong> desde su tarjeta. <strong>Ocultar</strong> lo retira de la principal y conserva su historial.</li><li>En <strong>Administrar y eliminar</strong> puedes entrar a sus integrantes y premios o eliminarlo. Los eliminados se restauran desde <strong>Eliminados</strong> y vuelven ocultos. Mazino principal esta protegido.</li></ol></details>
+        <details><summary>Circulos y grupos</summary><ol><li>Abre <strong>Circulos y grupos &gt; Agregar circulo o grupo</strong>. Escribe el nombre y, si es oficial, pega el enlace de R2Beat.</li><li>Se crea oculto. Revisa los integrantes y usa <strong>Actualizar integrantes desde R2Beat</strong> si hubo un error.</li><li>En Responsables elige un sublider que ya tenga acceso. Marca sus permisos y limites de este espacio; no cambian los de Mazino.</li><li>Activa <strong>Mostrar en la pagina principal</strong>. El selector publico mostrara el nuevo espacio.</li><li>Para administrarlo, usa <strong>Administrar</strong> o el selector de arriba. Carga sus cupones en su propio inventario y reserva el cupo del responsable en Sublideres &gt; Entregar cupo.</li></ol><p>Los integrantes de cada circulo tienen claves de premios separadas. Los sublideres mantienen su clave habitual y eligen el espacio en mazino.lat/equipo/. Los grupos aceptan solicitudes de invitados: deben enviar el codigo desde su personaje de R2Beat y ser aprobados antes de crear su clave. Ocultar un espacio conserva todos sus historiales. El origen de un circulo no se cambia por otro enlace; agrega otro espacio para evitar mezclar personas y registros.</p></details>
+        <details><summary>Historial de accesos y recuperaciones</summary><p>Abre <strong>Integrantes &gt; Solicitudes de acceso &gt; Historial de aprobaciones y rechazos</strong>. Ves todas las decisiones, con el nick, tipo, responsable y fecha y hora de Peru. Filtra por primer acceso o recuperacion, aprobadas o rechazadas, nick o responsable y fechas. Cada sublider autorizado solo ve sus propias decisiones. Los registros anteriores se conservan; una aprobacion no confirma que el integrante haya creado su clave.</p></details>
+        <details><summary>Aviso de solicitudes pendientes</summary><p>El aviso sobre las secciones muestra por separado <strong>accesos nuevos</strong> y <strong>recuperaciones</strong>. Se actualiza cada 30 segundos mientras el panel esta visible, al volver a la pestaña y despues de aprobar o rechazar. <strong>Revisar solicitudes</strong> abre la seccion correspondiente; <strong>Actualizar aviso</strong> consulta al momento. Solo cuenta solicitudes vigentes que esperan aprobacion. No incluye aprobadas, rechazadas, vencidas ni accesos que cambiaron. Si falla la conexion, el aviso indica que el ultimo conteo puede haber cambiado.</p></details>
+        <details><summary>Recuperar acceso si olvidaron la clave</summary><p>El integrante abre su nick y pulsa <strong>Olvide mi clave · Recuperar acceso</strong>. Envia el codigo desde su propio personaje dentro de R2Beat. En <strong>Integrantes &gt; Solicitudes de acceso</strong>, revisa la solicitud marcada <strong>Recuperacion de acceso</strong>, comprueba el nick y codigo dentro del juego y aprueba. Los sublideres usan el mismo permiso de aprobacion existente y no pueden aprobarse a si mismos.</p><p>La solicitud dura 24 horas y, una vez aprobada, hay 30 minutos para guardar una nueva clave en esa misma pestaña. Solicitar o aprobar no cambia la clave actual. Al terminar se cierran solo las sesiones de premios de ese integrante. Una recuperacion antigua deja de servir si cambia la clave, se pausa el acceso o se retira del circulo. La clave del panel de sublider, los premios y el historial se conservan.</p></details>
+        <details><summary>Solicitar acceso, aprobarlo y cambiar mi clave</summary><p>El nuevo integrante abre su nick en la pagina principal y pulsa <strong>Solicitar mi acceso</strong>. Debe enviar el codigo desde su personaje en R2Beat. En <strong>Integrantes &gt; Solicitudes de acceso</strong>, comprueba ese nick dentro del juego, escribe el codigo recibido y marca la verificacion antes de aprobar. No apruebes por un mensaje de otra persona. La solicitud dura 24 horas; tras aprobar, tiene 30 minutos para crear su clave desde esa misma pestaña.</p><p>Para delegar aprobaciones activa <strong>Verificar en el juego y aprobar nuevos accesos</strong> en los permisos del sublider. Esta desactivado inicialmente. Quien ya tiene acceso entra como siempre y usa <strong>Cambiar mi clave</strong>, indicando la actual. Las claves privadas nuevas no se muestran al administrador. No cambian la clave del panel de sublider ni las claves de eventos.</p></details>
+        <details><summary>Renombrar premios por lote y encontrar claves pendientes</summary><p>Abre <strong>Premios &gt; Renombrar por lote</strong>. Elige lote, premio actual (o todos sus premios), escribe el nuevo nombre y revisa la cantidad antes de confirmar. Solo se cambian nombres; los codigos, destinatarios, estados, reclamos y cupos quedan iguales. Los nombres nuevos aparecen tambien a los sublideres al actualizar. El cambio queda en <strong>Sublideres &gt; Actividad</strong>.</p><p>En <strong>Integrantes &gt; Claves de premios</strong>, elige <strong>Sin clave generada</strong> en Estado de la clave. Selecciona al integrante y usa el boton habitual para generar su acceso. <strong>Acceso pausado</strong> no significa que le falte clave. El listado no muestra ni genera contrasenas automaticamente.</p></details>
+        <details open><summary>Donde esta cada opcion</summary>
+          <dl><div><dt>Resumen diario</dt><dd>Inicio</dd></div><div><dt>Ficha del integrante</dt><dd>Integrantes: selecciona su nick</dd></div><div><dt>Claves de jugadores</dt><dd>Integrantes &gt; Claves de premios</dd></div><div><dt>Entregar o repartir premios</dt><dd>Premios &gt; Entregar / Repartir por lote</dd></div><div><dt>Sin reclamar y entregados</dt><dd>Premios &gt; Pendientes / Entregas</dd></div><div><dt>Cupones disponibles o nuevos</dt><dd>Premios &gt; Inventario / Cargar cupones</dd></div><div><dt>Eventos y ganadores</dt><dd>Eventos &gt; Crear y administrar / Ganadores</dd></div><div><dt>Totales, metas e historial</dt><dd>Donaciones</dd></div><div><dt>Permisos, cupos y actividad</dt><dd>Sublideres</dd></div><div><dt>Pagina principal, sincronizacion y publicacion</dt><dd>Configuracion</dd></div></dl>
+        </details>
+        <details><summary>Asignar un premio o repartir por lote</summary><ol><li>Abre <strong>Premios &gt; Entregar</strong>.</li><li>Elige el premio, busca al integrante y selecciona su nick en <strong>Entregar a</strong>.</li><li>Indica la cantidad, comprueba el destinatario y confirma.</li></ol><p>Tambien puedes abrir la ficha del integrante y elegir <strong>Asignar cupon</strong>.</p><p>Para varios integrantes: <strong>Premios &gt; Repartir por lote</strong>. Elige el lote, aplica los filtros y la exclusion de premios anteriores, revisa destinatarios y confirma el reparto.</p></details>
+        <details><summary>Corregir una entrega y revisar traspasos</summary><ol><li>Abre <strong>Premios &gt; Pendientes</strong> o la ficha del integrante.</li><li>Usa <strong>Quitar premio</strong> para devolverlo al inventario, o <strong>Traspasar / Pasar a otro integrante</strong> para mover el mismo cupon.</li><li>Para un traspaso, elige el nuevo destinatario, escribe el motivo y confirma.</li></ol><p>Solo se pueden corregir premios personales que <strong>no hayan sido reclamados</strong>. El historial se conserva. Consulta los movimientos en <strong>Sublideres &gt; Traspasos</strong>.</p></details>
+<details><summary>Crear eventos y ver ganadores</summary><ol><li>Abre <strong>Eventos &gt; Crear y administrar</strong>.</li><li>Escribe el nombre y elige el nick donde aparecera.</li><li>Elige premio, cantidad de ganadores y apertura: <strong>Ahora</strong> o fecha y hora de <strong>Peru</strong>.</li><li>Revisa la <strong>fecha y hora de termino</strong>. Se propone 24 horas despues de abrir; puedes cambiarla.</li><li>Crea el evento y comparte su clave con los participantes.</li></ol><p>El jugador ingresa con su <strong>clave del circulo</strong> y reclama con la <strong>clave del evento</strong>. Son distintas.</p><p>Al agotarse los premios o llegar el termino, el evento se cierra automaticamente y desaparece del login. Los pendientes vuelven a su inventario original; los reclamados y el historial se conservan. Los eventos anteriores sin termino vencen 24 horas despues de su apertura.</p><p>La <strong>Pizarra de eventos</strong> de mazino.lat muestra Proximos, Activos y Ganadores, sin claves ni codigos. Junto al evento tienes <strong>Ver ganadores</strong> y la opcion para consultar su clave. Tambien puedes entrar en <strong>Eventos &gt; Ganadores</strong>.</p><p>En <strong>Eventos &gt; Crear y administrar &gt; Editar</strong> puedes corregir el nombre y el termino de cualquier evento, incluso culminado. No cambia su apertura ni su clave. Los culminados siguen cerrados y no reservan premios de nuevo. En <strong>Sublideres &gt; Actividad</strong> queda quien lo edito, la fecha y los valores anteriores y nuevos. Cada sublider con permiso de eventos solo puede editar los suyos.</p></details>
+        <details><summary>Registrar donaciones con Excel</summary>
+          <ol><li>Abre <strong>Donaciones &gt; Integrantes y cambios</strong> y revisa si hay alguien <strong>Por confirmar</strong>. Resuelve su identidad antes de cargar sus totales.</li><li>Abre <strong>Donaciones &gt; Cargar totales</strong>, elige la fecha en que revisaste el juego (horario de <strong>Peru</strong>) y descarga una plantilla actualizada.</li><li>En Excel, llena solo <strong>Nuevo total</strong> con el <strong>total acumulado que muestra el juego</strong> para ese nick. Escribe numeros enteros, como <strong>150000</strong>, no 150k. No cambies nicks, ID, fechas ni encabezados.</li><li>Guarda como <strong>.xlsx</strong>, selecciona la misma fecha en el panel, sube el archivo y pulsa <strong>Revisar archivo</strong>.</li><li>Revisa nick, total y diferencia de cada fila. Corrige los errores en Excel y vuelve a revisar. Si pide una nueva base, consulta la seccion de reincorporados de esta ayuda.</li><li>Solo cuando todo sea correcto, pulsa <strong>Guardar totales revisados</strong> y acepta la confirmacion. <strong>Revisar archivo no guarda donaciones.</strong></li></ol>
+          <p><strong>Si no tienes el dato, deja Nuevo total vacio:</strong> esa fila no se carga. Escribe <strong>0</strong> solo si el juego realmente muestra cero.</p><p><strong>Ejemplo de un integrante antiguo sin base de ingreso conocida:</strong> primera carga de 100000 = punto de partida, no una donacion nueva. Si la siguiente lectura del mismo ingreso es 150000, dono <strong>50000</strong> entre esas revisiones.</p>
+          <p>Si un total es menor que el anterior dentro del mismo ingreso, revisa el dato; no lo fuerces ni lo interpretes como una donacion negativa. Solo si registraste mal un total de una fecha ya cargada, activa <strong>Corregir totales ya registrados en esta fecha</strong>, revisa el archivo y confirma la correccion.</p>
+        </details>
+        <details><summary>Registrar donaciones con capturas</summary><ol><li>Abre <strong>Donaciones &gt; Cargar totales &gt; Capturas</strong> y elige la fecha de revision.</li><li>Selecciona hasta <strong>6 capturas</strong> con las columnas <strong>Id de Juego</strong> y <strong>Rcoin donados</strong>, incluyendo las lineas de la tabla. Ordena las paginas y recorta lo que sobra si es necesario.</li><li>Pulsa <strong>Leer capturas</strong>. Usa las pestanas 1 a 6 para cambiar de pagina sin bajar por todo el bloque.</li><li>Compara cada fila con la imagen, elige el <strong>Integrante correcto</strong>, corrige el <strong>Total acumulado</strong> y marca la fila como revisada. Puedes ampliarla y usar <strong>Confirmar y siguiente</strong>. Las sugerencias de nick no se confirman solas.</li><li>Filtra <strong>Solo dudosas</strong>, resuelve los repetidos o excluye las filas que no puedas comprobar. Una fila excluida no se guarda ni se toma como cero.</li><li>Pulsa <strong>Revisar bloque antes de guardar</strong>. Comprueba diferencias y confirma las nuevas bases si las pide. Luego pulsa <strong>Guardar totales revisados</strong> y acepta.</li></ol><p>Leer o revisar capturas <strong>no guarda donaciones</strong>. Solo la confirmacion final registra los totales. Las imagenes se procesan en tu navegador y no se guardan en el servidor. Si cierras o recargas antes de guardar, tendras que cargar el bloque de nuevo.</p><p>Los casos de identidad dudosa se resuelven en <strong>Integrantes y cambios</strong>. Los titulos, colores, claves y premios del integrante no cambian. Los sublideres necesitan el mismo permiso que para cargar Excel y no pueden corregir cargas anteriores.</p></details>
+        <p><strong>Consultar capturas guardadas:</strong> abre <strong>Donaciones &gt; Cargas por captura</strong>, elige el bloque y pulsa <strong>Pagina 1, Pagina 2...</strong>. Los nicks y totales conservan el orden de las capturas, incluso despues de cerrar el panel. Las filas excluidas no aparecen; las ya registradas si aparecen. Tu ves todos los bloques y cada sublider ve sus propias cargas. Las cargas antiguas sin este detalle no se pueden reconstruir por pagina.</p>
+        <p>En cada pagina guardada, <strong>Total anterior</strong> muestra la ultima lectura de una fecha anterior del mismo ingreso. <strong>Donado desde anterior</strong> es la diferencia hasta ese bloque, no entre correcciones del mismo dia. Cero significa que no aumento; <strong>Nueva base</strong> no cuenta como donacion. Los bloques antiguos sin ese dato muestran <strong>Sin comparacion</strong> y nunca se calculan con lecturas actuales.</p>
+        <p>Si acaba de ingresar alguien, pulsa <strong>Actualizar integrantes</strong> en la carga o en la fila ampliada. No vuelvas a subir las capturas: selecciona su nick en <strong>Integrante correcto</strong> y comprueba su total. Un nuevo integrante no necesita vincularse a otro historial. Si es un ingreso nuevo sin historial previo, el sistema conserva su inicio en 0 desde la fecha de ingreso. Registra el total real que muestra el juego, no lo reemplaces por cero.</p>
+        <p>El lector omite las filas completamente vacias e indica cuantas se omitieron. <strong>0 es un total valido</strong>. Las filas con contenido ilegible siguen pendientes de revision y no se eliminan como vacias.</p>
+        <details><summary>Nuevos, retirados, reincorporados y casos dudosos</summary>
+          <p>Abre <strong>Donaciones &gt; Integrantes y cambios</strong> y filtra por situacion. Los cambios se detectan al sincronizar la lista oficial; que alguien falte en el Excel o en una captura <strong>no significa que se retiro</strong>.</p>
+          <dl><div><dt>Nuevo / sin base</dt><dd>Si es un integrante realmente nuevo, sin historial anterior, el sistema coloca su inicio en 0 desde su fecha de ingreso. Su total actual cuenta como donacion de ese ingreso. En la plantilla o captura registra siempre el total real del juego.</dd></div><div><dt>Retirado</dt><dd>Ya no aparece en la lista oficial sincronizada. No lo borres ni pongas cero: consulta sus registros con <strong>Historial</strong>. La plantilla nueva solo incluye integrantes activos.</dd></div><div><dt>Reincorporado</dt><dd>Volvio al circulo. Consulta su historial y registra el total actual del juego. Si aparece <strong>Confirmar nueva base</strong> en la revision del archivo, comprueba la fila y confirma: comienza un nuevo periodo sin borrar el anterior. No restes el total de antes de salir al total de su regreso.</dd></div><div><dt>Por confirmar</dt><dd>No hay certeza de que sea la misma persona de un historial anterior. Un nick igual no basta. Compruebalo con el integrante; si no estas seguro, deja su Nuevo total vacio y registra solo a los demas.</dd></div></dl>
+          <p><strong>Para resolver un caso dudoso:</strong></p><ol><li>Pulsa <strong>Confirmar identidad</strong> en su fila.</li><li>En <strong>Historial anterior</strong>, elige al retirado correcto solo si verificaste que es la misma persona. Si es otra persona, elige <strong>Es nuevo: no vincular historiales</strong>.</li><li>Escribe en <strong>Como verificaste su identidad</strong> la comprobacion que hiciste, revisa la seleccion y confirma.</li><li>Vuelve a descargar la plantilla y revisar el archivo. Si el regreso requiere una nueva base, confirmala antes de guardar.</li></ol>
+          <p>Vincular historiales solo afecta al seguimiento de donaciones: <strong>no cambia claves, cupones ni permisos</strong>. La identidad y la nueva base son dos confirmaciones distintas. Los sublideres solo pueden confirmar si tienen permiso para cargar donaciones.</p>
+          <p><strong>Inicio en cero:</strong> en <strong>Donaciones &gt; Integrantes y cambios</strong>, confirma primero si es nuevo o corresponde a un retirado. Luego pulsa <strong>Confirmar inicio en cero</strong>, verifica su fecha de ingreso de R2Beat, marca que comprobaste el contador y explica como lo verificaste. Un reincorporado necesita ademas confirmar la nueva base de ese ingreso. No se reemplazan bases existentes, no se borra el historial y no se pone cero automaticamente.</p><p>Si entra durante una meta, cuenta desde su fecha de ingreso, visible en Resultados. El objetivo sigue completo, sin prorratearlo. Una base cero no es una donacion: las cargas posteriores muestran el avance. Si falta la fecha oficial o no sabes el total inicial, revisa el ingreso o registra una lectura comprobada; no inventes el cero.</p>
+          <p>Desde <strong>Donaciones &gt; Resultados</strong>, pulsa <strong>Revisar inicio</strong> en una fila <strong>Sin registros suficientes</strong>. La ventana permite confirmar identidad y luego el inicio en cero, sin salir de la meta ni perder los filtros. Los retirados, las bases existentes y las lecturas de otra fecha se muestran para revision; no se inventan ceros.</p>
+        </details>
+        <details><summary>Crear metas y consultar donaciones</summary><p><strong>R2Beat cada hora:</strong> se agregan nuevas lecturas sin reemplazar el historial, aunque tu PC este apagada. Consulta Resultados e Historial como siempre. Un nuevo integrante sin historial previo cuenta desde 0 en su fecha oficial de ingreso; su total actual cuenta en las metas de ese ingreso. Se conservan las lecturas originales. Si es reincorporado o tiene historial anterior, no se aplica ese cero automatico: se revisa su identidad y se mantiene el periodo separado. Las identidades dudosas y los totales menores quedan por revisar. Excel y capturas siguen disponibles.</p><ol><li>Abre <strong>Donaciones &gt; Crear meta</strong>.</li><li>Escribe nombre, inicio, duracion de <strong>7 dias</strong> o <strong>Entre fechas</strong>, y objetivo por integrante.</li><li>Confirma. Luego abre <strong>Resultados</strong> y selecciona la meta.</li></ol><p>El calculo es <strong>ultimo total guardado dentro del plazo menos total del dia de inicio</strong>. Crear una meta no registra una donacion: guarda una lectura del dia de inicio y nuevas capturas o Excel cuando revises el juego. Si paso de 2500000 a 2800000, dono 300000. Si la meta es 50000, aparece en <strong>Cumplieron</strong> inmediatamente, sin esperar al cierre.</p><p><strong>Aun les falta / falta cierre</strong> muestra el avance pendiente. <strong>No cumplieron al cierre</strong> requiere una lectura del dia final. Si falta la base inicial, aparece <strong>Sin registros suficientes</strong>; no se inventan totales. Pulsa <strong>Ver todos</strong> para quitar filtros. Las fechas de ambas lecturas aparecen junto a sus totales.</p><p>En <strong>Metas y responsables</strong> veras quien creo cada meta. En <strong>Historial</strong> puedes elegir un integrante y consultar sus revisiones.</p></details>
+        <details><summary>Excluir o incluir integrantes en los tops</summary><p>Abre <strong>Donaciones &gt; Exclusiones de tops</strong>, busca y elige al integrante. Marca los tops de los que deseas excluirlo y pulsa <strong>Guardar exclusion</strong>. Para recuperarlo, pulsa <strong>Volver a incluir</strong>, o desmarca las opciones y guarda. No se borran sus donaciones ni cambia su meta o acceso.</p><p>En la web, <strong>General</strong> muestra el total acumulado; <strong>Semana</strong> compara las lecturas guardadas de lunes a domingo, hora de Peru. La primera lectura de la semana es la base: no cuenta todo su saldo como donacion nueva. Se necesitan dos lecturas para conocer el incremento. Para medir toda la semana, registra una lectura el lunes y sigue cargando los nuevos totales.</p></details>
+        <details><summary>Eliminar una meta de donaciones</summary><ol><li>Abre <strong>Donaciones &gt; Metas y responsables</strong>.</li><li>Busca la meta por su nombre y fechas y pulsa <strong>Eliminar meta</strong>.</li><li>Revisa la confirmacion y acepta solo si es la meta correcta.</li></ol><p>Solo el administrador puede eliminar metas, incluidas las creadas por sublideres. No se borran los totales, las cargas por capturas ni el historial de donaciones. Puedes seguir consultando esas donaciones entre fechas. La eliminacion queda registrada en <strong>Sublideres &gt; Actividad</strong> y no se puede deshacer.</p></details>
+<details><summary>Nivel y EXP del circulo</summary><p>Entra directamente en <strong>Nivel y EXP</strong> en el menu lateral (o Seccion en movil). Tambien puedes abrir <strong>Configuracion &gt; Nivel y EXP del circulo</strong>. Escribe el nivel destino (3, 4, 5...) y la <strong>EXP total acumulada necesaria para alcanzarlo</strong>. No escribas solo lo que falta. Guarda cada requisito; puedes corregirlo con <strong>Editar</strong>.</p><p>El nivel y la EXP actuales se consultan en R2Beat, incluso con tu PC apagada. En este panel puedes consultar la EXP actual, el requisito del siguiente nivel y cuanto falta. La portada solo muestra el nivel del circulo. Un requisito desconocido aparece por confirmar; alcanzar la EXP no cambia manualmente el nivel del juego. Solo el administrador puede configurar estos requisitos.</p></details>
+<details><summary>Claves, permisos y cupos de sublideres</summary><p>En <strong>Integrantes &gt; Claves de premios</strong> puedes consultar la clave de un jugador con <strong>Ver contrasena</strong>. Generar una nueva reemplaza la anterior.</p><p>En <strong>Sublideres &gt; Accesos y permisos</strong>, elige al sublider, marca sus permisos, configura sus limites y guarda. Para permitir metas, activa <strong>Crear metas de donaciones</strong>. Cargar donaciones es un permiso separado.</p><p>En <strong>Entregar cupo</strong> le reservas cupones para repartir. En <strong>Actividad</strong> puedes revisar sus acciones.</p><p>La <strong>clave del panel de sublider</strong> no es la clave de premios del jugador. El enlace del equipo sigue siendo <strong>mazino.lat/equipo/</strong>.</p></details>
+      </div>
+    </dialog>
+    <dialog class="admin-help-dialog" data-event-edit-dialog aria-labelledby="event-edit-title">
+      <header class="admin-help-head"><h2 id="event-edit-title">Editar evento</h2><button class="icon-button" type="button" data-event-edit-close aria-label="Cerrar edicion" title="Cerrar edicion"><img src="/assets/guides/icon-close.svg" alt="" width="20" height="20" /></button></header>
+      <div class="admin-help-content">
+        <p data-event-edit-info></p><p data-event-edit-warning></p>
+        <form class="settings-grid" data-event-edit-form>
+          <label class="wide"><span>Nombre del evento</span><input name="title" maxlength="80" required /></label>
+          <label class="wide"><span>Fecha y hora de termino (Peru)</span><input name="endsAt" type="datetime-local" step="1" required /></label>
+          <div class="editor-actions wide"><button class="primary-action small-action" type="submit">Guardar cambios</button><button class="ghost-button" type="button" data-event-edit-cancel>Cancelar</button></div>
+        </form>
+        <p class="form-status" role="status" aria-live="polite" data-event-edit-status></p>
+      </div>
+    </dialog>
+    <dialog class="preview-dialog" data-preview-dialog>
+      <div class="preview-card">
+        <button class="icon-button close-button" type="button" data-close-preview aria-label="Cerrar">x</button>
+        <div data-preview-content></div>
+      </div>
+    </dialog>
+
+    <dialog class="preview-dialog tracking-dialog" data-tracking-dialog>
+      <div class="preview-card">
+        <button class="icon-button close-button" type="button" data-tracking-close aria-label="Cerrar recorrido">x</button>
+        <h2 data-tracking-dialog-title>Recorrido</h2><div data-tracking-dialog-info></div>
+        <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha (Peru)</th><th>Movimiento</th><th>Nick registrado</th><th>Premio / detalle</th><th>Quien / origen</th></tr></thead><tbody data-tracking-history></tbody></table></div>
+        <div class="rewards-toolbar"><button class="ghost-button" type="button" data-tracking-history-prev>Anterior</button><span data-tracking-history-page></span><button class="ghost-button" type="button" data-tracking-history-next>Siguiente</button></div>
+      </div>
+    </dialog>
+    <dialog class="member-profile-dialog" data-profile-dialog aria-labelledby="profile-title">
+      <div class="member-profile-body">
+        <header class="member-profile-head"><p class="section-kicker">FICHA DEL INTEGRANTE</p><h2 id="profile-title" data-profile-title>Integrante</h2><button class="icon-button" type="button" data-profile-close aria-label="Cerrar ficha" title="Cerrar ficha"><img src="/assets/guides/icon-close.svg" alt="" width="20" height="20" /></button></header>
+        <p class="form-status" role="status" data-profile-status></p>
+        <div data-profile-content hidden>
+          <div class="profile-tabs" role="tablist" aria-label="Datos del integrante">
+            <button type="button" role="tab" id="profile-summary-tab" aria-controls="profile-summary" aria-selected="true" data-profile-tab="summary">Resumen</button>
+            <button type="button" role="tab" id="profile-prizes-tab" aria-controls="profile-prizes" aria-selected="false" tabindex="-1" data-profile-tab="prizes">Premios</button>
+            <button type="button" role="tab" id="profile-history-tab" aria-controls="profile-history" aria-selected="false" tabindex="-1" data-profile-tab="history">Movimientos</button>
+            <button type="button" role="tab" id="profile-assign-tab" aria-controls="profile-assign" aria-selected="false" tabindex="-1" data-profile-tab="assign">Asignar cupon</button>
+          </div>
+          <section id="profile-summary" role="tabpanel" aria-labelledby="profile-summary-tab" data-profile-panel="summary"><dl class="profile-facts" data-profile-facts></dl><p class="muted" data-profile-aliases></p></section>
+          <section id="profile-prizes" role="tabpanel" aria-labelledby="profile-prizes-tab" data-profile-panel="prizes" hidden>
+            <p class="delivery-summary" data-profile-prize-count></p>
+            <p class="form-status" role="status" data-profile-release-status></p>
+            <form class="settings-grid" data-profile-transfer-form hidden>
+              <h3 class="wide" data-profile-transfer-caption></h3>
+              <label><span>Buscar integrante</span><input type="search" data-profile-transfer-search placeholder="Nick" autocomplete="off" /></label>
+              <label><span>Nuevo destinatario</span><select data-profile-transfer-recipient required><option value="">Elige integrante</option></select></label>
+              <label class="wide"><span>Motivo del traspaso</span><input data-profile-transfer-reason maxlength="200" required placeholder="Ej.: destinatario equivocado" /></label>
+              <div class="editor-actions wide"><button class="primary-action small-action" type="submit" data-profile-transfer-submit disabled>Confirmar traspaso</button><button class="ghost-button" type="button" data-profile-transfer-cancel>Cancelar</button></div>
+            </form>
+            <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Premio</th><th>Situacion</th><th>Evento</th><th>Reclamado el (Peru)</th><th></th></tr></thead><tbody data-profile-prizes></tbody></table></div>
+            <div class="rewards-toolbar"><button type="button" class="ghost-button" data-profile-page="prizes-prev">Anterior</button><span data-profile-prize-page></span><button type="button" class="ghost-button" data-profile-page="prizes-next">Siguiente</button></div>
+          </section>
+          <section id="profile-history" role="tabpanel" aria-labelledby="profile-history-tab" data-profile-panel="history" hidden>
+            <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Fecha (Peru)</th><th>Movimiento</th><th>Nick registrado</th><th>Detalle</th></tr></thead><tbody data-profile-history></tbody></table></div>
+            <div class="rewards-toolbar"><button type="button" class="ghost-button" data-profile-page="history-prev">Anterior</button><span data-profile-history-page></span><button type="button" class="ghost-button" data-profile-page="history-next">Siguiente</button></div>
+          </section>
+          <section id="profile-assign" role="tabpanel" aria-labelledby="profile-assign-tab" data-profile-panel="assign" hidden>
+            <h3 class="profile-assign-title" data-profile-recipient></h3>
+            <form class="profile-assign-form" data-profile-assign-form>
+              <label><span>Premio disponible</span><select data-profile-item required><option value="">Actualizar premios</option></select></label>
+              <label><span>Cantidad</span><input data-profile-quantity type="number" min="1" max="50" step="1" value="1" required /></label>
+              <div class="editor-actions"><button class="primary-action small-action" type="submit" data-profile-assign-submit disabled>Asignar cupon</button><button class="icon-button" type="button" data-profile-stock-refresh title="Actualizar premios disponibles" aria-label="Actualizar premios disponibles"><img src="/assets/admin/refresh.svg" alt="" width="18" height="18" /></button></div>
+            </form>
+            <p class="muted" data-profile-stock-note></p>
+            <p class="form-status" role="status" data-profile-assignment-status></p>
+          </section>
+        </div>
+      </div>
+    </dialog>
+    <script src="/member-badge.js?v=5368ad7b060ad38a" defer></script>
+    <script src="/member-pairs.js?v=6987e507c19ce7bf" defer></script>
+<dialog class="space-preview-dialog" data-space-preview-dialog aria-labelledby="space-preview-title"><header><div><h2 id="space-preview-title" data-space-preview-title>Vista previa</h2><p data-space-preview-status></p></div><button class="ghost-button" type="button" data-space-preview-close aria-label="Cerrar vista previa">Cerrar</button></header><div class="space-preview-toolbar"><div class="space-actions" role="group" aria-label="Tamano de la vista previa"><button type="button" class="ghost-button" data-space-preview-size="desktop" aria-pressed="true">PC</button><button type="button" class="ghost-button" data-space-preview-size="mobile" aria-pressed="false">Movil</button></div><span>Solo vista previa: no activa el espacio ni guarda cambios.</span></div><div class="space-preview-viewport"><iframe title="Pagina del circulo en vista previa" data-space-preview-frame sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe></div></dialog>
+    <script src="/owner-ui/owner-config.js?v=c69e9dae40866a1c" defer></script><script src="/owner-ui/owner-qr.js?v=f8b36c106782aa75" defer></script><script src="/owner-ui/owner-cloud.js?v=cb4038bdc9b7ae8e" defer></script><script src="/owner-ui/admin-space-context.js?v=69ed1dee325b6f08" defer></script>
+    <script src="/owner-ui/admin.js?v=2b161a6d4ac36d4b" defer></script>
+  <script src="/owner-ui/admin-prizes.js?v=cf4734ff4e076496" defer></script>
+    <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
+    <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>
+    <script src="/owner-ui/admin-access-requests.js?v=15664ffba8dcc582" defer></script>
+    <script src="/owner-ui/admin-access-history.js?v=399edb5ebbd52346" defer></script>
+    <script src="/owner-ui/admin-access-notice.js?v=e39a224e7023f76c" defer></script>
+    <script src="/owner-ui/admin-event-edit.js?v=61d5cb109f3153e8" defer></script>
+    <script src="/owner-ui/admin-bulk.js?v=61ba485050b9a509" defer></script>
+  <script src="/owner-ui/admin-staff.js?v=7b2409f771add8d2" defer></script>
+    <script src="/owner-ui/admin-transfers.js?v=5581808c12c3784f" defer></script>
+    <script src="/owner-ui/admin-pending-actions.js?v=a975aed5ef34496f" defer></script>
+    <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
+    <script src="/owner-ui/admin-tracking.js?v=8b1f3b4997f3afb3" defer></script>
+    <script src="/owner-ui/admin-spaces.js?v=feae1a9da47820a6" defer></script>
+    <script src="/owner-ui/admin-navigation.js?v=da592059248e7c84" defer></script>
+    <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
+    <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>
+    <script src="/owner-ui/exceljs-4.4.0.min.js?v=926cb6a0dab94ac2" defer></script>
+    <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
+    <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
+    <script src="/owner-ui/admin-donations.js?v=2504ba0429c09dc5" defer></script>
+    <script src="/owner-ui/admin-profile.js?v=83d1499a9cd2ceb8" defer></script>
+    <script src="/owner-ui/admin-help.js?v=6ccb129cd99f92d8" defer></script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+.admin-body [data-owner-summary] {
+  margin-top: 20px;
+}
+
+.admin-body [data-owner-summary] > .admin-overview {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 20px;
+}
+
+.admin-body [data-owner-summary] > .admin-overview dd {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.admin-body [data-owner-summary] .admin-table {
+  min-width: 600px;
+}
+.admin-body [data-pending-rows] td:last-child { min-width: 220px; }
+.admin-body [data-pending-transfer-caption] { font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+
+@media (max-width: 850px) {
+  .admin-body [data-owner-summary] > .admin-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
