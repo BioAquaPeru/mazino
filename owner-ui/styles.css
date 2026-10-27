@@ -1386,6 +1386,22 @@ body.circle-themed { --red:var(--circle-page-accent); --muted:var(--circle-page-
 .batch-image-empty { display:grid; place-items:center; width:72px; height:72px; color:#c1c5d0; font-size:.8rem; border:1px dashed #626674; border-radius:10px; }
 .batch-image-editor { margin-top:18px; padding:16px; border:1px solid #626674; border-radius:12px; }
 .batch-image-editor label { display:grid; gap:8px; }
+.batch-paste-area { margin:16px 0; padding:18px; border:2px dashed #716071; border-radius:12px; background:#211a22; outline-offset:4px; }
+.batch-paste-area p { margin:8px 0 12px; }
+.batch-paste-area:focus-visible { outline:3px solid #ffbd78; }
+.batch-edit-comparison { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:16px 0; }
+.batch-edit-comparison section { min-width:0; padding:12px; border:1px solid #514550; border-radius:10px; }
+.batch-edit-comparison h4 { margin:0 0 12px; }
+.batch-edit-comparison canvas { display:block; width:auto; max-width:100%; max-height:520px; margin:auto; background-color:#fff; background-image:conic-gradient(#ccc 25%,transparent 0 50%,#ccc 0 75%,transparent 0); background-size:20px 20px; border:1px solid #726b76; }
+.batch-edit-comparison [data-edit-source] { cursor:crosshair; touch-action:none; }
+.batch-edit-comparison [data-edit-source].is-picking { cursor:copy; }
+.batch-crop-fields { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; border:1px solid #514550; border-radius:10px; padding:14px; }
+.batch-crop-fields label, .batch-blue-controls label { min-width:0; }
+.batch-crop-fields input { min-width:0; width:100%; min-height:44px; padding:8px; }
+.batch-blue-controls { display:flex; align-items:end; flex-wrap:wrap; gap:16px; margin:20px 0; }
+.batch-blue-controls input[type=range] { min-width:140px; width:100%; padding:0; accent-color:#fc476d; }
+.batch-blue-controls input[type=color] { width:70px; min-width:0; height:42px; padding:3px; }
+@media(max-width:650px) { .batch-edit-comparison { grid-template-columns:minmax(0,1fr); } .batch-crop-fields { grid-template-columns:repeat(2,minmax(0,1fr)); } .batch-edit-comparison canvas { max-height:440px; } .batch-blue-controls { align-items:stretch; } }
 .batch-image-editor input[type=file] { max-width:100%; min-width:0; }
 .batch-image-preview { margin:12px 0; }
 .batch-image-preview .coupon-image-thumb { width:160px; height:160px; max-width:100%; }

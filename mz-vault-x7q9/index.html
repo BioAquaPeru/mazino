@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/owner-ui/styles.css?v=10e151ace0d8b6ea" />
+    <link rel="stylesheet" href="/owner-ui/styles.css?v=8476d48ab9df1bd1" />
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
     <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=f7b504adeed05399" />
@@ -360,15 +360,16 @@
                 <label><span>Buscar lote</span><input type="search" maxlength="120" data-batch-image-search placeholder="Nombre del lote" /></label>
                 <label><span>Elegir lote</span><select data-batch-image-batch><option value="">Elige un lote</option></select></label>
               </div>
-              <div class="batch-image-list" data-batch-image-list></div>
-              <div class="editor-actions"><button class="ghost-button" type="button" data-batch-image-prev disabled>Anterior</button><span data-batch-image-page></span><button class="ghost-button" type="button" data-batch-image-next disabled>Siguiente</button></div>
               <div class="batch-image-editor" data-batch-image-editor hidden>
                 <h3 data-batch-image-target></h3>
                 <label><span>Imagen JPG, PNG o WebP (hasta 5 MB)</span><input type="file" accept="image/jpeg,image/png,image/webp" data-batch-image-file disabled /></label>
+                <div data-batch-image-tools></div>
                 <div data-batch-image-review hidden><p>Vista previa del cambio pendiente</p><div class="batch-image-preview" data-batch-image-preview></div></div>
                 <div class="editor-actions"><button class="primary-action small-action" type="button" data-batch-image-save disabled>Guardar imagen</button><button class="ghost-button" type="button" data-batch-image-cancel>Cancelar</button></div>
               </div>
               <p class="form-status" role="status" aria-live="polite" data-batch-image-status></p>
+              <div class="batch-image-list" data-batch-image-list></div>
+              <div class="editor-actions"><button class="ghost-button" type="button" data-batch-image-prev disabled>Anterior</button><span data-batch-image-page></span><button class="ghost-button" type="button" data-batch-image-next disabled>Siguiente</button></div>
             </details>
             <details class="admin-subsection" data-rewards-subsection="tracking">
               <summary>Seguimiento de cupones y retirados</summary>
@@ -813,7 +814,9 @@
     <script src="/owner-ui/owner-config.js?v=c69e9dae40866a1c" defer></script><script src="/owner-ui/owner-qr.js?v=f8b36c106782aa75" defer></script><script src="/owner-ui/owner-cloud.js?v=cb4038bdc9b7ae8e" defer></script><script src="/owner-ui/admin-space-context.js?v=69ed1dee325b6f08" defer></script>
     <script src="/owner-ui/admin.js?v=2b161a6d4ac36d4b" defer></script>
     <script src="/owner-ui/coupon-images.js?v=52ff6bdcf7daa10a" defer></script>
-    <script src="/owner-ui/admin-batch-images.js?v=06851016628c3311" defer></script>
+    <script src="/owner-ui/batch-image-tools.js?v=187ce9b906440c12" defer></script>
+    <script src="/owner-ui/admin-image-editor.js?v=0e608d0f11a614d4" defer></script>
+    <script src="/owner-ui/admin-batch-images.js?v=3a9777bdc86137d9" defer></script>
   <script src="/owner-ui/admin-prizes.js?v=c0923623a68732f2" defer></script>
     <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
     <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>

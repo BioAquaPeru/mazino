@@ -3,7 +3,7 @@
   const root = document.querySelector('[data-rewards-subsection="image-batches"]');
   if (!root || typeof CouponImages === 'undefined') return;
   const field = name => root.querySelector(`[data-batch-image-${name}]`);
-  let page = 0, selected = null, staged = null, busy = false, revision = 0;
+  let page = 0, selected = null, staged = null, busy = false, revision = 0, editor = null;
   const authenticated = () => !document.querySelector('[data-dashboard]')?.hidden;
   const context = () => authenticated() ? `${rewardAdminRevision}:${typeof adminCircleId === 'string' ? adminCircleId : 'main'}` : null;
   const call = async (action, body) => {
@@ -30,9 +30,11 @@
     field('cancel').disabled = busy;
     field('file').disabled = busy || !selected;
     field('batch').disabled = busy;
+    editor?.setDisabled(busy || !selected);
     for (const button of field('list').querySelectorAll('button[data-batch-action]')) button.disabled = busy;
   }
   function clearFile() {
+    editor?.reset();
     revision++; staged = null; field('file').value = ''; field('preview').replaceChildren();
     field('review').hidden = true; controls();
   }
@@ -45,6 +47,7 @@
     field('editor').hidden = !selected;
     field('target').textContent = selected ? `Imagen de ${selected.label}` : '';
     controls();
+    if(selected)field('editor').scrollIntoView?.({block:'nearest'});
   }
   function button(text, action, id) {
     const node = document.createElement('button'); node.type = 'button'; node.className = 'ghost-button'; node.textContent = text;
@@ -109,16 +112,40 @@
     } finally { image.src = ''; URL.revokeObjectURL(url); }
   }
   field('file').addEventListener('change', async () => {
-    const file = field('file').files[0]; clearFile();
+    const file = field('file').files[0]; await prepare(file);
+  });
+  async function prepare(file) {
+    clearFile();
     if (!selected || !file || busy) return;
     const current = revision, active = context(); field('status').textContent = 'Preparando vista previa...';
     try {
+      if(editor) { await editor.load(file); return; }
       const data = await canonicalImage(file);
       if (current !== revision || active !== context()) return;
       staged = data; field('preview').replaceChildren(CouponImages.thumbnail(data, selected.label)); field('review').hidden = false;
       field('status').textContent = 'Revisa la imagen y pulsa Guardar imagen para confirmar.';
     } catch (error) { if (current === revision && active === context()) field('status').textContent = error.message; }
     finally { if (current === revision) controls(); }
+  }
+  if(typeof MazinoBatchImageEditor !== 'undefined' && field('tools')) editor=MazinoBatchImageEditor.create({root:field('tools'),
+    onChange:data=>{
+      if(!selected || !authenticated())return;
+      staged=data;
+      field('preview').replaceChildren(...(data?[CouponImages.thumbnail(data,selected.label)]:[]));
+      field('review').hidden=!data; controls();
+    },onStatus:message=>{if(selected&&authenticated())field('status').textContent=message;},
+    onFile:file=>prepare(file)
+  });
+  root.addEventListener('paste',event=>{
+    if(!root.open || !authenticated() || busy)return;
+    const item=Array.from(event.clipboardData?.items||[]).find(item=>item.kind==='file'&&/^image\//.test(item.type));
+    if(!item){
+      if(event.target?.closest?.('.batch-paste-area')){event.preventDefault();field('status').textContent='Excel copio texto o celdas, pero no una imagen. Copia la imagen o pega un recorte de pantalla con Ctrl + V.';}
+      return;
+    }
+    event.preventDefault();
+    if(!selected){field('status').textContent='Elige primero el lote donde guardaras la imagen.';return;}
+    const file=item.getAsFile();if(file)prepare(file);
   });
   field('save').addEventListener('click', async () => {
     if (busy || !selected || staged === null || !authenticated()) return;
