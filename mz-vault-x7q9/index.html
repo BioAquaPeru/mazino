@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/owner-ui/styles.css?v=ab0c400e402f2381" />
+    <link rel="stylesheet" href="/owner-ui/styles.css?v=10e151ace0d8b6ea" />
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
     <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=f7b504adeed05399" />
@@ -352,6 +352,23 @@
             <p class="muted" role="status" data-assignment-count></p>
             <p class="form-status" role="status" data-assignment-feedback></p>
             <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Premio</th><th>Evento / entrega</th><th>Estado</th><th>Cupon</th><th>Reclamado el (Peru)</th><th>Acciones</th></tr></thead><tbody data-assignment-table></tbody></table></div>
+            </details>
+            <details class="admin-subsection" data-rewards-subsection="image-batches">
+              <summary>Imagenes de lotes</summary>
+              <p class="muted">Una imagen por lote, incluidos los premios del stock anterior. El jugador puede ampliarla al consultar o reclamar su premio.</p>
+              <div class="rewards-toolbar">
+                <label><span>Buscar lote</span><input type="search" maxlength="120" data-batch-image-search placeholder="Nombre del lote" /></label>
+                <label><span>Elegir lote</span><select data-batch-image-batch><option value="">Elige un lote</option></select></label>
+              </div>
+              <div class="batch-image-list" data-batch-image-list></div>
+              <div class="editor-actions"><button class="ghost-button" type="button" data-batch-image-prev disabled>Anterior</button><span data-batch-image-page></span><button class="ghost-button" type="button" data-batch-image-next disabled>Siguiente</button></div>
+              <div class="batch-image-editor" data-batch-image-editor hidden>
+                <h3 data-batch-image-target></h3>
+                <label><span>Imagen JPG, PNG o WebP (hasta 5 MB)</span><input type="file" accept="image/jpeg,image/png,image/webp" data-batch-image-file disabled /></label>
+                <div data-batch-image-review hidden><p>Vista previa del cambio pendiente</p><div class="batch-image-preview" data-batch-image-preview></div></div>
+                <div class="editor-actions"><button class="primary-action small-action" type="button" data-batch-image-save disabled>Guardar imagen</button><button class="ghost-button" type="button" data-batch-image-cancel>Cancelar</button></div>
+              </div>
+              <p class="form-status" role="status" aria-live="polite" data-batch-image-status></p>
             </details>
             <details class="admin-subsection" data-rewards-subsection="tracking">
               <summary>Seguimiento de cupones y retirados</summary>
@@ -717,6 +734,7 @@
         <details><summary>Excluir o incluir integrantes en los tops</summary><p>Abre <strong>Donaciones &gt; Exclusiones de tops</strong>, busca y elige al integrante. Marca los tops de los que deseas excluirlo y pulsa <strong>Guardar exclusion</strong>. Para recuperarlo, pulsa <strong>Volver a incluir</strong>, o desmarca las opciones y guarda. No se borran sus donaciones ni cambia su meta o acceso.</p><p>En la web, <strong>General</strong> muestra el total acumulado; <strong>Semana</strong> compara las lecturas guardadas de lunes a domingo, hora de Peru. La primera lectura de la semana es la base: no cuenta todo su saldo como donacion nueva. Se necesitan dos lecturas para conocer el incremento. Para medir toda la semana, registra una lectura el lunes y sigue cargando los nuevos totales.</p></details>
         <details><summary>Eliminar una meta de donaciones</summary><ol><li>Abre <strong>Donaciones &gt; Metas y responsables</strong>.</li><li>Busca la meta por su nombre y fechas y pulsa <strong>Eliminar meta</strong>.</li><li>Revisa la confirmacion y acepta solo si es la meta correcta.</li></ol><p>Solo el administrador puede eliminar metas, incluidas las creadas por sublideres. No se borran los totales, las cargas por capturas ni el historial de donaciones. Puedes seguir consultando esas donaciones entre fechas. La eliminacion queda registrada en <strong>Sublideres &gt; Actividad</strong> y no se puede deshacer.</p></details>
 <details><summary>Nivel y EXP del circulo</summary><p>Entra directamente en <strong>Nivel y EXP</strong> en el menu lateral (o Seccion en movil). Tambien puedes abrir <strong>Configuracion &gt; Nivel y EXP del circulo</strong>. Escribe el nivel destino (3, 4, 5...) y la <strong>EXP total acumulada necesaria para alcanzarlo</strong>. No escribas solo lo que falta. Guarda cada requisito; puedes corregirlo con <strong>Editar</strong>.</p><p>El nivel y la EXP actuales se consultan en R2Beat, incluso con tu PC apagada. En este panel puedes consultar la EXP actual, el requisito del siguiente nivel y cuanto falta. La portada solo muestra el nivel del circulo. Un requisito desconocido aparece por confirmar; alcanzar la EXP no cambia manualmente el nivel del juego. Solo el administrador puede configurar estos requisitos.</p></details>
+<details><summary>Imagenes de lotes</summary><ol><li>Abre <strong>Premios &gt; Imagenes de lotes</strong>. Busca o elige el lote; cada pagina muestra hasta 25 lotes. <strong>Stock anterior</strong> agrupa los cupones anteriores sin lote.</li><li>Pulsa <strong>Subir</strong> o <strong>Cambiar</strong> y elige una imagen JPG, PNG o WebP de hasta 5 MB. El navegador la reduce antes de enviarla.</li><li>Revisa la vista previa; puedes pulsarla para ampliarla. Pulsa <strong>Guardar imagen</strong> para aplicar el cambio a ese lote, o <strong>Cancelar</strong> para descartarlo.</li><li>Para retirar una foto, pulsa <strong>Quitar</strong> y luego <strong>Guardar imagen</strong>. Si el lote cambio mientras editabas, vuelve a elegirlo y revisa su imagen actual antes de guardar otra vez.</li></ol><p>La foto corresponde al lote exacto, aunque otro lote tenga premios con el mismo nombre. Aparece en Inventario, Entregas y en los premios personales y comprobantes del jugador. La imagen ampliada solo muestra la foto. Cambiarla no modifica codigos, entregas, reclamos ni historial. Cierra la ampliacion con <strong>Cerrar</strong> o <strong>Esc</strong>; usa <strong>Ampliar / Ajustar</strong> en PC o movil.</p></details>
 <details><summary>Claves, permisos y cupos de sublideres</summary><p>En <strong>Integrantes &gt; Claves de premios</strong> puedes consultar la clave de un jugador con <strong>Ver contrasena</strong>. Generar una nueva reemplaza la anterior.</p><p>En <strong>Sublideres &gt; Accesos y permisos</strong>, elige al sublider, marca sus permisos, configura sus limites y guarda. Para permitir metas, activa <strong>Crear metas de donaciones</strong>. Cargar donaciones es un permiso separado.</p><p>En <strong>Entregar cupo</strong> le reservas cupones para repartir. En <strong>Actividad</strong> puedes revisar sus acciones.</p><p>La <strong>clave del panel de sublider</strong> no es la clave de premios del jugador. El enlace del equipo sigue siendo <strong>mazino.lat/equipo/</strong>.</p></details>
       </div>
     </dialog>
@@ -794,7 +812,9 @@
 <dialog class="space-preview-dialog" data-space-preview-dialog aria-labelledby="space-preview-title"><header><div><h2 id="space-preview-title" data-space-preview-title>Vista previa</h2><p data-space-preview-status></p></div><button class="ghost-button" type="button" data-space-preview-close aria-label="Cerrar vista previa">Cerrar</button></header><div class="space-preview-toolbar"><div class="space-actions" role="group" aria-label="Tamano de la vista previa"><button type="button" class="ghost-button" data-space-preview-size="desktop" aria-pressed="true">PC</button><button type="button" class="ghost-button" data-space-preview-size="mobile" aria-pressed="false">Movil</button></div><span>Solo vista previa: no activa el espacio ni guarda cambios.</span></div><div class="space-preview-viewport"><iframe title="Pagina del circulo en vista previa" data-space-preview-frame sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe></div></dialog>
     <script src="/owner-ui/owner-config.js?v=c69e9dae40866a1c" defer></script><script src="/owner-ui/owner-qr.js?v=f8b36c106782aa75" defer></script><script src="/owner-ui/owner-cloud.js?v=cb4038bdc9b7ae8e" defer></script><script src="/owner-ui/admin-space-context.js?v=69ed1dee325b6f08" defer></script>
     <script src="/owner-ui/admin.js?v=2b161a6d4ac36d4b" defer></script>
-  <script src="/owner-ui/admin-prizes.js?v=cf4734ff4e076496" defer></script>
+    <script src="/owner-ui/coupon-images.js?v=52ff6bdcf7daa10a" defer></script>
+    <script src="/owner-ui/admin-batch-images.js?v=06851016628c3311" defer></script>
+  <script src="/owner-ui/admin-prizes.js?v=c0923623a68732f2" defer></script>
     <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
     <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>
     <script src="/owner-ui/admin-access-requests.js?v=15664ffba8dcc582" defer></script>
@@ -808,7 +828,7 @@
     <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
     <script src="/owner-ui/admin-tracking.js?v=8b1f3b4997f3afb3" defer></script>
     <script src="/owner-ui/admin-spaces.js?v=feae1a9da47820a6" defer></script>
-    <script src="/owner-ui/admin-navigation.js?v=da592059248e7c84" defer></script>
+    <script src="/owner-ui/admin-navigation.js?v=240c338e4e52b62b" defer></script>
     <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>
     <script src="/owner-ui/exceljs-4.4.0.min.js?v=926cb6a0dab94ac2" defer></script>

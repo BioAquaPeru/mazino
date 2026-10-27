@@ -8,6 +8,19 @@ let rewardDialogRevision = 0;
 let rewardPublicRevision = 0;
 let rewardPublicBusy = false;
 const rewardDialog = document.querySelector("[data-prize-dialog]");
+let rewardImageClient = null;
+let rewardConfiguredImageScope = '';
+const prizeImageScope = () => `${typeof spaceStorageKey === 'function' ? spaceStorageKey('coupon-images') : 'main'}|${rewardApi}`;
+const prizeImageContext = () => rewardSession ? `${prizeImageScope()}|${rewardSession.token}` : null;
+function resetPrizeImages() { rewardImageClient?.reset(); if (typeof CouponImages !== 'undefined') CouponImages.close(); }
+function prizeImageMarkup(prize) {
+  return typeof CouponImages === 'undefined' || prize.hasImage === false ? '' : CouponImages.slot(prize.batchId, prize.imageVersion);
+}
+function hydratePrizeImages() {
+  if (typeof CouponImages === 'undefined' || !rewardSession) return;
+  if (!rewardImageClient) rewardImageClient = CouponImages.createClient({ context: prizeImageContext, request: batchIds => prizeRequest('prize-images', { batchIds }) });
+  rewardImageClient.hydrate(rewardDialog);
+}
 
 function saveRewardSession() {
   try {
@@ -17,6 +30,7 @@ function saveRewardSession() {
 }
 
 function renderRewardIdentity() {
+  if (!rewardSession) resetPrizeImages();
   rewardDialog.querySelector("[data-prize-login]").hidden = Boolean(rewardSession);
   rewardDialog.querySelector("[data-prize-logout]").hidden = !rewardSession;
   rewardDialog.querySelector("[data-prize-identity]").textContent = rewardSession ? `Sesion: ${rewardSession.member.nick}` : "";
@@ -38,13 +52,14 @@ function refreshPrizeDonationPreview() {
 async function prizeRequest(path, body) {
   if (!rewardApi) throw new Error("Los premios aun no estan disponibles.");
   const requestToken = rewardSession?.token;
+  const requestScope = prizeImageScope();
   const response = await fetch(typeof spaceApiUrl==='function'?spaceApiUrl(`${rewardApi}/api/${path}`):`${rewardApi}/api/${path}`, {
     method: body === undefined ? "GET" : "POST", cache: "no-store",
     headers: { "Content-Type": "application/json", ...(rewardSession ? { Authorization: `Bearer ${rewardSession.token}` } : {}) },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
   const result = await response.json().catch(() => ({}));
-  if (response.status === 401 && requestToken === rewardSession?.token) { rewardSession = null; saveRewardSession(); renderRewardIdentity(); }
+  if (response.status === 401 && requestToken === rewardSession?.token && requestScope === prizeImageScope()) { rewardSession = null; resetPrizeImages(); saveRewardSession(); renderRewardIdentity(); }
   if (!response.ok) throw Object.assign(new Error(result.error || "No se pudo conectar con los premios."), { status: response.status, eventOutcome: result.eventOutcome });
   return result;
 }
@@ -52,11 +67,18 @@ async function prizeRequest(path, body) {
 function configurePrizes(settings) {
   const value = String(settings.rewardsServiceUrl || "");
   rewardApi = /^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(value) ? value : "";
+  const scope = prizeImageScope();
+  if (rewardConfiguredImageScope && rewardConfiguredImageScope !== scope) {
+    rewardSession = null; rewardDialogRevision++; rewardPublicRevision++; resetPrizeImages();
+    rewardDialog.querySelector('[data-personal-prizes]').innerHTML = '';
+  }
+  rewardConfiguredImageScope = scope;
   if (typeof configureEventBoard === 'function') configureEventBoard(settings);
   try {
     const saved = JSON.parse(sessionStorage.getItem(typeof spaceStorageKey==='function'?spaceStorageKey("mazino-prizes-session"):"mazino-prizes-session") || "null");
     if (saved?.expiresAt > Date.now() && saved.token && saved.member) rewardSession = saved;
   } catch { rewardSession = null; saveRewardSession(); }
+  if (!rewardSession) resetPrizeImages();
 }
 
 function eventIsFinished(event) {
@@ -123,7 +145,7 @@ async function refreshPublicPrizeEvents() {
 
 async function refreshPrizeDialog() {
   renderRewardIdentity();
-  const revision = rewardDialogRevision, session = rewardSession?.token;
+  const revision = rewardDialogRevision, session = rewardSession?.token, imageContext = prizeImageContext();
   await refreshPublicPrizeEvents();
   if (!rewardDialog.open || revision !== rewardDialogRevision) return;
   const container = rewardDialog.querySelector("[data-personal-prizes]");
@@ -131,15 +153,16 @@ async function refreshPrizeDialog() {
   rewardDialog.querySelector('[data-personal-donations]').innerHTML = '';
   if (!rewardSession) return;
   const personal = await prizeRequest("me");
-  if (!rewardDialog.open || revision !== rewardDialogRevision || session !== rewardSession?.token) return;
+  if (!rewardDialog.open || revision !== rewardDialogRevision || session !== rewardSession?.token || imageContext !== prizeImageContext()) return;
   renderPersonalDonations(personal.donations, personal.member?.nick || rewardSession.member.nick);
   container.innerHTML = personal.prizes.map((prize) => prize.code ? prizeCodeMarkup(prize, personal.instructions)
-    : `<section class="prize-item"><h3>${escapeHtml(prize.label)}</h3><p>Premio personal disponible</p><button class="primary-action small-action" type="button" data-personal-claim="${escapeHtml(prize.id)}">Reclamar cupon</button></section>`).join("")
+    : `<section class="prize-item">${prizeImageMarkup(prize)}<h3>${escapeHtml(prize.label)}</h3><p>Premio personal disponible</p><button class="primary-action small-action" type="button" data-personal-claim="${escapeHtml(prize.id)}">Reclamar cupon</button></section>`).join("")
     || '<p class="muted">No tienes cupones personales pendientes.</p>';
+  hydratePrizeImages();
 }
 
 function prizeCodeMarkup(prize, instructions) {
-  return `<section class="prize-item prize-revealed"><h3>${escapeHtml(prize.label)}</h3><p>${escapeHtml(instructions)}</p><code class="prize-code">${escapeHtml(prize.code)}</code><div class="editor-actions"><button class="ghost-button" type="button" data-prize-copy="${escapeHtml(prize.id)}">Copiar codigo</button><button class="primary-action small-action" type="button" data-prize-ack="${escapeHtml(prize.id)}">Ya lo guarde</button></div></section>`;
+  return `<section class="prize-item prize-revealed">${prizeImageMarkup(prize)}<h3>${escapeHtml(prize.label)}</h3><p>${escapeHtml(instructions)}</p><code class="prize-code">${escapeHtml(prize.code)}</code><div class="editor-actions"><button class="ghost-button" type="button" data-prize-copy="${escapeHtml(prize.id)}">Copiar codigo</button><button class="primary-action small-action" type="button" data-prize-ack="${escapeHtml(prize.id)}">Ya lo guarde</button></div></section>`;
 }
 function renderPersonalDonations(data, nick) {
   const container = rewardDialog.querySelector('[data-personal-donations]');
@@ -181,6 +204,7 @@ document.addEventListener("click", async (event) => {
 
 rewardDialog.querySelector("[data-prize-close]").addEventListener("click", () => rewardDialog.close());
 rewardDialog.addEventListener("close", () => {
+  if (typeof CouponImages !== 'undefined') CouponImages.close();
   rewardDialogRevision++; rewardPublicRevision++;
   rewardDialog.querySelector('[name="password"]').value = "";
   rewardDialog.querySelector("[data-personal-prizes]").innerHTML = "";
@@ -194,7 +218,10 @@ rewardDialog.querySelector("[data-prize-login]").addEventListener("submit", asyn
   rewardBusy = true;
   const button = event.target.querySelector('[type="submit"]'); button.disabled = true;
   try {
-    rewardSession = await prizeRequest("login", { nick: event.target.nick.value, password: event.target.password.value });
+    const loginScope = prizeImageScope(), loginRevision = rewardDialogRevision;
+    const session = await prizeRequest("login", { nick: event.target.nick.value, password: event.target.password.value });
+    if (loginScope !== prizeImageScope() || loginRevision !== rewardDialogRevision || !rewardDialog.open) return;
+    resetPrizeImages(); rewardSession = session;
     event.target.password.value = "";
     saveRewardSession();
     await refreshPrizeDialog();
@@ -219,9 +246,10 @@ rewardDialog.addEventListener("click", async (event) => {
       await refreshPrizeDialog();
       rewardDialog.querySelector("[data-prize-status]").textContent = "Premio guardado. Ya no aparecera en tu usuario.";
     } else if (button.hasAttribute("data-prize-logout")) {
+      resetPrizeImages();
       await prizeRequest("logout", {});
       if (revision !== rewardDialogRevision || !rewardDialog.open) return;
-      rewardSession = null; saveRewardSession();
+      rewardSession = null; resetPrizeImages(); saveRewardSession();
       await refreshPrizeDialog();
     } else {
       const input = button.dataset.flashClaim ? button.closest(".prize-item").querySelector("[data-event-key]") : null;

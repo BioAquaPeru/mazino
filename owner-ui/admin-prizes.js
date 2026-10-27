@@ -127,7 +127,8 @@ function renderRewardAssignments() {
   if (status === "winners") visible.sort((a, b) => (b.claimed_at || 0) - (a.claimed_at || 0));
   $("[data-assignment-count]").textContent = `${visible.length} ${status === "winners" ? "premios de eventos" : "entregas"} | ${visible.filter((coupon) => coupon.status === "assigned").length} pendientes | ${visible.filter((coupon) => coupon.status === "claimed").length} reclamadas`;
   const empty = eventId && !deliveries.some((c) => c.event_id === eventId && c.status === "claimed") ? "Aun no hay ganadores registrados en este evento." : "No hay entregas con estos filtros.";
-  $("[data-assignment-table]").innerHTML = visible.map((coupon) => `<tr><td>${escapeHtml(coupon.winnerNick || coupon.assignedNick || rewardAdminState.members.find((member) => member.id === (coupon.claimed_by || coupon.assigned_member_id))?.nick || "Integrante retirado")}</td><td>${escapeHtml(coupon.label)}</td><td>${escapeHtml(coupon.event_id ? eventNames.get(coupon.event_id) || "Evento anterior" : "Personal")}</td><td>${coupon.status === "assigned" ? "Asignado - pendiente de reclamar" : "Reclamado"}</td><td><code>${escapeHtml(coupon.code)}</code></td><td>${rewardTime(coupon.claimed_at)}</td><td>${coupon.status === "assigned" && coupon.assigned_member_id && !coupon.event_id ? `<button class="mini-button" type="button" data-unassign-coupon="${escapeHtml(coupon.id)}">Quitar premio</button>` : '<span class="muted">Ya reclamado</span>'}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">${empty}</td></tr>`;
+  $("[data-assignment-table]").innerHTML = visible.map((coupon) => `<tr><td>${escapeHtml(coupon.winnerNick || coupon.assignedNick || rewardAdminState.members.find((member) => member.id === (coupon.claimed_by || coupon.assigned_member_id))?.nick || "Integrante retirado")}</td><td>${typeof ownerCouponImageMarkup === 'function' ? ownerCouponImageMarkup(coupon) : ''}${escapeHtml(coupon.label)}</td><td>${escapeHtml(coupon.event_id ? eventNames.get(coupon.event_id) || "Evento anterior" : "Personal")}</td><td>${coupon.status === "assigned" ? "Asignado - pendiente de reclamar" : "Reclamado"}</td><td><code>${escapeHtml(coupon.code)}</code></td><td>${rewardTime(coupon.claimed_at)}</td><td>${coupon.status === "assigned" && coupon.assigned_member_id && !coupon.event_id ? `<button class="mini-button" type="button" data-unassign-coupon="${escapeHtml(coupon.id)}">Quitar premio</button>` : '<span class="muted">Ya reclamado</span>'}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">${empty}</td></tr>`;
+  if (typeof hydrateOwnerCouponImages === 'function') hydrateOwnerCouponImages();
 }
 
 function renderEventFields() {
@@ -208,6 +209,7 @@ function renderRewardAdmin() {
   rewardMemberOptions();
   if (typeof renderMemberAccessDirectory === "function") renderMemberAccessDirectory();
   if (typeof renderCouponLabelBatches === "function") renderCouponLabelBatches();
+  if (typeof renderBatchImagesManager === "function") renderBatchImagesManager();
   renderRewardDelivery();
   renderAssignmentEvents();
   renderRewardAssignments();
@@ -224,7 +226,7 @@ function renderRewardAdmin() {
   $("[data-coupon-select-all]").checked = false;
   $("[data-coupon-table]").innerHTML = visible.map((coupon) => `
     <tr><td><input type="checkbox" aria-label="Seleccionar cupon" data-coupon-id="${escapeHtml(coupon.id)}" ${coupon.status === "claimed" || coupon.status === "archived" || coupon.event_id ? "disabled" : ""} /></td>
-    <td><code>${escapeHtml(coupon.code)}</code></td><td><form data-coupon-name-form="${escapeHtml(coupon.id)}"><input name="label" aria-label="Nombre del premio" value="${escapeHtml(coupon.label)}" maxlength="80" required /><button class="mini-button" type="submit">Guardar nombre</button></form></td><td>${rewardStates[coupon.status] || "-"}</td>
+    <td><code>${escapeHtml(coupon.code)}</code></td><td>${typeof ownerCouponImageMarkup === 'function' ? ownerCouponImageMarkup(coupon) : ''}<form data-coupon-name-form="${escapeHtml(coupon.id)}"><input name="label" aria-label="Nombre del premio" value="${escapeHtml(coupon.label)}" maxlength="80" required /><button class="mini-button" type="submit">Guardar nombre</button></form></td><td>${rewardStates[coupon.status] || "-"}</td>
     <td>${escapeHtml(coupon.winnerNick || coupon.assignedNick || rewardAdminState.events.find((event) => event.id === coupon.event_id)?.title || (coupon.staff_owner_id ? `Cupo: ${rewardAdminState.members.find((m) => m.id === coupon.staff_owner_id)?.nick || "Sublider"}` : "-"))}</td><td>${rewardTime(coupon.claimed_at)}</td>
     <td><button class="mini-button" type="button" data-admin-copy-coupon="${escapeHtml(coupon.id)}">Copiar</button></td></tr>`).join("") || '<tr><td colspan="7" class="muted">Sin cupones con estos filtros.</td></tr>';
   $("[data-reward-events-table]").innerHTML = rewardAdminState.events.map((event) => {
@@ -233,6 +235,7 @@ return `<tr><td>${escapeHtml(event.title)}</td><td>${escapeHtml(event.ownerNick)
   }).join("") || '<tr><td colspan="7" class="muted">Sin eventos.</td></tr>';
   const cloud = rewardAdminState.roster;
   $("[data-cloud-sync-status]").textContent = cloud?.configured ? `En linea: ${cloud.enabled ? "activa" : "pausada"} | ${cloud.count} integrantes | Ultima consulta: ${cloud.lastSyncAt ? rewardTime(Date.parse(cloud.lastSyncAt)) : "pendiente"} | Nueva consulta habilitada desde: ${cloud.nextSyncAt ? rewardTime(Date.parse(cloud.nextSyncAt)) : "pausada"}${cloud.lastError ? ` | ${cloud.lastError}` : ""}` : "Sincronizacion en linea pendiente de conexion.";
+  if (typeof hydrateOwnerCouponImages === 'function') hydrateOwnerCouponImages();
 }
 
 async function refreshAdminPrizes() {

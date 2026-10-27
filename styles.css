@@ -1372,4 +1372,29 @@ body.circle-themed { --red:var(--circle-page-accent); --muted:var(--circle-page-
 .circle-custom-logo .eye-glow { display:none; }
 .circle-custom-logo .logo-stage { position:relative; z-index:2; inset:auto; order:-1; width:100%; height:clamp(180px,32svh,320px); flex-shrink:0; background:radial-gradient(ellipse at 50% 50%,rgba(var(--circle-page-rgb),.12),transparent 64%); }
 .circle-emblem { display:grid; place-items:center; width:min(240px,100%); height:min(240px,100%); aspect-ratio:1; margin:0 auto; border:2px solid var(--circle-page-accent); border-radius:50%; background:var(--circle-page-panel); color:var(--circle-page-heading); font:800 clamp(60px,18vw,110px)/1 'Orbitron',sans-serif; box-shadow:0 0 60px rgba(var(--circle-page-rgb),.2); }
+.coupon-image-slot { display:inline-block; vertical-align:middle; margin:0 10px 6px 0; }
+.coupon-image-slot:empty { min-width:64px; min-height:64px; }
+.coupon-image-thumb { display:block; width:72px; height:72px; padding:3px; border:1px solid #626674; border-radius:10px; background:#181b25; cursor:zoom-in; touch-action:manipulation; }
+.coupon-image-thumb img { display:block; width:100%; height:100%; object-fit:contain; border-radius:6px; }
+.coupon-image-thumb:focus-visible, .coupon-image-dialog button:focus-visible { outline:3px solid #ffbd78; outline-offset:3px; }
+.prize-item > .coupon-image-slot { float:right; }
+.prize-item::after { content:''; display:block; clear:both; }
+.batch-image-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:12px; margin:16px 0; }
+.batch-image-card { display:grid; grid-template-columns:76px minmax(0,1fr); gap:10px; padding:14px; border:1px solid #444958; border-radius:12px; }
+.batch-image-card h3, .batch-image-card p { margin:0 0 7px; overflow-wrap:anywhere; }
+.batch-image-card > .editor-actions { grid-column:1/-1; flex-wrap:wrap; }
+.batch-image-empty { display:grid; place-items:center; width:72px; height:72px; color:#c1c5d0; font-size:.8rem; border:1px dashed #626674; border-radius:10px; }
+.batch-image-editor { margin-top:18px; padding:16px; border:1px solid #626674; border-radius:12px; }
+.batch-image-editor label { display:grid; gap:8px; }
+.batch-image-editor input[type=file] { max-width:100%; min-width:0; }
+.batch-image-preview { margin:12px 0; }
+.batch-image-preview .coupon-image-thumb { width:160px; height:160px; max-width:100%; }
+.coupon-image-dialog { width:min(1080px,96vw); max-width:96vw; max-height:94dvh; padding:14px; border:1px solid #626674; border-radius:14px; background:#11141c; color:#f4f5fa; overflow:auto; }
+.coupon-image-dialog::backdrop { background:rgba(0,0,0,.85); }
+.coupon-image-dialog header { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px; }
+.coupon-image-dialog h2 { flex:1 1 180px; margin:0; font-size:1.1rem; overflow-wrap:anywhere; }
+.coupon-image-viewport { max-height:76dvh; overflow:auto; overscroll-behavior:contain; touch-action:pan-x pan-y pinch-zoom; }
+.coupon-image-viewport img { display:block; width:auto; height:auto; max-width:100%; max-height:75dvh; object-fit:contain; margin:auto; }
+.coupon-image-viewport.is-zoomed img { width:150%; max-width:none; max-height:none; margin:0; }
+@media(max-width:600px) { .coupon-image-dialog { padding:10px; } .coupon-image-dialog header button { min-height:44px; } .batch-image-card { padding:10px; } .coupon-image-thumb { width:64px; height:64px; } }
 @media(max-width:600px) { .circle-custom-logo .logo-frame { width:80%; } .circle-themed .hero::before { background:linear-gradient(180deg,transparent 42%,var(--circle-page-bg) 70%); } }
