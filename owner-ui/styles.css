@@ -1438,3 +1438,7 @@ body.circle-themed { --red:var(--circle-page-accent); --muted:var(--circle-page-
 @media(max-width:600px) { .exact-delivery-dialog { padding:14px; } .exact-delivery-dialog > .editor-actions button { min-height:44px; flex:1; } .exact-delivery-lot { padding:10px; } }
 @media(max-width:600px) { .coupon-image-dialog { padding:10px; } .coupon-image-dialog header button { min-height:44px; } .batch-image-card { padding:10px; } .coupon-image-thumb { width:64px; height:64px; } }
 @media(max-width:600px) { .circle-custom-logo .logo-frame { width:80%; } .circle-themed .hero::before { background:linear-gradient(180deg,transparent 42%,var(--circle-page-bg) 70%); } }
+
+.nick-suggestions { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.nick-suggestions:empty { display:none; }
+.nick-suggestions button { min-height:40px; padding:8px 12px; text-transform:none; }

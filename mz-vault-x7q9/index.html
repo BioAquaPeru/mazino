@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/owner-ui/styles.css?v=79b6e903f1445afe" />
+    <link rel="stylesheet" href="/owner-ui/styles.css?v=893adfea1828a808" />
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
     <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=f7b504adeed05399" />
@@ -347,7 +347,7 @@
             <div class="editor-actions"><button class="ghost-button" type="button" data-access-prev>Anterior</button><span data-access-page></span><button class="ghost-button" type="button" data-access-next>Siguiente</button></div>
             </details>
             <details class="admin-subsection" data-rewards-subsection="assignments">
-            <summary>A quien entregaste cada premio</summary>
+            <summary>Ganadores de eventos</summary>
             <div class="rewards-toolbar">
               <label><span>Buscar entregas</span><input type="search" data-assignment-search placeholder="Nick, premio o evento" /></label>
               <label><span>Integrante exacto</span><select data-assignment-member-filter><option value="">Todos los integrantes</option></select></label>
@@ -380,22 +380,22 @@
               <div class="editor-actions"><button class="ghost-button" type="button" data-batch-image-prev disabled>Anterior</button><span data-batch-image-page></span><button class="ghost-button" type="button" data-batch-image-next disabled>Siguiente</button></div>
             </details>
             <details class="admin-subsection" data-rewards-subsection="tracking">
-              <summary>Seguimiento de cupones y retirados</summary>
+              <summary>Entregas y seguimiento</summary>
               <button class="ghost-button" type="button" data-roster-tracking-open>Ver quienes salieron del circulo</button>
               <div class="rewards-toolbar">
-                <label><span>Buscar codigo, premio o nick</span><input type="search" data-tracking-search autocomplete="off" /></label>
-                <label><span>Integrante exacto</span><select data-tracking-member-filter><option value="">Todos los integrantes</option></select></label>
-                <label><span>Situacion del destinatario</span><select data-tracking-membership><option value="recipients">Con destinatario / entregados</option><option value="outside">Retirados</option><option value="inside">Dentro del circulo</option><option value="renamed">Cambio de nick confirmado</option><option value="historical">Sin destinatario actual, con historial</option><option value="all">Todo el inventario</option><option value="unlinked">Sin entregas registradas</option></select></label>
-                <label><span>Estado del cupon</span><select data-tracking-state><option value="all">Todos</option><option value="assigned">Pendiente</option><option value="claimed">Reclamado</option><option value="available">Disponible</option><option value="archived">Archivado</option></select></label>
+                <label class="wide"><span>Buscar integrante por nick</span><input type="search" data-tracking-search autocomplete="off" placeholder="Escribe una o mas letras del nick" /><div class="nick-suggestions" data-tracking-suggestions aria-label="Coincidencias de integrantes"></div></label>
+                <label hidden><span>Integrante exacto</span><select data-tracking-member-filter><option value="">Todos los integrantes</option></select></label>
+                <label><span>Dentro o fuera del circulo</span><select data-tracking-membership><option value="recipients">Todos</option><option value="outside">Retirados</option><option value="inside">Dentro del circulo</option></select></label>
+                <label><span>Estado del cupon</span><select data-tracking-state><option value="all">Todos</option><option value="assigned">Pendiente</option><option value="claimed">Reclamado</option></select></label>
                 <button class="ghost-button" type="button" data-tracking-refresh>Actualizar seguimiento</button>
                 <button class="ghost-button" type="button" data-tracking-retired>Ver retirados</button>
-                <button class="ghost-button" type="button" data-tracking-clear>Ver todos los entregados</button>
+                <button class="ghost-button" type="button" data-tracking-clear>Limpiar filtros</button>
               </div>
-              <p class="muted">El filtro por integrante incluye sus registros con cambio de nick confirmado y sus entregas anteriores, incluso premios traspasados. El destinatario mostrado puede ser otra persona: abre Ver recorrido para comprobar quien lo recibio y cuando.</p>
+              <p class="muted">Busca un nick para consultar sus premios. Combina Dentro / Fuera del circulo con Pendientes / Reclamados. En Ver recorrido encontraras el codigo, las fechas y los traspasos anteriores.</p>
               <p class="owner-tracking-summary" data-tracking-summary></p>
               <p class="muted" data-tracking-count></p><p class="form-status" role="status" data-tracking-status></p>
               <div class="rewards-toolbar"><button class="ghost-button" type="button" data-tracking-prev>Anterior</button><span data-tracking-page></span><button class="ghost-button" type="button" data-tracking-next>Siguiente</button></div>
-              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Cupon</th><th>Premio</th><th>Destinatario actual / ultimo registro</th><th>Nick actual confirmado</th><th>Situacion</th><th>Estado</th><th>Ultima vez visto (Peru)</th><th>Salida detectada (Peru)</th><th></th></tr></thead><tbody data-tracking-table></tbody></table></div>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Nick</th><th>Premio</th><th>Estado</th><th>Dentro / fuera</th><th>Ultima fecha (Peru)</th><th>Acciones</th></tr></thead><tbody data-tracking-table></tbody></table></div>
               <details class="admin-subsection" data-tracking-alias-section>
                 <summary>Confirmar o corregir cambios de nick</summary>
                 <p class="muted">R2Beat no proporciona un identificador permanente. Confirma la identidad antes de vincular nicks. Esta relacion solo sirve para seguimiento: no mueve premios ni comparte contrasenas.</p>
@@ -837,7 +837,7 @@
     <script src="/owner-ui/admin-image-editor.js?v=0e608d0f11a614d4" defer></script>
     <script src="/owner-ui/admin-batch-images.js?v=3a9777bdc86137d9" defer></script>
     <script src="/owner-ui/admin-delivery-preview.js?v=f495caec76adb5fb" defer></script>
-  <script src="/owner-ui/admin-prizes.js?v=fdc1928e9ca19135" defer></script>
+  <script src="/owner-ui/admin-prizes.js?v=83a7250f48aafbbd" defer></script>
     <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
     <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>
     <script src="/owner-ui/admin-access-requests.js?v=7590e4f3c3793c15" defer></script>
@@ -849,9 +849,9 @@
     <script src="/owner-ui/admin-transfers.js?v=5581808c12c3784f" defer></script>
     <script src="/owner-ui/admin-pending-actions.js?v=a975aed5ef34496f" defer></script>
     <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
-    <script src="/owner-ui/admin-tracking.js?v=c6478ca8008ab63d" defer></script>
+    <script src="/owner-ui/admin-tracking.js?v=35677e4fec0d4c55" defer></script>
     <script src="/owner-ui/admin-spaces.js?v=feae1a9da47820a6" defer></script>
-    <script src="/owner-ui/admin-navigation.js?v=6c11fa7db364a487" defer></script>
+    <script src="/owner-ui/admin-navigation.js?v=eea258b2ad52d20b" defer></script>
     <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>
     <script src="/owner-ui/exceljs-4.4.0.min.js?v=926cb6a0dab94ac2" defer></script>

@@ -127,7 +127,7 @@ function renderAssignmentMembers() {
     if (id && !members.has(id)) members.set(id, { id, nick: coupon.winnerNick || coupon.assignedNick || 'Registro anterior' });
   }
   if (selected && !members.has(selected)) members.set(selected, { id: selected, nick: 'Registro anterior' });
-  const html = '<option value="">Todos los integrantes</option>' + [...members.values()].sort((a,b) => a.nick.localeCompare(b.nick, 'es') || a.id.localeCompare(b.id)).map(member => `<option value="${escapeHtml(member.id)}">${escapeHtml(member.nick)}${member.active === 0 || member.active === false ? ' (retirado)' : ''} | ref. ${escapeHtml(member.id.slice(-6))}</option>`).join('');
+  const html = '<option value="">Todos los integrantes</option>' + [...members.values()].sort((a,b) => a.nick.localeCompare(b.nick, 'es') || a.id.localeCompare(b.id)).map(member => `<option value="${escapeHtml(member.id)}">${escapeHtml(member.nick)}${member.active === 0 || member.active === false ? ' (retirado)' : ''}</option>`).join('');
   if (select.innerHTML !== html) select.innerHTML = html;
   select.value = selected;
   $('[data-assignment-member-history]')?.toggleAttribute?.('disabled', !selected);

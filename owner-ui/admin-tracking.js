@@ -5,21 +5,30 @@ let trackingQueued = false;
 let trackingDialogRevision = 0;
 let trackingTimer;
 let trackingHistory = null;
+let trackingDirectory = [];
+function renderTrackingSuggestions() {
+  const container=$('[data-tracking-suggestions]'); if(!container)return;
+  const query=$('[data-tracking-search]').value.normalize('NFKC').trim().toLowerCase();
+  const selected=$('[data-tracking-member-filter]').value;
+  container.innerHTML=!query||selected?'':(trackingDirectory.filter(m=>m.nick.normalize('NFKC').toLowerCase().includes(query)).slice(0,12).map(m=>`<button type="button" class="mini-button" data-pick-tracking-member="${escapeHtml(m.id)}">${escapeHtml(m.nick)}${m.active?'':' · Retirado'}</button>`).join('') || '<span>Sin coincidencias de nick.</span>');
+}
 const trackingContext = () => `${typeof rewardAdminRevision === 'number' ? rewardAdminRevision : 0}:${typeof adminCircleId === 'string' ? adminCircleId : 'main'}`;
 function trackingHtml(selector, html) { const node = $(selector); if (node && node.innerHTML !== html) node.innerHTML = html; }
 function trackingMemberOptions(members) {
+  trackingDirectory = members;
   const select = $('[data-tracking-member-filter]'); if (!select) return;
   const selected = select.value, directory = new Map(members.map(member => [member.id, member]));
   if (selected && !directory.has(selected)) directory.set(selected, { id: selected, nick: 'Registro seleccionado' });
-  const html = '<option value="">Todos los integrantes</option>' + [...directory.values()].sort((a,b) => a.nick.localeCompare(b.nick, 'es') || a.id.localeCompare(b.id)).map(member => `<option value="${escapeHtml(member.id)}">${escapeHtml(member.nick)}${member.active ? '' : ' (registro anterior)'} | ref. ${escapeHtml(member.id.slice(-6))}</option>`).join('');
+  const html = '<option value="">Todos los integrantes</option>' + [...directory.values()].sort((a,b) => a.nick.localeCompare(b.nick, 'es') || a.id.localeCompare(b.id)).map(member => `<option value="${escapeHtml(member.id)}">${escapeHtml(member.nick)}${member.active ? '' : ' (registro anterior)'}</option>`).join('');
   if (select.innerHTML !== html && document.activeElement !== select) select.innerHTML = html;
   select.value = selected;
+  renderTrackingSuggestions();
 }
 function openMemberTracking(memberId) {
   const select = $('[data-tracking-member-filter]');
   if (!select) return;
   // Keep the exact ID even when the reward directory no longer lists this record.
-  if (!select.querySelector?.(`option[value="${String(memberId).replace(/[^a-zA-Z0-9_-]/g, '')}"]`)) select.innerHTML += `<option value="${escapeHtml(memberId)}">Registro elegido | ref. ${escapeHtml(memberId.slice(-6))}</option>`;
+  if (!select.querySelector?.(`option[value="${String(memberId).replace(/[^a-zA-Z0-9_-]/g, '')}"]`)) select.innerHTML += `<option value="${escapeHtml(memberId)}">Integrante seleccionado</option>`;
   select.value = memberId;
   $('[data-tracking-membership]').value = 'recipients'; $('[data-tracking-state]').value = 'all'; $('[data-tracking-search]').value = '';
   trackingOffset = 0; trackingRevision++;
@@ -86,7 +95,7 @@ async function refreshTracking() {
   const revision = trackingRevision, session = trackingContext();
   try {
     const memberId = $('[data-tracking-member-filter]')?.value || '';
-    const result = await trackingApi("tracking", { query: $("[data-tracking-search]").value, membership: $("[data-tracking-membership]").value || "recipients", status: $("[data-tracking-state]").value || "all", ...(memberId ? { memberId } : {}), offset: trackingOffset });
+    const result = await trackingApi("tracking", { query: memberId ? '' : $("[data-tracking-search]").value, membership: $("[data-tracking-membership]").value || "recipients", status: $("[data-tracking-state]").value || "all", ...(memberId ? { memberId } : {}), offset: trackingOffset });
     if (revision !== trackingRevision || session !== trackingContext() || $("[data-dashboard]").hidden) return;
     trackingOffset = result.offset;
     trackingMemberOptions(result.members || []);
@@ -97,11 +106,11 @@ async function refreshTracking() {
     }
     $("[data-tracking-page]").textContent = `Pagina ${Math.floor(result.offset / 25) + 1}`;
     $("[data-tracking-prev]").disabled = result.offset === 0; $("[data-tracking-next]").disabled = result.offset + 25 >= result.total;
-    trackingHtml('[data-tracking-table]', result.entries.map((c) => `<tr><td><code class="tracking-code">${escapeHtml(c.code)}</code></td><td>${escapeHtml(c.label)}</td><td>${escapeHtml(c.originalNick || "-")}${c.memberId ? `<button class="mini-button" type="button" data-tracking-member="${escapeHtml(c.memberId)}">Ver integrante</button><button class="mini-button" type="button" data-member-profile="${escapeHtml(c.memberId)}">Ver ficha</button>` : ""}</td><td>${escapeHtml(c.currentNick || "-")}${c.pendingPreviousNick ? '<br><span class="muted">Pendiente en su registro anterior</span>' : ""}</td><td>${escapeHtml(trackingNames[c.membership] || c.membership)}</td><td>${escapeHtml(rewardStates[c.status] || c.status)}</td><td>${trackingTime(c.lastSeenAt)}</td><td>${trackingTime(c.leftAt)}</td><td><button class="mini-button" type="button" data-tracking-coupon="${escapeHtml(c.id)}">Ver recorrido</button>${c.status === "assigned" && c.assigned_member_id && !c.event_id ? `<button class="mini-button" type="button" data-unassign-coupon="${escapeHtml(c.id)}">Quitar premio</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="9" class="muted">Sin cupones con estos filtros.</td></tr>');
+    trackingHtml('[data-tracking-table]', result.entries.map(c => `<tr><td>${escapeHtml(c.currentNick || c.originalNick || '-')}${c.currentNick && c.originalNick && c.currentNick !== c.originalNick ? `<small>Antes: ${escapeHtml(c.originalNick)}</small>` : ''}</td><td>${escapeHtml(c.label)}<details><summary>Ver codigo</summary><code>${escapeHtml(c.code)}</code></details></td><td>${escapeHtml(rewardStates[c.status] || c.status)}</td><td>${escapeHtml(trackingNames[c.membership] || c.membership)}</td><td>${trackingTime(c.membership === 'outside' ? c.leftAt : c.claimed_at || c.lastSeenAt)}</td><td><button class="mini-button" type="button" data-tracking-coupon="${escapeHtml(c.id)}">Ver recorrido</button>${c.memberId ? `<button class="mini-button" type="button" data-member-profile="${escapeHtml(c.memberId)}">Ver ficha</button>` : ''}${c.status === 'assigned' && c.assigned_member_id && !c.event_id ? `<button class="mini-button" type="button" data-unassign-coupon="${escapeHtml(c.id)}">Quitar premio</button>` : ''}</td></tr>`).join('') || '<tr><td colspan="6">Sin premios con estos filtros.</td></tr>');
     for (const [selector, active] of [["[data-tracking-old]", false], ["[data-tracking-new]", true]]) {
       const select = $(selector), selected = select.value;
       const linked = new Set(result.aliases.map((a) => a.from_id));
-      const html = '<option value="">Elige integrante</option>' + result.members.filter((m) => Boolean(m.active) === active && (active || !linked.has(m.id))).map((m) => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.nick)} | ref. ${escapeHtml(m.id.slice(-6))}${!active && m.left_at ? ` | ${trackingTime(m.left_at)}` : ""}</option>`).join("");
+      const html = '<option value="">Elige integrante</option>' + result.members.filter((m) => Boolean(m.active) === active && (active || !linked.has(m.id))).map((m) => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.nick)}${!active && m.left_at ? ` | ${trackingTime(m.left_at)}` : ""}</option>`).join("");
       if (select.innerHTML !== html && document.activeElement !== select) select.innerHTML = html;
       select.value = selected;
     }
@@ -139,8 +148,15 @@ $('[data-tracking-clear]')?.addEventListener('click', () => {
   trackingOffset = 0; trackingRevision++; refreshTracking();
 });
 $("[data-tracking-search]").addEventListener("input", () => {
+  $('[data-tracking-member-filter]').value=''; renderTrackingSuggestions();
   clearTimeout(trackingTimer); trackingOffset = 0; trackingRevision++;
   trackingTimer = setTimeout(refreshTracking, 250);
+});
+$('[data-tracking-suggestions]')?.addEventListener('click',event=>{
+  const button=event.target.closest('[data-pick-tracking-member]');if(!button)return;
+  const member=trackingDirectory.find(m=>m.id===button.dataset.pickTrackingMember);if(!member)return;
+  $('[data-tracking-member-filter]').value=member.id;$('[data-tracking-search]').value=member.nick;
+  renderTrackingSuggestions();trackingOffset=0;trackingRevision++;refreshTracking();
 });
 $("[data-tracking-prev]").addEventListener("click", () => { trackingOffset = Math.max(0, trackingOffset - 25); trackingRevision++; refreshTracking(); });
 $("[data-tracking-next]").addEventListener("click", () => { trackingOffset += 25; trackingRevision++; refreshTracking(); });
@@ -175,6 +191,7 @@ for (const [selector, delta] of [["[data-tracking-history-prev]", -25], ["[data-
 $("[data-tracking-close]").addEventListener("click", () => $("[data-tracking-dialog]").close());
 $("[data-tracking-dialog]").addEventListener("close", resetTrackingDialog);
 function clearOwnerTracking() {
+  trackingDirectory=[];if($("[data-tracking-suggestions]"))$("[data-tracking-suggestions]").innerHTML="";
   clearTimeout(rosterTrackingTimer); rosterTrackingRevision++; rosterTrackingQueued = false; rosterTrackingOffset = 0;
   $("[data-roster-tracking-table]").innerHTML = ""; $("[data-roster-tracking-count]").textContent = ""; $("[data-roster-tracking-sync]").textContent = ""; $("[data-roster-tracking-status]").textContent = "";
   clearTimeout(trackingTimer); trackingRevision++; trackingQueued = false; trackingOffset = 0; resetTrackingDialog();
@@ -190,3 +207,4 @@ function clearOwnerTracking() {
 $('[data-logout]').addEventListener('click', clearOwnerTracking);
 $('[data-admin-circle-select]')?.addEventListener('change', clearOwnerTracking);
 if (typeof window !== 'undefined') window.addEventListener('mazino-owner-session-cleared', clearOwnerTracking);
+
