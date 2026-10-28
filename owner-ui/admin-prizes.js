@@ -532,7 +532,7 @@ document.addEventListener("click", async (event) => {
     } else if (button.hasAttribute("data-reward-clear-secret")) {
       clearRewardCredential();
     } else if (button.hasAttribute("data-reward-copy-secret")) {
-      await navigator.clipboard.writeText(`Nick: ${$("[data-reward-secret-nick]").value}\nClave de premios: ${$("[data-reward-secret]").value}`); rewardStatus("Acceso copiado.");
+      await navigator.clipboard.writeText(`Nick: ${$("[data-reward-secret-nick]").value}\nClave del circulo: ${$("[data-reward-secret]").value}\n\nIngresa a https://mazino.lat. Si aparecen varios circulos, elige el tuyo. Busca tu usuario y haz clic en tu nick. Escribe tu nick y tu clave del circulo para consultar y reclamar tus premios.\n\nPara cambiar tu clave: entra con tu clave actual y usa la opcion de cambiar clave. Si la olvidaste, solicita recuperar acceso; el lider o un sublider autorizado verificara tu identidad dentro del juego antes de aprobarlo.\n\nLa clave del circulo es distinta de la clave de los eventos.`); rewardStatus("Acceso copiado.");
     } else if (button.hasAttribute("data-admin-copy-coupon")) {
       await navigator.clipboard.writeText(rewardAdminState.coupons.find((coupon) => coupon.id === button.dataset.adminCopyCoupon).code); rewardStatus("Cupon copiado.");
     } else if (button.hasAttribute("data-view-event-key")) {

@@ -169,7 +169,7 @@
                 <button class="ghost-button" type="button" data-donation-clear-filters><img src="/assets/admin/refresh.svg" alt="" />Ver todos</button>
               </form>
               <dl class="admin-overview"><div><dt>Cumplieron</dt><dd data-donation-fulfilled>-</dd></div><div><dt>No cumplieron al cierre</dt><dd data-donation-shortfall>-</dd></div><div><dt>Aun les falta / falta cierre</dt><dd data-donation-progress>-</dd></div><div><dt>Sin registros suficientes</dt><dd data-donation-missing>-</dd></div></dl>
-              <p class="muted" role="status" data-donation-report-status></p>
+              <p class="muted" role="status" data-donation-report-status></p><button type="button" class="ghost-button" data-donation-image-report>Preparar reporte con observaciones / PNG</button>
               <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Total inicial</th><th>Ultimo total</th><th>Donado en el plazo</th><th>Le falta</th><th>Resultado</th><th>Ultima revision</th><th></th></tr></thead><tbody data-donation-report-rows></tbody></table></div>
             </details>
               <details class="admin-subsection" data-donation-task="goal-create"><summary>Crear una meta</summary><form class="settings-grid" data-donation-goal-form>
@@ -339,7 +339,7 @@
             <div class="rewards-toolbar" data-reward-credential hidden>
               <label><span>Nick</span><input readonly data-reward-secret-nick autocomplete="off" spellcheck="false" /></label>
               <label><span>Clave de premios</span><input readonly data-reward-secret autocomplete="off" spellcheck="false" /></label>
-              <button class="ghost-button" type="button" data-reward-copy-secret>Copiar acceso</button>
+              <button class="ghost-button" type="button" data-reward-copy-secret>Copiar datos e instrucciones</button>
               <button class="ghost-button" type="button" data-reward-clear-secret>Ocultar acceso</button>
             </div>
             <p class="muted" data-access-summary role="status"></p>
@@ -837,7 +837,7 @@
     <script src="/owner-ui/admin-image-editor.js?v=0e608d0f11a614d4" defer></script>
     <script src="/owner-ui/admin-batch-images.js?v=3a9777bdc86137d9" defer></script>
     <script src="/owner-ui/admin-delivery-preview.js?v=f495caec76adb5fb" defer></script>
-  <script src="/owner-ui/admin-prizes.js?v=83a7250f48aafbbd" defer></script>
+  <script src="/owner-ui/admin-prizes.js?v=ca88696d889e2645" defer></script>
     <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
     <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>
     <script src="/owner-ui/admin-access-requests.js?v=7590e4f3c3793c15" defer></script>
@@ -857,7 +857,8 @@
     <script src="/owner-ui/exceljs-4.4.0.min.js?v=926cb6a0dab94ac2" defer></script>
     <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
-    <script src="/owner-ui/admin-donations.js?v=5d0ee12ba3aeace5" defer></script>
+    <script src="/owner-ui/donation-report-image.js?v=d6ab6bc5ec49f87a" defer></script>
+    <script src="/owner-ui/admin-donations.js?v=9e5428394ac68875" defer></script>
     <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=6ccb129cd99f92d8" defer></script>
   </body>
