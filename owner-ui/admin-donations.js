@@ -8,7 +8,7 @@
   const labels = { baseline: "Inicio del seguimiento", new: "Nueva revision", correction: "Correccion", unchanged: "Ya registrado", error: "Revisar", fulfilled: "Cumplio", shortfall: "No cumplio al cierre", progress: "Aun le falta / falta cierre", missing: "Sin registros suficientes" };
   let data = null, staged = null, busy = false, context = 0, reportRevision = 0, historyRevision = 0, metadataRevision = 0;
   let syncBusy = false, syncTimer, pendingMetadata = null;
-  let imageReport=null, closeImageReport=null;
+  let imageReport=null, closeImageReport=null, groupManager=null, targetPicker=null;
   field("image-report")?.addEventListener("click",()=>{
     if(!imageReport?.entries?.length){status("Consulta primero una meta o rango con integrantes.");return;}
     const snapshot=imageReport,version=context,currentScope=scope();
@@ -24,7 +24,7 @@
       if (field('auto-issues').innerHTML !== html) field('auto-issues').innerHTML = html;
     }
   }
-  const reportFilters = () => ({ goalId: field('goal').value, start: field('start').value, end: field('end').value, target: Number(field('target').value), search: field('search').value, status: field('filter').value, membership: field('membership').value });
+  const reportFilters = () => ({ goalId: field('goal').value, start: field('start').value, end: field('end').value, target: Number(field('target').value), search: field('search').value, status: field('filter').value, membership: field('membership').value,groupId:field('group-filter').value });
   const memberSignature = members => JSON.stringify(members.map(m => [m.id, m.nick, m.active, m.membership, !!m.needsConfirmation, m.confirmedAt, m.relatedIds]).sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
   let directoryPage = 0, identityId = "", zeroMember = null;
   let reviewId = '', reviewStart = '', reviewSignature = '', reviewTrigger = null;
@@ -89,6 +89,7 @@
     for (const node of $$("input,button,select", panel)) node.disabled = value;
     field("save").disabled = value || !staged || !!staged.plan.errors.length || !staged.plan.changed;
     goalFields();
+    targetPicker?.update(data||{members:[],groups:[]},value);
     renderDirectory();
     captureWidget?.setLocked(value);
     renderCaptureBlocks();
@@ -110,7 +111,7 @@
     if (revision !== context || currentScope !== scope() || request !== metadataRevision || !visible()) return;
     automaticStatus(result.automatic);
     if (options.background && data) {
-      if (JSON.stringify([data.members, data.goals, data.imports]) !== JSON.stringify([result.members, result.goals, result.imports])) {
+      if (JSON.stringify([data.members, data.goals, data.imports,data.groupRevision]) !== JSON.stringify([result.members, result.goals, result.imports,result.groupRevision])) {
         if (memberSignature(data.members) !== memberSignature(result.members)) clearPreview();
         pendingMetadata = result; field('refresh-notice').hidden = false;
       }
@@ -118,6 +119,10 @@
     }
     if (data && memberSignature(data.members) !== memberSignature(result.members)) clearPreview();
     data = result;
+    const groupOptions={data:result,canEdit:true,save:async body=>{let saved;await operation(async current=>{saved=await call('group-save',body);if(current())await load();},true);return saved;}};
+    if(!groupManager)groupManager=MazinoDonationGroups.manager(field('groups-host'),groupOptions);else groupManager.update(result);
+    if(!targetPicker)targetPicker=MazinoDonationGroups.picker(field('target-picker'),{data:result,disabled:busy});else targetPicker.update(result,busy);
+    const groupSelected=field('group-filter').value;field('group-filter').innerHTML='<option value="all">Todos los grupos</option><option value="none">Sin grupo</option>'+(result.groups||[]).map(g=>`<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join('');field('group-filter').value=groupSelected||'all';
     pendingMetadata = null; field('refresh-notice').hidden = true;
     if (zeroMember && !result.members.some(m => m.id === zeroMember.id && m.active && !m.hasEntryBase && m.entryOn === zeroMember.entryOn && m.entryPeriod === zeroMember.entryPeriod && m.confirmedBy && !m.needsConfirmation)) { zeroMember = null; field('zero-form').hidden = true; }
     renderReview();
@@ -258,9 +263,10 @@
       const result = await call('report', filters);
       if (revision !== reportRevision || session !== context || !visible() || JSON.stringify(filters) !== JSON.stringify(reportFilters())) return;
       imageReport=result;
+      const selectedGroup=field('group-filter').value;field('group-filter').innerHTML='<option value="all">Todos los grupos</option><option value="none">Sin grupo</option>'+(result.groups||[]).map(g=>`<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join('');field('group-filter').value=selectedGroup;
       for (const name of ["fulfilled", "shortfall", "progress", "missing"]) field(name).textContent = result.counts[name];
-      field("report-status").textContent = `${result.start} al ${result.end} | Meta: ${number(result.target)} por integrante | ${result.entries.length} de ${result.total} integrantes${field("filter").value !== "all" ? ` | Filtro: ${labels[field("filter").value]}` : ""}`;
-      field("report-rows").innerHTML = result.entries.map(r => `<tr><td>${escapeHtml(r.nick)}${result.notes?.[r.memberId] ? `<p style="color:${result.notes[r.memberId].mark === "red" ? "#ff7d8c" : result.notes[r.memberId].mark === "yellow" ? "#ffe182" : "inherit"}">${result.notes[r.memberId].mark === "red" ? "Lo retire" : result.notes[r.memberId].mark === "yellow" ? "En observacion" : ""} ${escapeHtml(result.notes[r.memberId].observation || "")}</p>` : ""}<br><span class="muted">${memberships[r.membership] || (r.active ? "En el circulo" : "Retirado")}</span>${r.zeroFromEntry ? `<p>Nuevo ingreso: inicio en 0 desde ${r.effectiveStart}</p>` : r.baselineObservedOn ? `<p>Seguimiento desde base observada: ${r.baselineObservedOn}</p>` : r.joinedDuring ? `<p>Cuenta desde su ingreso: ${r.effectiveStart}</p>` : ''}</td><td>${number(r.initialTotal)}${r.initialTotal != null ? `<br><small>${r.effectiveStart || result.start}</small>` : ""}</td><td>${number(r.finalTotal)}${r.lastOn ? `<br><small>${r.lastOn}</small>` : ""}</td><td>${number(r.donated)}</td><td>${number(r.remaining)}</td><td><span class="donation-state ${r.status}">${labels[r.status]}</span>${r.identityPending ? '<br>Confirma su identidad en Integrantes y cambios' : r.periodChanged ? "<br>Reincorporacion: consulta cada periodo por separado" : r.missingStart ? "<br>Falta revision inicial" : r.missingEnd ? r.status === "fulfilled" ? "<br>Meta alcanzada antes del cierre" : "<br>Falta revision final" : ""}</td><td>${r.lastOn || "-"}</td><td><div class="editor-actions"><button class="mini-button" type="button" data-donation-member="${escapeHtml(r.memberId)}"${busy ? " disabled" : ""}>Ver historial</button>${r.status === 'missing' ? `<button class="mini-button" type="button" aria-label="Revisar inicio de ${escapeHtml(r.nick)}" data-donation-review="${escapeHtml(r.memberId)}" data-donation-review-start="${escapeHtml(r.effectiveStart || result.start)}"${busy ? ' disabled' : ''}><img src="/assets/admin/users.svg" width="16" height="16" alt="" />Revisar inicio</button>` : ''}</div></td></tr>`).join("") || '<tr><td colspan="8" class="muted">No hay integrantes con estos filtros. Pulsa Ver todos para consultar el grupo completo.</td></tr>';
+      field("report-status").textContent = `${result.start} al ${result.end} | ${result.goalId?'Meta general: '+number(result.target)+'; se aplican las individuales':'Meta de consulta: '+number(result.target)} | ${result.entries.length} de ${result.total} integrantes${field("filter").value !== "all" ? ` | Filtro: ${labels[field("filter").value]}` : ""}`;
+      field("report-rows").innerHTML = result.entries.map(r => `<tr><td>${escapeHtml(r.nick)}<p>${escapeHtml(r.groupName||"Sin grupo")} · ${escapeHtml(r.targetSource||"General")}</p>${result.notes?.[r.memberId] ? `<p style="color:${result.notes[r.memberId].mark === "red" ? "#ff7d8c" : result.notes[r.memberId].mark === "yellow" ? "#ffe182" : "inherit"}">${result.notes[r.memberId].mark === "red" ? "Lo retire" : result.notes[r.memberId].mark === "yellow" ? "En observacion" : ""} ${escapeHtml(result.notes[r.memberId].observation || "")}</p>` : ""}<br><span class="muted">${memberships[r.membership] || (r.active ? "En el circulo" : "Retirado")}</span>${r.zeroFromEntry ? `<p>Nuevo ingreso: inicio en 0 desde ${r.effectiveStart}</p>` : r.baselineObservedOn ? `<p>Seguimiento desde base observada: ${r.baselineObservedOn}</p>` : r.joinedDuring ? `<p>Cuenta desde su ingreso: ${r.effectiveStart}</p>` : ''}</td><td>${number(r.initialTotal)}${r.initialTotal != null ? `<br><small>${r.effectiveStart || result.start}</small>` : ""}</td><td>${number(r.finalTotal)}${r.lastOn ? `<br><small>${r.lastOn}</small>` : ""}</td><td>${number(r.donated)}</td><td>Meta: ${number(r.target??result.target)}<br>Le falta: ${number(r.remaining)}</td><td><span class="donation-state ${r.status}">${labels[r.status]}</span>${r.identityPending ? '<br>Confirma su identidad en Integrantes y cambios' : r.periodChanged ? "<br>Reincorporacion: consulta cada periodo por separado" : r.missingStart ? "<br>Falta revision inicial" : r.missingEnd ? r.status === "fulfilled" ? "<br>Meta alcanzada antes del cierre" : "<br>Falta revision final" : ""}</td><td>${r.lastOn || "-"}</td><td><div class="editor-actions"><button class="mini-button" type="button" data-donation-member="${escapeHtml(r.memberId)}"${busy ? " disabled" : ""}>Ver historial</button>${r.status === 'missing' ? `<button class="mini-button" type="button" aria-label="Revisar inicio de ${escapeHtml(r.nick)}" data-donation-review="${escapeHtml(r.memberId)}" data-donation-review-start="${escapeHtml(r.effectiveStart || result.start)}"${busy ? ' disabled' : ''}><img src="/assets/admin/users.svg" width="16" height="16" alt="" />Revisar inicio</button>` : ''}</div></td></tr>`).join("") || '<tr><td colspan="8" class="muted">No hay integrantes con estos filtros. Pulsa Ver todos para consultar el grupo completo.</td></tr>';
     } catch (error) { if (revision === reportRevision && session === context && visible()) { for (const name of ["fulfilled", "shortfall", "progress", "missing"]) field(name).textContent = "-"; field("report-status").textContent = error.message; } }
   }
   async function history(id, options = {}) {
@@ -323,13 +329,13 @@
   field("cancel").addEventListener("click", clearPreview);
   for (const name of ["date", "file", "replace", "note"]) field(name).addEventListener("change", () => { if (!busy) clearPreview(); });
   field("report-form").addEventListener("submit", event => { event.preventDefault(); if (!busy) report(); });
-  for (const name of ["filter", "membership"]) field(name).addEventListener("change", () => { if (!busy) report(); });
+  for (const name of ["filter", "membership","group-filter"]) field(name).addEventListener("change", () => { if (!busy) report(); });
   field("clear-filters").addEventListener("click", () => {
     if (busy) return;
-    field("filter").value = field("membership").value = "all"; field("search").value = ""; report();
+    field("filter").value = field("membership").value = field("group-filter").value = "all"; field("search").value = ""; report();
   });
   field("goal").addEventListener("change", () => {
-    field("filter").value = field("membership").value = "all"; field("search").value = "";
+    field("filter").value = field("membership").value = field("group-filter").value = "all"; field("search").value = "";
     const goal = data?.goals.find(g => g.id === field("goal").value);
     if (goal) { field("start").value = goal.start_on; field("end").value = goal.end_on; field("target").value = goal.target; }
     goalFields(); report();
@@ -339,12 +345,12 @@
   field("duration").addEventListener("change", goalEnd); field("goal-start").addEventListener("change", goalEnd);
   field("goal-form").addEventListener("submit", event => {
     event.preventDefault(); operation(async current => {
-      const result = await call("goal", { title: field("goal-title").value, start: field("goal-start").value, end: field("goal-end").value, target: Number(field("goal-target").value) });
+      const result = await call("goal", { title: field("goal-title").value, start: field("goal-start").value, end: field("goal-end").value, target: Number(field("goal-target").value),...targetPicker.get() });
       if (!current()) return;
       await load(); if (!current()) return;
       field("goal").value = result.id; field("goal").dispatchEvent(new Event("change"));
       if (typeof selectAdminSection === "function") selectAdminSection("donations");
-      status(`Meta creada para ${result.participants} integrantes. Se conservaran aunque salgan del circulo.`);
+      status(`Meta creada para ${result.participants} integrantes. Las metas individuales reemplazan la grupal para las mismas fechas; se conserva el historial.`);
     });
   });
   panel.addEventListener("click", event => {
@@ -422,6 +428,7 @@
   });
   panel.addEventListener("toggle", () => { if (panel.open && visible() && !busy) operation(async current => { await load(); if (current()) await report(); }); });
   function reset() {
+    groupManager?.destroy();targetPicker?.destroy();groupManager=targetPicker=null;field("group-filter").innerHTML='<option value="all">Todos los grupos</option><option value="none">Sin grupo</option>';
     closeImageReport?.();closeImageReport=null;imageReport=null;
     clearTimeout(syncTimer); syncBusy = false; pendingMetadata = null;
     field('sync-now').disabled = false; field('sync-status').textContent = ''; field('auto-status').textContent = ''; field('refresh-notice').hidden = true;
