@@ -6,6 +6,7 @@ let rewardEventKeyRevision = 0;
 let rewardCouponPage = 0;
 let rewardDeliveryPreview = null;
 let rewardDeliveryConfirmBusy = false;
+let rewardEventSelection = null, rewardEventConfirmBusy = false, rewardEventRequestPending = false, rewardEventFormRevision = 0;
 const rewardStatus = (message) => { $("[data-rewards-status]").textContent = message; };
 const rewardTime = (value) => value ? new Date(value).toLocaleString("es-PE", { timeZone: "America/Lima" }) : "-";
 const rewardStates = { available: "Disponible", assigned: "Asignado", claimed: "Reclamado", archived: "Archivado", active: "Activo", closed: "Cerrado" };
@@ -168,6 +169,19 @@ function renderEventFields() {
   $("[data-event-quantity]").max = String(Math.min(50, item?.count || 1));
   const owner = rewardAdminState.members.find((member) => member.id === $("[data-reward-owner]").value);
   $("[data-event-summary]").textContent = item ? `${count || 1} x ${item.label} | Nick: ${owner?.nick || "Elige integrante"} | ${scheduled ? "Apertura programada (Peru)" : "Abre ahora"}` : "Elige un premio disponible para crear el evento.";
+  rewardEventSelection = null;
+  if (typeof OwnerDeliveryPreview !== 'undefined') {
+    const stock = rewardDeliveryStock(select.value);
+    if (select.value && Number.isInteger(count) && count >= 1 && count <= Math.min(50, stock.length)) {
+      rewardEventSelection = Object.freeze({ itemKey: select.value, quantity: count, coupons: Object.freeze(stock.slice(0, count).map(coupon => Object.freeze({ ...coupon }))) });
+      OwnerDeliveryPreview.renderEventStock($("[data-event-exact-preview]"), rewardEventSelection.coupons, owner);
+    } else OwnerDeliveryPreview.render($("[data-event-exact-preview]"), null);
+  }
+}
+
+function rewardEventFingerprint(form) {
+  return JSON.stringify([form.elements.namedItem('title').value, form.elements.namedItem('ownerId').value, form.elements.namedItem('startsAt').value,
+    $('[data-event-mode]').value, $('[data-event-item]').value, $('[data-event-quantity]').value, $('[data-event-end]').value]);
 }
 
 function clearEventKey() {
@@ -350,7 +364,7 @@ $("[data-personal-delivery]").addEventListener("submit", async (event) => {
   finally { renderRewardDelivery(); }
 });
 $("[data-admin-section=\"rewards\"]").addEventListener("toggle", (event) => {
-  if (!event.target.open) { clearRewardCredential(); clearEventKey(); }
+  if (!event.target.open) { clearRewardCredential(); clearEventKey(); if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancelEvent(); }
 });
 $("[data-coupon-filter]").addEventListener("change", () => { rewardCouponPage = 0; renderRewardAdmin(); });
 $("[data-coupon-item-filter]").addEventListener("change", () => { rewardCouponPage = 0; renderRewardAdmin(); });
@@ -389,11 +403,12 @@ $("[data-coupon-table]").addEventListener("submit", async (event) => {
 $("[data-reward-event-form]").addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.target;
-  if (rewardAdminBusy) return;
+  if (rewardAdminBusy || rewardEventConfirmBusy) return;
+  rewardEventConfirmBusy = true;
   const revision = rewardAdminRevision, button = $("[data-event-submit]");
+  const formRevision = rewardEventFormRevision, previousKeyRevision = rewardEventKeyRevision;
+  let snapshot = null;
   button.disabled = true;
-  const keyRevision = clearEventKey();
-  $("[data-event-status]").textContent = "Creando evento...";
   try {
     const itemKey = $("[data-event-item]").value, quantity = Number($("[data-event-quantity]").value);
     if (!itemKey || !Number.isInteger(quantity) || quantity < 1 || quantity > Math.min(50, rewardDeliveryStock(itemKey).length)) throw new Error("Elige un premio disponible y una cantidad valida de ganadores.");
@@ -410,23 +425,50 @@ $("[data-reward-event-form]").addEventListener("submit", async (event) => {
     if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(value)) throw new Error('Elige la fecha y hora de termino en Peru.');
     const endsAt = Date.parse(`${value.length === 16 ? `${value}:00` : value}-05:00`);
     if (!Number.isFinite(endsAt) || endsAt <= Math.max(startsAt, Date.now())) throw new Error('El termino debe ser posterior a la apertura y a la hora actual.');
-    const result = await rewardAdminAction("event", {
-      title, ownerId, startsAt, endsAt, itemKey, quantity,
-    });
-    if (revision !== rewardAdminRevision) return;
+    const payload = { title, ownerId, startsAt, endsAt, itemKey, quantity };
+    if (typeof OwnerDeliveryPreview !== 'undefined') {
+      if (!rewardEventSelection || rewardEventSelection.itemKey !== itemKey || rewardEventSelection.quantity !== quantity) throw new Error('Elige el premio y revisa los lotes del evento antes de confirmar.');
+      if (typeof form.checkValidity === 'function' && !form.checkValidity()) throw new Error('Revisa los datos del formulario del evento.');
+      const fingerprint = rewardEventFingerprint(form), host = rewardAdminState.members.find(member => member.id === ownerId && member.active);
+      snapshot = OwnerDeliveryPreview.createEvent(host, payload, rewardEventSelection.coupons, { mode: $('[data-event-mode]').value,
+        valid: () => formRevision === rewardEventFormRevision && previousKeyRevision === rewardEventKeyRevision && fingerprint === rewardEventFingerprint(form)
+          && (typeof form.checkValidity !== 'function' || form.checkValidity()),
+      });
+      $('[data-event-status]').textContent = 'Revisa el evento y confirma los lotes.';
+      if (!await OwnerDeliveryPreview.confirm(snapshot)) {
+        if (revision === rewardAdminRevision && OwnerDeliveryPreview.isContextCurrent(snapshot)) $('[data-event-status]').textContent = 'Evento cancelado. No se creo ningun evento ni clave.';
+        return;
+      }
+      OwnerDeliveryPreview.validate(snapshot);
+    } else if (typeof document.createElement === 'function') throw new Error('No se pudo cargar la confirmacion del evento. Recarga el panel.');
+    if (revision !== rewardAdminRevision || previousKeyRevision !== rewardEventKeyRevision) return;
+    const keyRevision = clearEventKey();
+    rewardEventRequestPending = true;
+    $('[data-event-status]').textContent = 'Creando evento...';
+    const result = await rewardAdminAction('event', snapshot ? { ...snapshot.event, couponIds: [...snapshot.couponIds], strict: true } : payload);
+    // A stock refresh may reset the item selector after a successful commit.
+    // Keep lifecycle/key guards here; full field/stock validation ran before sending.
+    if (revision !== rewardAdminRevision || keyRevision !== rewardEventKeyRevision || snapshot && !OwnerDeliveryPreview.isContextCurrent(snapshot)) return;
     showEventKey(result, title, keyRevision);
     const message = `Evento ${title} creado: ${result.prizes} premios. ${startsAt > Date.now() ? `Abre ${rewardTime(startsAt)} (Peru).` : "Ya esta activo."} Termina ${rewardTime(endsAt)} (Peru), o al agotarse. Comparte la clave del evento con los jugadores.`;
     $("[data-event-status]").textContent = message;
     rewardStatus(message);
-  } catch (error) { $("[data-event-status]").textContent = error.message; }
-  finally { button.disabled = false; }
+  } catch (error) { if (revision === rewardAdminRevision && (!snapshot || OwnerDeliveryPreview.isContextCurrent(snapshot))) $("[data-event-status]").textContent = error.message; }
+  finally { rewardEventConfirmBusy = false; rewardEventRequestPending = false; button.disabled = false; }
 });
+function rewardEventFormChanged() {
+  rewardEventFormRevision++;
+  if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancelEvent();
+  if (rewardEventRequestPending) clearEventKey();
+}
+$('[data-reward-event-form]').addEventListener('input', rewardEventFormChanged);
+$('[data-reward-event-form]').addEventListener('change', rewardEventFormChanged);
 $("[data-event-copy-key]").addEventListener("click", async () => {
   try { await navigator.clipboard.writeText($("[data-event-key-output]").value); $("[data-event-status]").textContent = "Clave del evento copiada."; }
   catch { $("[data-event-status]").textContent = "Selecciona la clave para copiarla manualmente."; }
 });
 $("[data-rewards-subsection=\"events\"]").addEventListener("toggle", (event) => {
-  if (!event.target.open) clearEventKey();
+  if (!event.target.open) { clearEventKey(); if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancelEvent(); }
 });
 $("[data-rewards-subsection=\"access\"]").addEventListener("toggle", (event) => { if (!event.target.open) clearRewardCredential(); });
 
@@ -513,6 +555,7 @@ document.addEventListener("click", async (event) => {
 });
 $("[data-logout]").addEventListener("click", () => {
   rewardDeliveryPreview = null;
+  rewardEventSelection = null;
   if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancel();
   rewardAdminRevision++;
   rewardAdminState = { members: [], coupons: [], events: [] };

@@ -13,7 +13,7 @@
     const batch = (state.batches || []).find(item => (item.id == null ? '__legacy__' : String(item.id)) === id);
     return { name: batch?.name || (id === '__legacy__' ? 'Stock anterior (sin lote)' : `Lote ${id}`), hasImage: Boolean(batch?.hasImage), imageVersion: Number.isSafeInteger(batch?.imageVersion) && batch.imageVersion >= 0 ? batch.imageVersion : 0 };
   }
-  const stale = () => new Error('La entrega cambio mientras la revisabas. Vuelve a elegir el premio y confirma la nueva vista previa.');
+  const stale = snapshot => new Error(`${snapshot?.source === 'event' ? 'El evento cambio mientras lo revisabas.' : 'La entrega cambio mientras la revisabas.'} Vuelve a elegir el premio y confirma la nueva vista previa.`);
   function groupCoupons(state, coupons) {
     const groups = new Map();
     for (const coupon of coupons) {
@@ -39,27 +39,53 @@
     validate(snapshot); return snapshot;
   }
   function validate(snapshot) {
-    if (!authenticated() || snapshot.context !== context() || !snapshot.valid()) throw stale();
+    if (!authenticated() || snapshot.context !== context() || !snapshot.valid()) throw stale(snapshot);
     const state = snapshot.getState(), member = state.members?.find(item => item.id === snapshot.member.id);
-    if (!member?.active || member.nick !== snapshot.member.nick) throw stale();
+    if (!member?.active || member.nick !== snapshot.member.nick) throw stale(snapshot);
     const coupons = new Map((state.coupons || []).map(coupon => [coupon.id, coupon]));
     for (const entry of snapshot.coupons) {
       const current = coupons.get(entry.id);
-      if (!eligible(current) || current.label !== entry.label || batchId(current) !== entry.batchId || (current.created_at ?? null) !== entry.createdAt || (current.staff_owner_id ?? null) !== entry.staffOwnerId) throw stale();
+      if (!eligible(current) || current.label !== entry.label || batchId(current) !== entry.batchId || (current.created_at ?? null) !== entry.createdAt || (current.staff_owner_id ?? null) !== entry.staffOwnerId) throw stale(snapshot);
+      if (snapshot.kind === 'event' && current.staff_owner_id) throw stale(snapshot);
     }
     for (const group of snapshot.groups) {
       const current = batchMetadata(state, group.id);
-      if (current.name !== group.name || current.hasImage !== group.hasImage || current.imageVersion !== group.imageVersion) throw stale();
+      if (current.name !== group.name || current.hasImage !== group.hasImage || current.imageVersion !== group.imageVersion) throw stale(snapshot);
+    }
+    if (snapshot.kind === 'event') {
+      const event = snapshot.event;
+      if (event.ownerId !== snapshot.member.id || !event.title || event.quantity !== snapshot.couponIds.length || snapshot.coupons.some(coupon => rewardItemKey(coupon.label) !== event.itemKey)
+        || !Number.isFinite(event.startsAt) || !Number.isFinite(event.endsAt) || event.endsAt <= Math.max(event.startsAt, Date.now())
+        || snapshot.mode === 'scheduled' && event.startsAt <= Date.now()) throw new Error('Los datos o el horario del evento cambiaron. Revisa y confirma de nuevo.');
     }
     return snapshot;
+  }
+  function createEvent(host, payload, coupons, options = {}) {
+    if (!host?.id) throw new Error('Elige un integrante activo en Nick donde aparece.');
+    const base = create(host, coupons, { ...options, source: 'event' });
+    const snapshot = Object.freeze({ ...base, kind: 'event', mode: options.mode,
+      event: Object.freeze({ title: payload.title, ownerId: payload.ownerId, startsAt: payload.startsAt, endsAt: payload.endsAt, itemKey: payload.itemKey, quantity: payload.quantity }),
+    });
+    validate(snapshot); return snapshot;
   }
   function render(target, snapshot) {
     if (!target) return;
     target.replaceChildren();
     if (!snapshot) { target.hidden = true; return; }
     target.hidden = false;
-    const recipient = document.createElement('p'); recipient.className = 'exact-delivery-recipient'; recipient.textContent = `Destinatario: ${snapshot.member?.nick || 'Elige un integrante'} | ${snapshot.couponIds.length} cupones`;
+    const recipient = document.createElement('p'); recipient.className = 'exact-delivery-recipient';
+    recipient.textContent = snapshot.kind === 'event' ? `Nick donde aparecera: ${snapshot.member?.nick || 'Elige un integrante'} | ${snapshot.couponIds.length} premios. Este nick no determina al ganador.`
+      : `Destinatario: ${snapshot.member?.nick || 'Elige un integrante'} | ${snapshot.couponIds.length} cupones`;
     target.append(recipient);
+    if (snapshot.event) {
+      const details = document.createElement('dl'); details.className = 'exact-event-details';
+      const time = value => `${new Date(value).toLocaleString('es-PE', { timeZone: 'America/Lima', hour12: false })} (Peru)`;
+      for (const [label, value] of [['Evento', snapshot.event.title], ['Apertura', `${snapshot.mode === 'scheduled' ? '' : 'Abre ahora: '}${time(snapshot.event.startsAt)}`], ['Termino', time(snapshot.event.endsAt)], ['Cantidad', `${snapshot.event.quantity} premios`]]) {
+        const row = document.createElement('div'), term = document.createElement('dt'), description = document.createElement('dd');
+        term.textContent = label; description.textContent = value; row.append(term, description); details.append(row);
+      }
+      target.append(details);
+    }
     const list = document.createElement('div'); list.className = 'exact-delivery-lots';
     for (const group of snapshot.groups) {
       const card = document.createElement('section'); card.className = 'exact-delivery-lot';
@@ -80,6 +106,9 @@
   function renderStock(target, coupons) {
     render(target, coupons.length ? { member: null, couponIds: coupons.map(coupon => coupon.id), groups: groupCoupons(rewardAdminState, coupons) } : null);
   }
+  function renderEventStock(target, coupons, host) {
+    render(target, coupons.length ? { kind: 'event', member: host, couponIds: coupons.map(coupon => coupon.id), groups: groupCoupons(rewardAdminState, coupons) } : null);
+  }
   function finish(accepted) {
     const active = pending; pending = null;
     if (dialog?.open) { closing++; dialog.close(); }
@@ -96,7 +125,13 @@
     validate(snapshot);
     return new Promise((resolve, reject) => {
       pending = { snapshot, resolve };
-      try { render(field('content'), snapshot); dialog.showModal(); if (typeof hydrateOwnerCouponImages === 'function') hydrateOwnerCouponImages(); }
+      try {
+        const event = snapshot.kind === 'event';
+        if (field('title')) field('title').textContent = event ? 'Confirmar evento' : 'Confirmar entrega';
+        if (field('description')) field('description').textContent = event ? 'Revisa el evento y los lotes exactos. La clave se generara solo al confirmar.' : 'Revisa el destinatario y los lotes exactos antes de asignar.';
+        field('accept').textContent = event ? 'Crear evento y generar clave' : 'Confirmar entrega';
+        render(field('content'), snapshot); dialog.showModal(); if (typeof hydrateOwnerCouponImages === 'function') hydrateOwnerCouponImages();
+      }
       catch (error) { pending = null; finish(false); reject(error); }
     });
   }
@@ -104,6 +139,7 @@
   field('cancel')?.addEventListener('click', cancel);
   dialog?.addEventListener('cancel', event => { event.preventDefault(); cancel(); });
   dialog?.addEventListener('close', () => { if (closing) closing--; else cancel(); });
+  function cancelEvent() { if (pending?.snapshot.kind === 'event') cancel(); }
   function invalidate() {
     epoch++; cancel();
     for (const node of document.querySelectorAll('[data-exact-delivery-preview]')) render(node, null);
@@ -118,5 +154,5 @@
   if (dashboard && typeof MutationObserver === 'function') new MutationObserver(() => { if (!authenticated()) invalidate(); }).observe(dashboard, { attributes: true, attributeFilter: ['hidden'] });
   // Post-commit UI may legitimately reset item/quantity when stock is exhausted.
   // Full selection/state validation belongs before the request, not after it.
-  globalThis.OwnerDeliveryPreview = Object.freeze({ create, validate, render, renderStock, confirm: confirmDelivery, cancel, isContextCurrent: snapshot => authenticated() && snapshot.context === context() });
+  globalThis.OwnerDeliveryPreview = Object.freeze({ create, createEvent, validate, render, renderStock, renderEventStock, confirm: confirmDelivery, cancel, cancelEvent, isContextCurrent: snapshot => authenticated() && snapshot.context === context() });
 })();
