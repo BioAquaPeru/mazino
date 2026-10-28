@@ -19,9 +19,9 @@ const adminWorkflows = [
 ];
 function renderAdminHome() {
   if (!adminState) return;
-  $("[data-home-members]").textContent = String(adminState.draft.members.length);
-  $("[data-home-sync]").textContent = adminState.sync?.lastSyncAt ? new Date(adminState.sync.lastSyncAt).toLocaleString("es-PE", { timeZone: "America/Lima" }) : "Sin consulta registrada";
-  $("[data-home-publishing]").textContent = adminState.github?.enabled ? "Activa" : "Desactivada";
+  for (const [selector, value] of [['[data-home-members]', String(adminState.draft.members.length)], ['[data-home-sync]', adminState.sync?.lastSyncAt ? new Date(adminState.sync.lastSyncAt).toLocaleString('es-PE', { timeZone: 'America/Lima' }) : 'Sin consulta registrada'], ['[data-home-publishing]', adminState.github?.enabled ? 'Activa' : 'Desactivada']]) {
+    if ($(selector).textContent !== value) $(selector).textContent = value;
+  }
 }
 function selectAdminSection(name) {
   if (!Object.hasOwn(adminDestinations, name)) return;
@@ -44,9 +44,11 @@ function selectAdminSection(name) {
   }
   $("[data-admin-nav-select]").value = workflow?.id || name;
   $("[data-workspace-title]").textContent = workflow?.title || "MAZINO";
-  $("[data-admin-task-navigation]").innerHTML = (workflow?.tasks || []).map(([id, label]) => `<button type="button" data-admin-open="${id}"${id === name ? ' aria-current="page"' : ""}>${label}</button>`).join("");
+  const tasks = (workflow?.tasks || []).map(([id, label]) => `<button type="button" data-admin-open="${id}"${id === name ? ' aria-current="page"' : ""}>${label}</button>`).join("");
+  if ($('[data-admin-task-navigation]').innerHTML !== tasks) $('[data-admin-task-navigation]').innerHTML = tasks;
   if (name === "home" && typeof refreshDailySummary === "function") refreshDailySummary();
   if (name === "winners") {
+    if ($('[data-assignment-member-filter]')) $('[data-assignment-member-filter]').value = '';
     $("[data-assignment-event]").value = ""; $("[data-assignment-status]").value = "winners";
     if (typeof renderRewardAssignments === "function") renderRewardAssignments();
   }

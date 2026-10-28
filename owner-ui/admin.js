@@ -218,12 +218,15 @@ async function refreshAdminRoster() {
     if (!adminState || $("[data-dashboard]").hidden || revision !== rosterRevision) return;
     adminState.sync = result.sync;
     renderSync(false);
-    if ($("[data-member-editor]").hidden && !$("[data-members-table]").querySelector("input:focus, button:focus")) {
+    const membersChanged = JSON.stringify(adminState.draft.members) !== JSON.stringify(result.members);
+    const selection = typeof window !== 'undefined' && window.getSelection?.();
+    const readingTable = selection && !selection.isCollapsed && $('[data-members-table]').contains?.(selection.anchorNode);
+    if (membersChanged && $("[data-member-editor]").hidden && !readingTable && !$("[data-members-table]").querySelector("input:focus, button:focus")) {
       adminState.draft.members = result.members;
       renderMembersTable();
     }
     if (typeof renderAdminHome === "function") renderAdminHome();
-    if (typeof refreshDonationRoster === "function") await refreshDonationRoster();
+    if (typeof refreshDonationRoster === "function") await refreshDonationRoster({ background: true });
   } catch (error) {
     if (adminState) $("[data-sync-status]").textContent = `No se pudo refrescar el panel: ${error.message}`;
   } finally {

@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/owner-ui/styles.css?v=f43f602b263b7e48" />
+    <link rel="stylesheet" href="/owner-ui/styles.css?v=79b6e903f1445afe" />
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
     <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=f7b504adeed05399" />
@@ -73,7 +73,7 @@
           </nav>
           <div class="admin-content">
           <aside class="access-notice" data-access-notice aria-label="Solicitudes pendientes" hidden>
-            <div><strong role="status" aria-live="polite" data-access-notice-counts>Consultando solicitudes...</strong><small data-access-notice-status>Actualizacion automatica cada 30 segundos.</small></div>
+            <div><strong role="status" aria-live="polite" data-access-notice-counts>Solicitudes de acceso</strong><small data-access-notice-status>Actualizacion automatica cada 30 segundos.</small></div>
             <div class="access-notice-actions"><button class="ghost-button" type="button" data-admin-open="accessRequests">Revisar solicitudes</button><button class="ghost-button" type="button" data-access-notice-refresh>Actualizar aviso</button></div>
           </aside>
           <header class="admin-workspace-head"><h2 data-workspace-title>Inicio</h2><nav class="admin-task-navigation" data-admin-task-navigation aria-label="Tareas de la seccion"></nav></header>
@@ -100,6 +100,9 @@
             <summary class="admin-section-title"><h2>Donaciones</h2></summary>
             <p class="form-status" role="status" aria-live="polite" data-donation-status></p>
             <p class="muted" role="status" data-donation-auto-status></p>
+            <div class="editor-actions"><button class="ghost-button" type="button" data-donation-sync-now>Consultar R2Beat ahora</button><span class="muted" role="status" data-donation-sync-status></span></div>
+            <p class="muted">Los totales son la ultima lectura verificada, no datos en vivo. La consulta automatica es cada hora; puedes consultar ahora para no esperar al siguiente ciclo. Las lecturas anteriores se conservan.</p>
+            <div class="owner-update-notice" data-donation-refresh-notice hidden>Hay nuevos datos de donaciones. Tu consulta se mantiene hasta que decidas actualizar. <button class="ghost-button" type="button" data-donation-apply-refresh>Actualizar esta vista</button></div>
             <p class="muted">Las lecturas anteriores se conservan. Un nuevo ingreso sin historial previo cuenta desde 0 en su fecha de ingreso. Las reincorporaciones mantienen periodos separados.</p>
             <details class="admin-subsection" data-donation-auto-review hidden><summary>Consultas automaticas por revisar</summary><div data-donation-auto-issues></div></details>
             <details class="admin-subsection" data-donation-task="rankings" data-ranking-panel><summary>Exclusiones de los tops</summary>
@@ -347,10 +350,13 @@
             <summary>A quien entregaste cada premio</summary>
             <div class="rewards-toolbar">
               <label><span>Buscar entregas</span><input type="search" data-assignment-search placeholder="Nick, premio o evento" /></label>
+              <label><span>Integrante exacto</span><select data-assignment-member-filter><option value="">Todos los integrantes</option></select></label>
               <label><span>Mostrar</span><select data-assignment-status><option value="all">Todas las entregas</option><option value="winners">Ganadores de eventos</option><option value="assigned">Pendientes de reclamar</option><option value="claimed">Todas las reclamadas</option></select></label>
               <label><span>Evento</span><select data-assignment-event><option value="">Todos los eventos y entregas</option></select></label>
               <button class="ghost-button" type="button" data-assignment-refresh>Actualizar resultados</button>
+              <button class="ghost-button" type="button" data-assignment-member-history disabled>Historial y traspasos del integrante</button>
             </div>
+            <p class="muted">Elige un integrante para ver sus entregas actuales, personales y de eventos. Para consultar entregas anteriores, cambios de nick confirmados o premios que paso a otra persona, usa Historial y traspasos.</p>
             <p class="muted" role="status" data-assignment-count></p>
             <p class="form-status" role="status" data-assignment-feedback></p>
             <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Premio</th><th>Evento / entrega</th><th>Estado</th><th>Cupon</th><th>Reclamado el (Peru)</th><th>Acciones</th></tr></thead><tbody data-assignment-table></tbody></table></div>
@@ -378,13 +384,18 @@
               <button class="ghost-button" type="button" data-roster-tracking-open>Ver quienes salieron del circulo</button>
               <div class="rewards-toolbar">
                 <label><span>Buscar codigo, premio o nick</span><input type="search" data-tracking-search autocomplete="off" /></label>
-                <label><span>Situacion del destinatario</span><select data-tracking-membership><option value="outside">Fuera del circulo</option><option value="all">Todos</option><option value="inside">Dentro del circulo</option><option value="renamed">Cambio de nick confirmado</option><option value="historical">Sin destinatario actual, con historial</option><option value="unlinked">Sin entregas registradas</option></select></label>
+                <label><span>Integrante exacto</span><select data-tracking-member-filter><option value="">Todos los integrantes</option></select></label>
+                <label><span>Situacion del destinatario</span><select data-tracking-membership><option value="recipients">Con destinatario / entregados</option><option value="outside">Retirados</option><option value="inside">Dentro del circulo</option><option value="renamed">Cambio de nick confirmado</option><option value="historical">Sin destinatario actual, con historial</option><option value="all">Todo el inventario</option><option value="unlinked">Sin entregas registradas</option></select></label>
                 <label><span>Estado del cupon</span><select data-tracking-state><option value="all">Todos</option><option value="assigned">Pendiente</option><option value="claimed">Reclamado</option><option value="available">Disponible</option><option value="archived">Archivado</option></select></label>
                 <button class="ghost-button" type="button" data-tracking-refresh>Actualizar seguimiento</button>
+                <button class="ghost-button" type="button" data-tracking-retired>Ver retirados</button>
+                <button class="ghost-button" type="button" data-tracking-clear>Ver todos los entregados</button>
               </div>
+              <p class="muted">El filtro por integrante incluye sus registros con cambio de nick confirmado y sus entregas anteriores, incluso premios traspasados. El destinatario mostrado puede ser otra persona: abre Ver recorrido para comprobar quien lo recibio y cuando.</p>
+              <p class="owner-tracking-summary" data-tracking-summary></p>
               <p class="muted" data-tracking-count></p><p class="form-status" role="status" data-tracking-status></p>
               <div class="rewards-toolbar"><button class="ghost-button" type="button" data-tracking-prev>Anterior</button><span data-tracking-page></span><button class="ghost-button" type="button" data-tracking-next>Siguiente</button></div>
-              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Cupon</th><th>Premio</th><th>Destinatario registrado</th><th>Nick actual confirmado</th><th>Situacion</th><th>Estado</th><th>Ultima vez visto (Peru)</th><th>Salida detectada (Peru)</th><th></th></tr></thead><tbody data-tracking-table></tbody></table></div>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Cupon</th><th>Premio</th><th>Destinatario actual / ultimo registro</th><th>Nick actual confirmado</th><th>Situacion</th><th>Estado</th><th>Ultima vez visto (Peru)</th><th>Salida detectada (Peru)</th><th></th></tr></thead><tbody data-tracking-table></tbody></table></div>
               <details class="admin-subsection" data-tracking-alias-section>
                 <summary>Confirmar o corregir cambios de nick</summary>
                 <p class="muted">R2Beat no proporciona un identificador permanente. Confirma la identidad antes de vincular nicks. Esta relacion solo sirve para seguimiento: no mueve premios ni comparte contrasenas.</p>
@@ -820,33 +831,33 @@
     <script src="/member-pairs.js?v=6987e507c19ce7bf" defer></script>
 <dialog class="space-preview-dialog" data-space-preview-dialog aria-labelledby="space-preview-title"><header><div><h2 id="space-preview-title" data-space-preview-title>Vista previa</h2><p data-space-preview-status></p></div><button class="ghost-button" type="button" data-space-preview-close aria-label="Cerrar vista previa">Cerrar</button></header><div class="space-preview-toolbar"><div class="space-actions" role="group" aria-label="Tamano de la vista previa"><button type="button" class="ghost-button" data-space-preview-size="desktop" aria-pressed="true">PC</button><button type="button" class="ghost-button" data-space-preview-size="mobile" aria-pressed="false">Movil</button></div><span>Solo vista previa: no activa el espacio ni guarda cambios.</span></div><div class="space-preview-viewport"><iframe title="Pagina del circulo en vista previa" data-space-preview-frame sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe></div></dialog>
     <script src="/owner-ui/owner-config.js?v=c69e9dae40866a1c" defer></script><script src="/owner-ui/owner-qr.js?v=f8b36c106782aa75" defer></script><script src="/owner-ui/owner-cloud.js?v=cb4038bdc9b7ae8e" defer></script><script src="/owner-ui/admin-space-context.js?v=69ed1dee325b6f08" defer></script>
-    <script src="/owner-ui/admin.js?v=2b161a6d4ac36d4b" defer></script>
+    <script src="/owner-ui/admin.js?v=07ea64518880b025" defer></script>
     <script src="/owner-ui/coupon-images.js?v=52ff6bdcf7daa10a" defer></script>
     <script src="/owner-ui/batch-image-tools.js?v=187ce9b906440c12" defer></script>
     <script src="/owner-ui/admin-image-editor.js?v=0e608d0f11a614d4" defer></script>
     <script src="/owner-ui/admin-batch-images.js?v=3a9777bdc86137d9" defer></script>
     <script src="/owner-ui/admin-delivery-preview.js?v=f495caec76adb5fb" defer></script>
-  <script src="/owner-ui/admin-prizes.js?v=4412ba05f86bf087" defer></script>
+  <script src="/owner-ui/admin-prizes.js?v=fdc1928e9ca19135" defer></script>
     <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
     <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>
-    <script src="/owner-ui/admin-access-requests.js?v=15664ffba8dcc582" defer></script>
+    <script src="/owner-ui/admin-access-requests.js?v=7590e4f3c3793c15" defer></script>
     <script src="/owner-ui/admin-access-history.js?v=399edb5ebbd52346" defer></script>
-    <script src="/owner-ui/admin-access-notice.js?v=e39a224e7023f76c" defer></script>
+    <script src="/owner-ui/admin-access-notice.js?v=ea16934f74f82e74" defer></script>
     <script src="/owner-ui/admin-event-edit.js?v=61d5cb109f3153e8" defer></script>
     <script src="/owner-ui/admin-bulk.js?v=61ba485050b9a509" defer></script>
   <script src="/owner-ui/admin-staff.js?v=7b2409f771add8d2" defer></script>
     <script src="/owner-ui/admin-transfers.js?v=5581808c12c3784f" defer></script>
     <script src="/owner-ui/admin-pending-actions.js?v=a975aed5ef34496f" defer></script>
     <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
-    <script src="/owner-ui/admin-tracking.js?v=8b1f3b4997f3afb3" defer></script>
+    <script src="/owner-ui/admin-tracking.js?v=c6478ca8008ab63d" defer></script>
     <script src="/owner-ui/admin-spaces.js?v=feae1a9da47820a6" defer></script>
-    <script src="/owner-ui/admin-navigation.js?v=240c338e4e52b62b" defer></script>
+    <script src="/owner-ui/admin-navigation.js?v=6c11fa7db364a487" defer></script>
     <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>
     <script src="/owner-ui/exceljs-4.4.0.min.js?v=926cb6a0dab94ac2" defer></script>
     <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
-    <script src="/owner-ui/admin-donations.js?v=2504ba0429c09dc5" defer></script>
+    <script src="/owner-ui/admin-donations.js?v=5d0ee12ba3aeace5" defer></script>
     <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=6ccb129cd99f92d8" defer></script>
   </body>

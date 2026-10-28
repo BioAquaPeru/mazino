@@ -5,21 +5,22 @@ let refreshAccessNotice;
   const active=()=>!dashboard.hidden&&!document.hidden;
   function stop(clear=false) {
     revision++;clearTimeout(timer);clearTimeout(requestTimeout);controller?.abort();controller=null;
-    if(clear){banner.hidden=true;counts.textContent='Consultando solicitudes...';status.textContent='';banner.removeAttribute('data-pending');}
+    if(clear){banner.hidden=true;counts.textContent='Solicitudes de acceso';status.textContent='';banner.removeAttribute('data-pending');}
   }
   refreshAccessNotice=async()=>{
     if(!active())return;
     stop();const version=revision;controller=new AbortController();const current=controller;
-    banner.hidden=false;const timeout=setTimeout(()=>current.abort(),20000);requestTimeout=timeout;
+    if(banner.hidden)banner.hidden=false;const timeout=setTimeout(()=>current.abort(),20000);requestTimeout=timeout;
     try {
       const result=await api('/api/admin/rewards/access-counts',{method:'POST',body:'{}',signal:current.signal});
       if(version!==revision||!active())return;
       if(![result.total,result.accesses,result.recoveries].every(n=>Number.isSafeInteger(n)&&n>=0)||result.total!==result.accesses+result.recoveries)throw Error('Conteo invalido');
       const label=result.total?`${result.total} ${result.total===1?'solicitud pendiente':'solicitudes pendientes'} · ${result.accesses} ${result.accesses===1?'acceso':'accesos'} · ${result.recoveries} ${result.recoveries===1?'recuperacion':'recuperaciones'}`:'Sin solicitudes pendientes';
       if(counts.textContent!==label)counts.textContent=label;
-      banner.toggleAttribute('data-pending',result.total>0);status.textContent='Actualizado. Consulta automatica cada 30 segundos.';
+      banner.toggleAttribute('data-pending',result.total>0);const message='Actualizado. Consulta automatica cada 30 segundos.';if(status.textContent!==message)status.textContent=message;
     } catch {
-      if(version===revision&&active())status.textContent='No se pudo actualizar el aviso. Reintenta; el ultimo conteo puede haber cambiado.';
+      const message='No se pudo actualizar el aviso. Reintenta; el ultimo conteo puede haber cambiado.';
+      if(version===revision&&active()&&status.textContent!==message)status.textContent=message;
     } finally {
       clearTimeout(timeout);
       if(version===revision){controller=null;if(active())timer=setTimeout(refreshAccessNotice,30000);}

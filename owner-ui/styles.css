@@ -1429,6 +1429,12 @@ body.circle-themed { --red:var(--circle-page-accent); --muted:var(--circle-page-
 .exact-event-details > div { display:grid; grid-template-columns:90px minmax(0,1fr); gap:8px; }
 .exact-event-details dt { color:#c1c5d0; }
 .exact-event-details dd { margin:0; overflow-wrap:anywhere; }
+.access-notice > div:first-child { min-height:3.5em; }
+.access-notice [data-access-notice-status] { display:block; min-height:2.5em; }
+.owner-update-notice { margin:12px 0; padding:12px; border:1px solid #8d754f; border-radius:10px; background:#302b22; color:#fff1d8; }
+.owner-update-notice[hidden] { display:none; }
+.owner-update-notice button { margin:6px 0 0 10px; }
+.owner-tracking-summary { padding:12px; border:1px solid #625246; border-radius:10px; line-height:1.7; }
 @media(max-width:600px) { .exact-delivery-dialog { padding:14px; } .exact-delivery-dialog > .editor-actions button { min-height:44px; flex:1; } .exact-delivery-lot { padding:10px; } }
 @media(max-width:600px) { .coupon-image-dialog { padding:10px; } .coupon-image-dialog header button { min-height:44px; } .batch-image-card { padding:10px; } .coupon-image-thumb { width:64px; height:64px; } }
 @media(max-width:600px) { .circle-custom-logo .logo-frame { width:80%; } .circle-themed .hero::before { background:linear-gradient(180deg,transparent 42%,var(--circle-page-bg) 70%); } }

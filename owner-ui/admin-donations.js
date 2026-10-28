@@ -7,6 +7,18 @@
   const addDays = (date, days) => new Date(Date.parse(`${date}T12:00:00Z`) + days * 86400000).toISOString().slice(0, 10);
   const labels = { baseline: "Inicio del seguimiento", new: "Nueva revision", correction: "Correccion", unchanged: "Ya registrado", error: "Revisar", fulfilled: "Cumplio", shortfall: "No cumplio al cierre", progress: "Aun le falta / falta cierre", missing: "Sin registros suficientes" };
   let data = null, staged = null, busy = false, context = 0, reportRevision = 0, historyRevision = 0, metadataRevision = 0;
+  let syncBusy = false, syncTimer, pendingMetadata = null;
+  const scope = () => typeof adminCircleId === 'string' ? adminCircleId : 'main';
+  function automaticStatus(automatic) {
+    const message = `${automatic?.enabled ? 'R2Beat: consulta automatica cada hora' : 'Consulta automatica no activada'} | Ultima lectura correcta (Peru): ${automatic?.lastSyncAt ? staffTime(automatic.lastSyncAt) : 'Pendiente'}${automatic?.lastError ? ` | ${automatic.lastError}` : ''}`;
+    if (field('auto-status') && field('auto-status').textContent !== message) field('auto-status').textContent = message;
+    if (field('auto-review')) {
+      field('auto-review').hidden = !automatic?.issues?.length;
+      const html = (automatic?.issues || []).map(r => `<p><strong>${escapeHtml(r.nick)}</strong>: ${escapeHtml(r.reason)} | Guardado: ${number(r.savedTotal)} | R2Beat: ${number(r.sourceTotal)}</p>`).join('');
+      if (field('auto-issues').innerHTML !== html) field('auto-issues').innerHTML = html;
+    }
+  }
+  const reportFilters = () => ({ goalId: field('goal').value, start: field('start').value, end: field('end').value, target: Number(field('target').value), search: field('search').value, status: field('filter').value, membership: field('membership').value });
   const memberSignature = members => JSON.stringify(members.map(m => [m.id, m.nick, m.active, m.membership, !!m.needsConfirmation, m.confirmedAt, m.relatedIds]).sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
   let directoryPage = 0, identityId = "", zeroMember = null;
   let reviewId = '', reviewStart = '', reviewSignature = '', reviewTrigger = null;
@@ -76,7 +88,7 @@
     renderCaptureBlocks();
   }
   async function operation(fn, propagate = false) {
-    if (busy || !visible()) return;
+    if (busy || syncBusy || !visible()) return;
     const revision = context; lock(true); status("");
     try { await fn(() => revision === context && visible()); }
     catch (error) { if (revision === context && visible()) status(error.message); if (propagate) throw error; }
@@ -87,14 +99,20 @@
     const link = document.createElement("a"); link.href = url; link.download = name; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  async function load() {
-    const revision = context, request = ++metadataRevision, result = await call("state", { date: field("date").value || dateNow() });
-    if (revision !== context || request !== metadataRevision || !visible()) return;
+  async function load(incoming = null, options = {}) {
+    const revision = context, currentScope = scope(), request = ++metadataRevision, result = incoming || await call("state", { date: field("date").value || dateNow() });
+    if (revision !== context || currentScope !== scope() || request !== metadataRevision || !visible()) return;
+    automaticStatus(result.automatic);
+    if (options.background && data) {
+      if (JSON.stringify([data.members, data.goals, data.imports]) !== JSON.stringify([result.members, result.goals, result.imports])) {
+        if (memberSignature(data.members) !== memberSignature(result.members)) clearPreview();
+        pendingMetadata = result; field('refresh-notice').hidden = false;
+      }
+      return;
+    }
     if (data && memberSignature(data.members) !== memberSignature(result.members)) clearPreview();
     data = result;
-    const automatic = result.automatic;
-    if (field('auto-status')) field('auto-status').textContent = automatic?.enabled ? `R2Beat: actualizacion cada hora | Ultima lectura: ${automatic.lastSyncAt ? staffTime(automatic.lastSyncAt) : 'Pendiente'} | ${automatic.saved} totales registrados${automatic.lastError ? ` | ${automatic.lastError}` : ''}` : 'Actualizacion automatica no activada';
-    if (field('auto-review')) { field('auto-review').hidden = !automatic?.issues?.length; field('auto-issues').innerHTML = (automatic?.issues || []).map(r => `<p><strong>${escapeHtml(r.nick)}</strong>: ${escapeHtml(r.reason)} | Guardado: ${number(r.savedTotal)} | R2Beat: ${number(r.sourceTotal)}</p>`).join(''); }
+    pendingMetadata = null; field('refresh-notice').hidden = true;
     if (zeroMember && !result.members.some(m => m.id === zeroMember.id && m.active && !m.hasEntryBase && m.entryOn === zeroMember.entryOn && m.entryPeriod === zeroMember.entryPeriod && m.confirmedBy && !m.needsConfirmation)) { zeroMember = null; field('zero-form').hidden = true; }
     renderReview();
     captureWidget?.setMembers(result.members);
@@ -110,12 +128,50 @@
     field("import-rows").innerHTML = result.imports.map(r => `<tr><td>${escapeHtml(staffTime(r.created_at))}</td><td>${r.reading_on}</td><td>${escapeHtml(r.actor_nick || "Administrador")}</td><td>${r.changes.length}</td><td>${escapeHtml(r.note || "-")}</td><td><details><summary>Ver cambios</summary>${r.changes.map(c => `<p>${escapeHtml(c.nick)}: ${c.oldTotal == null ? "Nuevo" : number(c.oldTotal)} &rarr; ${number(c.total)} (${labels[c.status] || "Revision"})</p>`).join("")}</details></td></tr>`).join("") || '<tr><td colspan="6" class="muted">Todavia no hay cargas registradas.</td></tr>';
     goalFields();
   }
-  globalThis.refreshDonationRoster = async () => {
-    if (!panel.open || !visible() || busy) return;
+  globalThis.refreshDonationRoster = async (options = {}) => {
+    if (!panel.open || !visible() || busy || syncBusy) return;
     const revision = context;
-    try { await load(); if (field("results").open) await report(); }
+    try { await load(null, options); if (!options.background && field("results").open) await report({ quiet: true }); }
     catch (error) { if (revision === context && visible()) field("roster-status").textContent = `No se pudo actualizar integrantes: ${error.message}`; }
   };
+  field('apply-refresh')?.addEventListener('click', async () => {
+    if (!pendingMetadata || busy || syncBusy || !visible()) return;
+    const revision = context; await load(pendingMetadata);
+    if (revision !== context || !visible()) return;
+    if (field('results').open) await report({ quiet: true });
+    if (field('history-panel').open && field('history-member').value) await history(field('history-member').value, { quiet: true });
+  });
+  field('sync-now')?.addEventListener('click', async () => {
+    if (busy || syncBusy || field('sync-now').disabled || !visible()) return;
+    syncBusy = true; field('sync-now').disabled = true;
+    const revision = context, currentScope = scope(); let retry = 0;
+    field('sync-status').textContent = 'Consultando R2Beat. Se conservaran las lecturas anteriores...';
+    try {
+      const result = await call('sync-now');
+      if (revision !== context || currentScope !== scope() || !visible()) return;
+      if (!Array.isArray(result.members) || !Array.isArray(result.goals) || !Array.isArray(result.imports)) throw new Error('No se recibio el estado de donaciones. Reintenta la consulta.');
+      retry = Number.isFinite(result.automatic?.retryAfterSeconds) ? Math.max(0, Math.min(3600, result.automatic.retryAfterSeconds)) : 0;
+      const outcome = result.automatic?.refreshStatus;
+      if (outcome === 'updated') {
+        clearPreview(); await load(result);
+        if (revision !== context || currentScope !== scope() || !visible()) return;
+        if (field('results').open) await report({ quiet: true });
+        if (field('history-panel').open && field('history-member').value) await history(field('history-member').value, { quiet: true });
+      } else automaticStatus(result.automatic);
+      if (revision !== context || currentScope !== scope() || !visible()) return;
+      field('sync-status').textContent = outcome === 'updated' ? 'Consulta terminada. Los totales muestran la ultima lectura verificada; el historial anterior se conserva.'
+        : outcome === 'throttled' ? `Ya se consulto hace poco. Espera ${Math.ceil(retry)} segundos para volver a consultar.`
+          : outcome === 'busy' ? 'Hay una consulta de R2Beat en curso. Vuelve a intentarlo en unos segundos.'
+            : `No se pudo obtener una lectura nueva. Se conserva la ultima correcta.${result.automatic?.lastError ? ` ${result.automatic.lastError}` : ''}`;
+    } catch (error) { if (revision === context && currentScope === scope() && visible()) field('sync-status').textContent = `No se pudo consultar R2Beat: ${error.message}. Se conserva la ultima lectura correcta.`; }
+    finally {
+      if (revision === context && currentScope === scope()) {
+        syncBusy = false; clearTimeout(syncTimer);
+        if (retry > 0) syncTimer = setTimeout(() => { if (revision === context && currentScope === scope() && visible()) field('sync-now').disabled = false; }, retry * 1000);
+        else field('sync-now').disabled = false;
+      }
+    }
+  });
   const refreshCaptureMembers = () => operation(async current => { await load(); if (current()) status("Lista actualizada. Elige al integrante nuevo en su fila; no necesitas volver a cargar las capturas."); }, true);
   field("members-refresh").addEventListener("click", () => operation(async current => { await load(); if (current()) status("Integrantes de donaciones actualizados."); }));
   function renderDirectory() {
@@ -187,32 +243,32 @@
     field("preview-summary").textContent = `${plan.changed} para guardar | ${plan.unchanged} ya registrados | ${plan.errors.length} errores`;
     field("preview-rows").innerHTML = plan.entries.map(r => `<tr><td>${escapeHtml(r.nick)}${r.nickChanged ? "<br>Nick actualizado por ID" : ""}</td><td>${number(r.previous)}</td><td>${number(r.total)}</td><td>${r.delta == null ? "Inicio del seguimiento" : number(r.delta)}</td><td><span class="donation-state ${r.status}">${labels[r.status]}</span>${r.status === "correction" ? `<br>Reemplaza ${number(r.oldTotal)} de esta fecha` : ""}${r.error ? `<br>${escapeHtml(r.error)}` : ""}${r.needsPeriodConfirmation ? `<button class="mini-button" type="button" data-donation-period="${escapeHtml(r.memberId)}">Confirmar nueva base</button>` : ""}</td></tr>`).join("");
   }
-  async function report() {
+  async function report(options = {}) {
     const revision = ++reportRevision, session = context;
     if (!visible()) return;
-    field("report-status").textContent = "Consultando donaciones...";
-    field("report-rows").innerHTML = "";
+    if (!options.quiet) { field("report-status").textContent = "Consultando donaciones..."; field("report-rows").innerHTML = ""; }
+    const filters = reportFilters();
     try {
-      const result = await call("report", { goalId: field("goal").value, start: field("start").value, end: field("end").value, target: Number(field("target").value), search: field("search").value, status: field("filter").value, membership: field("membership").value });
-      if (revision !== reportRevision || session !== context || !visible()) return;
+      const result = await call('report', filters);
+      if (revision !== reportRevision || session !== context || !visible() || JSON.stringify(filters) !== JSON.stringify(reportFilters())) return;
       for (const name of ["fulfilled", "shortfall", "progress", "missing"]) field(name).textContent = result.counts[name];
       field("report-status").textContent = `${result.start} al ${result.end} | Meta: ${number(result.target)} por integrante | ${result.entries.length} de ${result.total} integrantes${field("filter").value !== "all" ? ` | Filtro: ${labels[field("filter").value]}` : ""}`;
       field("report-rows").innerHTML = result.entries.map(r => `<tr><td>${escapeHtml(r.nick)}<br><span class="muted">${memberships[r.membership] || (r.active ? "En el circulo" : "Retirado")}</span>${r.zeroFromEntry ? `<p>Nuevo ingreso: inicio en 0 desde ${r.effectiveStart}</p>` : r.baselineObservedOn ? `<p>Seguimiento desde base observada: ${r.baselineObservedOn}</p>` : r.joinedDuring ? `<p>Cuenta desde su ingreso: ${r.effectiveStart}</p>` : ''}</td><td>${number(r.initialTotal)}${r.initialTotal != null ? `<br><small>${r.effectiveStart || result.start}</small>` : ""}</td><td>${number(r.finalTotal)}${r.lastOn ? `<br><small>${r.lastOn}</small>` : ""}</td><td>${number(r.donated)}</td><td>${number(r.remaining)}</td><td><span class="donation-state ${r.status}">${labels[r.status]}</span>${r.identityPending ? '<br>Confirma su identidad en Integrantes y cambios' : r.periodChanged ? "<br>Reincorporacion: consulta cada periodo por separado" : r.missingStart ? "<br>Falta revision inicial" : r.missingEnd ? r.status === "fulfilled" ? "<br>Meta alcanzada antes del cierre" : "<br>Falta revision final" : ""}</td><td>${r.lastOn || "-"}</td><td><div class="editor-actions"><button class="mini-button" type="button" data-donation-member="${escapeHtml(r.memberId)}"${busy ? " disabled" : ""}>Ver historial</button>${r.status === 'missing' ? `<button class="mini-button" type="button" aria-label="Revisar inicio de ${escapeHtml(r.nick)}" data-donation-review="${escapeHtml(r.memberId)}" data-donation-review-start="${escapeHtml(r.effectiveStart || result.start)}"${busy ? ' disabled' : ''}><img src="/assets/admin/users.svg" width="16" height="16" alt="" />Revisar inicio</button>` : ''}</div></td></tr>`).join("") || '<tr><td colspan="8" class="muted">No hay integrantes con estos filtros. Pulsa Ver todos para consultar el grupo completo.</td></tr>';
     } catch (error) { if (revision === reportRevision && session === context && visible()) { for (const name of ["fulfilled", "shortfall", "progress", "missing"]) field(name).textContent = "-"; field("report-status").textContent = error.message; } }
   }
-  async function history(id) {
-    if (typeof selectAdminSection === "function") selectAdminSection("donationHistory");
+  async function history(id, options = {}) {
+    if (!options.quiet && typeof selectAdminSection === "function") selectAdminSection("donationHistory");
     field("history-member").value = id;
     const revision = ++historyRevision, session = context;
-    field("history-panel").open = true; field("history-title").textContent = ""; field("history-rows").innerHTML = ""; field("history-status").textContent = "Consultando historial...";
+    if (!options.quiet) { field("history-panel").open = true; field("history-title").textContent = ""; field("history-rows").innerHTML = ""; field("history-status").textContent = "Consultando historial..."; }
     try {
       const result = await call("history", { memberId: id });
-      if (revision !== historyRevision || session !== context || !visible()) return;
+      if (revision !== historyRevision || session !== context || !visible() || field('history-member').value !== id) return;
       field("history-title").textContent = result.member.nick;
       field("history-status").textContent = `Donado desde el inicio del seguimiento: ${number(result.trackedTotal)}`;
       field("history-movements").innerHTML = (result.movements || []).map(h => `<p>${escapeHtml(staffTime(h.created_at))}: ${movements[h.action] || "Cambio"} - ${escapeHtml(h.nick)}</p>`).join("");
       field("history-rows").innerHTML = result.entries.map(r => `<tr><td>${r.reading_on}<br>${escapeHtml(r.nick || result.member.nick)}<br><small>${r.source === 'entry_rule' ? 'Inicio 0: nuevo ingreso' : r.source === 'r2beat' ? r.kind === 'baseline' ? 'R2Beat: primer total observado' : 'R2Beat: lectura automatica' : 'Carga manual'}</small></td><td>${number(r.total)}</td><td>${r.donated == null ? "Base de este ingreso" : `${number(r.donated)} (desde ${r.from})`}</td><td>${escapeHtml(staffTime(r.updated_at))}</td></tr>`).join("") || '<tr><td colspan="4">Sin revisiones guardadas.</td></tr>';
-      field("history-panel").scrollIntoView({ block: "nearest", behavior: "smooth" });
+      if (!options.quiet) field("history-panel").scrollIntoView({ block: "nearest", behavior: "smooth" });
     } catch (error) { if (revision === historyRevision && session === context && visible()) field("history-status").textContent = error.message; }
   }
   field("template").addEventListener("click", () => operation(async current => {
@@ -359,6 +415,8 @@
   });
   panel.addEventListener("toggle", () => { if (panel.open && visible() && !busy) operation(async current => { await load(); if (current()) await report(); }); });
   function reset() {
+    clearTimeout(syncTimer); syncBusy = false; pendingMetadata = null;
+    field('sync-now').disabled = false; field('sync-status').textContent = ''; field('auto-status').textContent = ''; field('refresh-notice').hidden = true;
     captureWidget?.destroy(); captureWidget = null; capturePending = null;
     captureRevision++; captureBlocks = null; capturePage = 0; captureOffset = 0; captureSelection = ""; captureLoading = false;
     field("capture-block-status").textContent = "";
@@ -400,6 +458,8 @@
     await capturePending;
   }
   new MutationObserver(() => { if (!visible()) reset(); }).observe($("[data-dashboard]"), { attributes: true, attributeFilter: ["hidden"] });
+  $('[data-admin-circle-select]')?.addEventListener('change', reset);
+  if (typeof window !== 'undefined') window.addEventListener('mazino-owner-session-cleared', reset);
   for (const name of ["date", "start", "goal-start"]) field(name).value = dateNow();
   field("date").max = dateNow(); field("end").value = addDays(dateNow(), 7); goalEnd();
 })();

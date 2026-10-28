@@ -111,13 +111,37 @@ function renderAssignmentEvents() {
   const events = new Map(rewardAdminState.events.map((e) => [e.id, { title: e.title, date: e.starts_at }]));
   for (const c of rewardAdminState.coupons) if (c.event_id && !events.has(c.event_id)) events.set(c.event_id, { title: "Evento anterior", date: null });
   if (selected && !events.has(selected)) events.set(selected, { title: "Evento anterior", date: null });
-  select.innerHTML = '<option value="">Todos los eventos y entregas</option>' + [...events].map(([id, e]) => {
+  const html = '<option value="">Todos los eventos y entregas</option>' + [...events].map(([id, e]) => {
     const winners = rewardAdminState.coupons.filter((c) => c.event_id === id && c.status === "claimed").length;
     return `<option value="${escapeHtml(id)}">${escapeHtml(e.title)}${e.date ? ` | ${rewardTime(e.date)}` : ""} | ${winners} ganadores</option>`;
   }).join("");
+  if (select.innerHTML !== html) select.innerHTML = html;
   select.value = selected;
 }
+const rewardAssignmentRecipient = coupon => coupon.claimed_by || coupon.assigned_member_id || '';
+function renderAssignmentMembers() {
+  const select = $('[data-assignment-member-filter]'); if (!select) return;
+  const selected = select.value, members = new Map(rewardAdminState.members.map(member => [member.id, { ...member }]));
+  for (const coupon of rewardAdminState.coupons) {
+    const id = rewardAssignmentRecipient(coupon);
+    if (id && !members.has(id)) members.set(id, { id, nick: coupon.winnerNick || coupon.assignedNick || 'Registro anterior' });
+  }
+  if (selected && !members.has(selected)) members.set(selected, { id: selected, nick: 'Registro anterior' });
+  const html = '<option value="">Todos los integrantes</option>' + [...members.values()].sort((a,b) => a.nick.localeCompare(b.nick, 'es') || a.id.localeCompare(b.id)).map(member => `<option value="${escapeHtml(member.id)}">${escapeHtml(member.nick)}${member.active === 0 || member.active === false ? ' (retirado)' : ''} | ref. ${escapeHtml(member.id.slice(-6))}</option>`).join('');
+  if (select.innerHTML !== html) select.innerHTML = html;
+  select.value = selected;
+  $('[data-assignment-member-history]')?.toggleAttribute?.('disabled', !selected);
+  if ($('[data-assignment-member-history]')) $('[data-assignment-member-history]').disabled = !selected;
+}
+function viewMemberAssignments(memberId) {
+  renderAssignmentMembers();
+  $('[data-assignment-member-filter]').value = memberId;
+  $('[data-assignment-event]').value = ''; $('[data-assignment-status]').value = 'all'; $('[data-assignment-search]').value = '';
+  if (typeof selectAdminSection === 'function') selectAdminSection('assignments');
+  renderRewardAssignments();
+}
 function viewEventWinners(eventId) {
+  if ($('[data-assignment-member-filter]')) $('[data-assignment-member-filter]').value = '';
   $("[data-assignment-event]").value = eventId;
   $("[data-assignment-status]").value = "winners";
   $("[data-assignment-search]").value = "";
@@ -129,6 +153,8 @@ function viewEventWinners(eventId) {
   section.scrollIntoView?.({ behavior: "smooth", block: "start" });
 }
 function renderRewardAssignments() {
+  renderAssignmentMembers();
+  const memberId = $('[data-assignment-member-filter]')?.value || '';
   const query = adminSearchKey($("[data-assignment-search]").value);
   const status = $("[data-assignment-status]").value || "all";
   const eventId = $("[data-assignment-event]").value;
@@ -136,12 +162,14 @@ function renderRewardAssignments() {
   const deliveries = rewardAdminState.coupons.filter((coupon) => (coupon.assigned_member_id || coupon.claimed_by)
     && (coupon.status === "assigned" || coupon.status === "claimed"));
   const visible = deliveries.filter((coupon) => (status === "winners" ? coupon.status === "claimed" && coupon.event_id : status === "all" || coupon.status === status)
+    && (!memberId || rewardAssignmentRecipient(coupon) === memberId)
     && (!eventId || coupon.event_id === eventId)
-    && adminSearchKey(`${coupon.assignedNick || ""} ${coupon.winnerNick || ""} ${coupon.label} ${eventNames.get(coupon.event_id) || ""}`).includes(query));
+    && adminSearchKey(`${coupon.assignedNick || ""} ${coupon.winnerNick || ""} ${rewardAdminState.members.find(member => member.id === rewardAssignmentRecipient(coupon))?.nick || ''} ${coupon.label} ${eventNames.get(coupon.event_id) || ""}`).includes(query));
   if (status === "winners") visible.sort((a, b) => (b.claimed_at || 0) - (a.claimed_at || 0));
   $("[data-assignment-count]").textContent = `${visible.length} ${status === "winners" ? "premios de eventos" : "entregas"} | ${visible.filter((coupon) => coupon.status === "assigned").length} pendientes | ${visible.filter((coupon) => coupon.status === "claimed").length} reclamadas`;
   const empty = eventId && !deliveries.some((c) => c.event_id === eventId && c.status === "claimed") ? "Aun no hay ganadores registrados en este evento." : "No hay entregas con estos filtros.";
-  $("[data-assignment-table]").innerHTML = visible.map((coupon) => `<tr><td>${escapeHtml(coupon.winnerNick || coupon.assignedNick || rewardAdminState.members.find((member) => member.id === (coupon.claimed_by || coupon.assigned_member_id))?.nick || "Integrante retirado")}</td><td>${typeof ownerCouponImageMarkup === 'function' ? ownerCouponImageMarkup(coupon) : ''}${escapeHtml(coupon.label)}</td><td>${escapeHtml(coupon.event_id ? eventNames.get(coupon.event_id) || "Evento anterior" : "Personal")}</td><td>${coupon.status === "assigned" ? "Asignado - pendiente de reclamar" : "Reclamado"}</td><td><code>${escapeHtml(coupon.code)}</code></td><td>${rewardTime(coupon.claimed_at)}</td><td>${coupon.status === "assigned" && coupon.assigned_member_id && !coupon.event_id ? `<button class="mini-button" type="button" data-unassign-coupon="${escapeHtml(coupon.id)}">Quitar premio</button>` : '<span class="muted">Ya reclamado</span>'}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">${empty}</td></tr>`;
+  const html = visible.map((coupon) => `<tr><td><button class="member-profile-link" type="button" data-member-profile="${escapeHtml(rewardAssignmentRecipient(coupon))}">${escapeHtml(coupon.winnerNick || coupon.assignedNick || rewardAdminState.members.find((member) => member.id === rewardAssignmentRecipient(coupon))?.nick || "Integrante retirado")}</button></td><td>${typeof ownerCouponImageMarkup === 'function' ? ownerCouponImageMarkup(coupon) : ''}${escapeHtml(coupon.label)}</td><td>${escapeHtml(coupon.event_id ? eventNames.get(coupon.event_id) || "Evento anterior" : "Personal")}</td><td>${coupon.status === "assigned" ? "Asignado - pendiente de reclamar" : "Reclamado"}</td><td><code>${escapeHtml(coupon.code)}</code></td><td>${rewardTime(coupon.claimed_at)}</td><td><button class="mini-button" type="button" data-tracking-coupon="${escapeHtml(coupon.id)}">Ver recorrido</button>${coupon.status === "assigned" && coupon.assigned_member_id && !coupon.event_id ? `<button class="mini-button" type="button" data-unassign-coupon="${escapeHtml(coupon.id)}">Quitar premio</button>` : '<span class="muted">Ya reclamado</span>'}</td></tr>`).join("") || `<tr><td colspan="7" class="muted">${empty}</td></tr>`;
+  if ($('[data-assignment-table]').innerHTML !== html) $('[data-assignment-table]').innerHTML = html;
   if (typeof hydrateOwnerCouponImages === 'function') hydrateOwnerCouponImages();
 }
 
@@ -221,6 +249,7 @@ async function assignRewardDelivery(member, coupons, options = {}) {
     $("[data-delivery-status]").textContent = message;
     rewardStatus(message);
     $("[data-assignment-search]").value = member.nick;
+    if ($('[data-assignment-member-filter]')) $('[data-assignment-member-filter]').value = member.id;
     $("[data-assignment-status]").value = "all";
     $("[data-assignment-event]").value = "";
     renderRewardAssignments();
@@ -344,6 +373,11 @@ $("[data-reward-member-search]").addEventListener("keydown", (event) => { if (ev
 $("[data-delivery-item]").addEventListener("change", renderRewardDelivery);
 $("[data-delivery-quantity]").addEventListener("input", renderRewardDelivery);
 $("[data-assignment-search]").addEventListener("input", renderRewardAssignments);
+$('[data-assignment-member-filter]')?.addEventListener('change', renderRewardAssignments);
+$('[data-assignment-member-history]')?.addEventListener('click', () => {
+  const id = $('[data-assignment-member-filter]').value;
+  if (id && typeof openMemberTracking === 'function') openMemberTracking(id);
+});
 $("[data-assignment-status]").addEventListener("change", renderRewardAssignments);
 $("[data-assignment-refresh]").addEventListener("click", refreshAdminPrizes);
 $("[data-assignment-event]").addEventListener("change", () => { if ($("[data-assignment-event]").value) $("[data-assignment-status]").value = "winners"; renderRewardAssignments(); });
@@ -569,6 +603,7 @@ $("[data-logout]").addEventListener("click", () => {
   $("[data-assignment-feedback]").textContent = "";
   $("[data-assignment-event]").innerHTML = '<option value="">Todos los eventos y entregas</option>';
   $("[data-assignment-event]").value = ""; $("[data-assignment-status]").value = "all"; $("[data-assignment-search]").value = "";
+  if ($('[data-assignment-member-filter]')) { $('[data-assignment-member-filter]').value = ''; $('[data-assignment-member-filter]').innerHTML = '<option value="">Todos los integrantes</option>'; }
   $("[data-delivery-status]").textContent = "";
   $("[data-delivery-item]").innerHTML = '<option value="">Elige un item disponible</option>';
   $("[data-delivery-item]").value = "";
