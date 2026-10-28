@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/owner-ui/styles.css?v=8476d48ab9df1bd1" />
+    <link rel="stylesheet" href="/owner-ui/styles.css?v=449c6ee1655a6131" />
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
     <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=f7b504adeed05399" />
@@ -265,6 +265,7 @@
               </div>
               <label><span>3. Cantidad de cupones</span><input type="number" min="1" max="50" step="1" value="1" data-delivery-quantity required /></label>
               <p class="wide delivery-summary" role="status" data-delivery-summary></p>
+              <div class="wide exact-delivery-preview" data-exact-delivery-preview data-delivery-exact-preview aria-live="polite" hidden></div>
               <div class="editor-actions"><button class="primary-action small-action" type="submit" data-delivery-submit disabled>Elige un premio y destinatario</button></div>
               <p class="wide form-status" role="status" data-delivery-status></p>
             </form>
@@ -766,6 +767,11 @@
         <div class="rewards-toolbar"><button class="ghost-button" type="button" data-tracking-history-prev>Anterior</button><span data-tracking-history-page></span><button class="ghost-button" type="button" data-tracking-history-next>Siguiente</button></div>
       </div>
     </dialog>
+    <dialog class="exact-delivery-dialog" data-delivery-confirm-dialog aria-labelledby="delivery-confirm-title">
+      <header><h2 id="delivery-confirm-title">Confirmar entrega</h2><p>Revisa el destinatario y los lotes exactos antes de asignar.</p></header>
+      <div data-delivery-confirm-content></div>
+      <div class="editor-actions"><button class="ghost-button" type="button" data-delivery-confirm-cancel autofocus>Cancelar</button><button class="primary-action small-action" type="button" data-delivery-confirm-accept>Confirmar entrega</button></div>
+    </dialog>
     <dialog class="member-profile-dialog" data-profile-dialog aria-labelledby="profile-title">
       <div class="member-profile-body">
         <header class="member-profile-head"><p class="section-kicker">FICHA DEL INTEGRANTE</p><h2 id="profile-title" data-profile-title>Integrante</h2><button class="icon-button" type="button" data-profile-close aria-label="Cerrar ficha" title="Cerrar ficha"><img src="/assets/guides/icon-close.svg" alt="" width="20" height="20" /></button></header>
@@ -800,6 +806,7 @@
             <form class="profile-assign-form" data-profile-assign-form>
               <label><span>Premio disponible</span><select data-profile-item required><option value="">Actualizar premios</option></select></label>
               <label><span>Cantidad</span><input data-profile-quantity type="number" min="1" max="50" step="1" value="1" required /></label>
+              <div class="exact-delivery-preview" data-exact-delivery-preview data-profile-exact-preview aria-live="polite" hidden></div>
               <div class="editor-actions"><button class="primary-action small-action" type="submit" data-profile-assign-submit disabled>Asignar cupon</button><button class="icon-button" type="button" data-profile-stock-refresh title="Actualizar premios disponibles" aria-label="Actualizar premios disponibles"><img src="/assets/admin/refresh.svg" alt="" width="18" height="18" /></button></div>
             </form>
             <p class="muted" data-profile-stock-note></p>
@@ -817,7 +824,8 @@
     <script src="/owner-ui/batch-image-tools.js?v=187ce9b906440c12" defer></script>
     <script src="/owner-ui/admin-image-editor.js?v=0e608d0f11a614d4" defer></script>
     <script src="/owner-ui/admin-batch-images.js?v=3a9777bdc86137d9" defer></script>
-  <script src="/owner-ui/admin-prizes.js?v=c0923623a68732f2" defer></script>
+    <script src="/owner-ui/admin-delivery-preview.js?v=97bd42f516fb13fd" defer></script>
+  <script src="/owner-ui/admin-prizes.js?v=50c5a6e1af956301" defer></script>
     <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
     <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>
     <script src="/owner-ui/admin-access-requests.js?v=15664ffba8dcc582" defer></script>
@@ -838,7 +846,7 @@
     <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
     <script src="/owner-ui/admin-donations.js?v=2504ba0429c09dc5" defer></script>
-    <script src="/owner-ui/admin-profile.js?v=83d1499a9cd2ceb8" defer></script>
+    <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=6ccb129cd99f92d8" defer></script>
   </body>
 </html>

@@ -1,6 +1,7 @@
 let memberProfileRevision = 0, memberProfileId = "", memberProfileData = null, memberProfileTrigger = null;
 let memberProfilePrizeOffset = 0, memberProfileHistoryOffset = 0;
 let memberProfileContext = 0, memberProfileStockRequest = 0, memberProfileStock = [], memberProfileStockReady = false, memberProfileAssignBusy = false;
+let memberProfileRewardState = null, memberProfileDeliveryPreview = null;
 const profileDate = value => value ? value.split("-").reverse().join("/") : "Sin fecha registrada";
 let memberProfileRecipients = [], memberProfileTransferId = "";
 function selectProfileTab(name) {
@@ -37,7 +38,8 @@ function renderMemberProfile(data) {
   renderProfileAssignment();
 }
 function profileAssignmentStock() {
-  return memberProfileStock.filter(c => rewardItemKey(c.label) === $("[data-profile-item]").value);
+  return memberProfileStock.filter(c => rewardItemKey(c.label) === $("[data-profile-item]").value)
+    .sort((a, b) => (a.created_at || 0) - (b.created_at || 0) || a.id.localeCompare(b.id));
 }
 function renderProfileAssignment() {
   const member = memberProfileData?.member, select = $("[data-profile-item]"), selected = select.value;
@@ -55,6 +57,19 @@ function renderProfileAssignment() {
   const blocked = !member?.active || !memberProfileStockReady || memberProfileAssignBusy;
   select.disabled = blocked; $("[data-profile-quantity]").disabled = blocked;
   $("[data-profile-assign-submit]").disabled = blocked || !Number.isInteger(quantity) || quantity < 1 || quantity > Math.min(50, available);
+  memberProfileDeliveryPreview = null;
+  if (typeof OwnerDeliveryPreview !== 'undefined') {
+    if (!blocked && !$("[data-profile-assign-submit]").disabled) {
+      const context = memberProfileContext, item = select.value, count = $("[data-profile-quantity]").value;
+      try {
+        memberProfileDeliveryPreview = OwnerDeliveryPreview.create(member, profileAssignmentStock().slice(0, quantity), {
+          source: 'profile', getState: () => memberProfileRewardState,
+          valid: () => context === memberProfileContext && $("[data-profile-dialog]").open && memberProfileData?.member.id === member.id && memberProfileData.member.active && memberProfileData.member.nick === member.nick && select.value === item && $("[data-profile-quantity]").value === count,
+        });
+      } catch { $("[data-profile-assign-submit]").disabled = true; }
+    }
+    OwnerDeliveryPreview.render($("[data-profile-exact-preview]"), memberProfileDeliveryPreview);
+  }
   $("[data-profile-stock-refresh]").disabled = memberProfileAssignBusy;
   for (const button of $$("[data-profile-release]")) button.disabled = memberProfileAssignBusy;
   for (const button of $$("[data-profile-transfer]")) button.disabled = memberProfileAssignBusy;
@@ -70,8 +85,9 @@ async function refreshProfileStock() {
     const state = await api("/api/admin/rewards");
     if (context !== memberProfileContext || request !== memberProfileStockRequest || !$("[data-profile-dialog]").open || $("[data-dashboard]").hidden) return;
     if (!state.connection?.configured) throw new Error("El servicio de premios no esta conectado.");
+    memberProfileRewardState = state;
     memberProfileStock = state.coupons.filter(c => c.status === "available" && !c.event_id && !c.staff_owner_id)
-      .map(c => ({ id: c.id, label: c.label }));
+      .map(c => ({ ...c }));
     memberProfileRecipients = (state.members || []).filter(m => m.active && m.id !== memberProfileId).map(m => ({ id: m.id, nick: m.nick }));
     memberProfileStockReady = true; $("[data-profile-assignment-status]").textContent = ""; renderProfileAssignment();
   } catch (error) {
@@ -91,6 +107,7 @@ async function loadMemberProfile() {
   }
 }
 function showMemberProfile(id, trigger) {
+  if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancel();
   $("[data-profile-transfer-reason]").value = "";
   memberProfileRecipients = []; memberProfileTransferId = "";
   $("[data-profile-transfer-search]").value = ""; $("[data-profile-transfer-recipient]").value = "";
@@ -116,11 +133,22 @@ $("[data-profile-assign-form]").addEventListener("submit", async event => {
   const member = { ...memberProfileData.member }, quantity = Number($("[data-profile-quantity]").value), stock = profileAssignmentStock();
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > Math.min(50, stock.length)) return;
   const coupons = stock.slice(0, quantity), context = memberProfileContext;
-  if (!confirm(`Asignar ${quantity} x ${coupons[0].label} a ${member.nick}?`)) return;
+  const preview = memberProfileDeliveryPreview;
+  if (typeof OwnerDeliveryPreview === 'undefined' && typeof assignRewardDelivery !== 'function' && typeof document.createElement !== 'function' && !confirm(`Asignar ${quantity} x ${coupons[0].label} a ${member.nick}?`)) return;
   memberProfileAssignBusy = true; renderProfileAssignment();
-  $("[data-profile-assignment-status]").textContent = "Asignando cupon...";
+  $("[data-profile-assignment-status]").textContent = "Revisa los lotes y confirma la entrega.";
   try {
-    const result = await rewardAdminAction("assign", { memberId: member.id, couponIds: coupons.map(c => c.id) });
+    if (typeof OwnerDeliveryPreview !== 'undefined' && !preview) throw new Error('Elige el premio y revisa la vista previa antes de confirmar.');
+    let result;
+    if (typeof assignRewardDelivery === 'function') result = await assignRewardDelivery(member, coupons, { preview, source: 'profile', getState: () => memberProfileRewardState, quiet: true,
+      onAssign: () => { if (context === memberProfileContext && $("[data-profile-dialog]").open) $("[data-profile-assignment-status]").textContent = "Asignando cupon..."; },
+    });
+    else if (typeof document.createElement !== 'function') result = await rewardAdminAction("assign", { memberId: member.id, couponIds: coupons.map(c => c.id) });
+    else throw new Error('No se pudo cargar la confirmacion de entrega. Recarga el panel.');
+    if (!result) {
+      if (context === memberProfileContext && $("[data-profile-dialog]").open && !$("[data-dashboard]").hidden) $("[data-profile-assignment-status]").textContent = "Entrega cancelada. No se asignaron cupones.";
+      return;
+    }
     if (context !== memberProfileContext || !$("[data-profile-dialog]").open || $("[data-dashboard]").hidden) return;
     memberProfilePrizeOffset = 0;
     await loadMemberProfile(); await refreshProfileStock();
@@ -232,6 +260,8 @@ for (const button of $$("[data-profile-page]")) button.addEventListener("click",
 });
 $("[data-profile-close]").addEventListener("click", () => $("[data-profile-dialog]").close());
 $("[data-profile-dialog]").addEventListener("close", () => {
+  if (typeof OwnerDeliveryPreview !== 'undefined') { OwnerDeliveryPreview.cancel(); OwnerDeliveryPreview.render($("[data-profile-exact-preview]"), null); }
+  memberProfileRewardState = null; memberProfileDeliveryPreview = null;
   $("[data-profile-transfer-reason]").value = "";
   memberProfileRecipients = []; memberProfileTransferId = "";
   $("[data-profile-transfer-search]").value = ""; $("[data-profile-transfer-recipient]").innerHTML = "";

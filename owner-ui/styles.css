@@ -1412,5 +1412,19 @@ body.circle-themed { --red:var(--circle-page-accent); --muted:var(--circle-page-
 .coupon-image-viewport { max-height:76dvh; overflow:auto; overscroll-behavior:contain; touch-action:pan-x pan-y pinch-zoom; }
 .coupon-image-viewport img { display:block; width:auto; height:auto; max-width:100%; max-height:75dvh; object-fit:contain; margin:auto; }
 .coupon-image-viewport.is-zoomed img { width:150%; max-width:none; max-height:none; margin:0; }
+.exact-delivery-preview { padding:12px; border:1px solid #626674; border-radius:12px; }
+.exact-delivery-preview[hidden] { display:none; }
+.exact-delivery-recipient { margin:0 0 12px; font-weight:700; overflow-wrap:anywhere; }
+.exact-delivery-lots { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:12px; }
+.exact-delivery-lot { display:grid; grid-template-columns:80px minmax(0,1fr); align-content:start; gap:6px 10px; padding:12px; border:1px solid #444958; border-radius:10px; }
+.exact-delivery-lot h4, .exact-delivery-lot p { margin:0; overflow-wrap:anywhere; }
+.exact-delivery-lot .exact-delivery-image { grid-row:1/3; font-size:.8rem; color:#c1c5d0; }
+.exact-delivery-image .coupon-image-slot { margin:0; }
+.profile-assign-form > .exact-delivery-preview { grid-column:1/-1; }
+.exact-delivery-dialog { width:min(760px,94vw); max-width:94vw; max-height:90dvh; padding:20px; border:1px solid #626674; border-radius:14px; background:#181b25; color:#f4f5fa; overflow:auto; }
+.exact-delivery-dialog::backdrop { background:rgba(0,0,0,.8); }
+.exact-delivery-dialog header h2 { margin:0 0 8px; }
+.exact-delivery-dialog > .editor-actions { justify-content:flex-end; flex-wrap:wrap; margin-top:18px; }
+@media(max-width:600px) { .exact-delivery-dialog { padding:14px; } .exact-delivery-dialog > .editor-actions button { min-height:44px; flex:1; } .exact-delivery-lot { padding:10px; } }
 @media(max-width:600px) { .coupon-image-dialog { padding:10px; } .coupon-image-dialog header button { min-height:44px; } .batch-image-card { padding:10px; } .coupon-image-thumb { width:64px; height:64px; } }
 @media(max-width:600px) { .circle-custom-logo .logo-frame { width:80%; } .circle-themed .hero::before { background:linear-gradient(180deg,transparent 42%,var(--circle-page-bg) 70%); } }

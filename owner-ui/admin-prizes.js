@@ -4,6 +4,8 @@ let rewardAdminRevision = 0;
 let rewardCredentialRevision = 0;
 let rewardEventKeyRevision = 0;
 let rewardCouponPage = 0;
+let rewardDeliveryPreview = null;
+let rewardDeliveryConfirmBusy = false;
 const rewardStatus = (message) => { $("[data-rewards-status]").textContent = message; };
 const rewardTime = (value) => value ? new Date(value).toLocaleString("es-PE", { timeZone: "America/Lima" }) : "-";
 const rewardStates = { available: "Disponible", assigned: "Asignado", claimed: "Reclamado", archived: "Archivado", active: "Activo", closed: "Cerrado" };
@@ -82,10 +84,21 @@ function renderRewardDelivery() {
   $("[data-coupon-assign]").disabled = !member;
   try {
     const plan = rewardDeliveryPlan();
+    if (typeof OwnerDeliveryPreview !== 'undefined') {
+      const item = select.value, quantity = $("[data-delivery-quantity]").value, memberId = plan.member.id;
+      rewardDeliveryPreview = OwnerDeliveryPreview.create(plan.member, plan.coupons, { valid: () => $("[data-reward-member]").value === memberId && select.value === item && $("[data-delivery-quantity]").value === quantity });
+      OwnerDeliveryPreview.render($("[data-delivery-exact-preview]"), rewardDeliveryPreview);
+    }
     $("[data-delivery-summary]").textContent = `${plan.coupons.length} x ${plan.coupons[0].label} para ${plan.member.nick}${plan.member.loginEnabled ? "" : " | Falta generar su acceso de premios"}`;
     $("[data-delivery-submit]").textContent = `Asignar a ${plan.member.nick}`;
     $("[data-delivery-submit]").disabled = false;
   } catch (error) {
+    rewardDeliveryPreview = null;
+    if (typeof OwnerDeliveryPreview !== 'undefined') {
+      const quantity = Number($("[data-delivery-quantity]").value), stock = rewardDeliveryStock(select.value);
+      if (!member && select.value && Number.isInteger(quantity) && quantity >= 1 && quantity <= Math.min(50, stock.length)) OwnerDeliveryPreview.renderStock($("[data-delivery-exact-preview]"), stock.slice(0, quantity));
+      else OwnerDeliveryPreview.render($("[data-delivery-exact-preview]"), null);
+    }
     $("[data-delivery-summary]").textContent = error.message;
     $("[data-delivery-submit]").textContent = "Elige un premio y destinatario";
     $("[data-delivery-submit]").disabled = true;
@@ -171,19 +184,34 @@ function showEventKey(result, title, revision) {
   $("[data-event-created]").hidden = false;
 }
 
-async function assignRewardDelivery(member, coupons) {
-  const items = new Map();
-  for (const coupon of coupons) items.set(coupon.label, (items.get(coupon.label) || 0) + 1);
-  const description = [...items].map(([label, count]) => `${count} x ${label}`).join(", ");
-  if (!confirm(`Asignar ${description} a ${member.nick}?`)) return;
-  const result = await rewardAdminAction("assign", { memberId: member.id, couponIds: coupons.map((coupon) => coupon.id) });
-  const message = result.assigned ? `${result.assigned} de ${coupons.length} cupones asignados a ${member.nick}: ${description}.${member.loginEnabled ? "" : " Genera su acceso de premios para que pueda reclamarlos."}` : "No se asigno ningun cupon. El inventario cambio; vuelve a elegir el premio.";
-  $("[data-delivery-status]").textContent = message;
-  rewardStatus(message);
-  $("[data-assignment-search]").value = member.nick;
-  $("[data-assignment-status]").value = "all";
-  $("[data-assignment-event]").value = "";
-  renderRewardAssignments();
+async function assignRewardDelivery(member, coupons, options = {}) {
+  if (rewardDeliveryConfirmBusy || rewardAdminBusy) return null;
+  rewardDeliveryConfirmBusy = true;
+  try {
+    let snapshot = null;
+    if (typeof OwnerDeliveryPreview !== 'undefined') {
+      snapshot = options.preview || OwnerDeliveryPreview.create(member, coupons, options);
+      if (!await OwnerDeliveryPreview.confirm(snapshot)) return null;
+      OwnerDeliveryPreview.validate(snapshot);
+      member = snapshot.member;
+      coupons = snapshot.coupons;
+    } else if (typeof document.createElement === 'function') throw new Error('No se pudo cargar la vista previa de entrega. Recarga el panel.');
+    const items = new Map();
+    for (const coupon of coupons) items.set(coupon.label, (items.get(coupon.label) || 0) + 1);
+    const description = [...items].map(([label, count]) => `${count} x ${label}`).join(", ");
+    if (!snapshot && !confirm(`Asignar ${description} a ${member.nick}?`)) return null;
+    options.onAssign?.();
+    const result = await rewardAdminAction("assign", { memberId: member.id, couponIds: snapshot ? [...snapshot.couponIds] : coupons.map((coupon) => coupon.id), ...(snapshot ? { strict: true } : {}) });
+    if (options.quiet || snapshot && !OwnerDeliveryPreview.isContextCurrent(snapshot)) return result;
+    const message = result.assigned ? `${result.assigned} de ${coupons.length} cupones asignados a ${member.nick}: ${description}.${member.loginEnabled ? "" : " Genera su acceso de premios para que pueda reclamarlos."}` : "No se asigno ningun cupon. El inventario cambio; vuelve a elegir el premio.";
+    $("[data-delivery-status]").textContent = message;
+    rewardStatus(message);
+    $("[data-assignment-search]").value = member.nick;
+    $("[data-assignment-status]").value = "all";
+    $("[data-assignment-event]").value = "";
+    renderRewardAssignments();
+    return result;
+  } finally { rewardDeliveryConfirmBusy = false; }
 }
 
 function rewardMemberOptions() {
@@ -311,8 +339,13 @@ $("[data-personal-delivery]").addEventListener("submit", async (event) => {
   const button = $("[data-delivery-submit]");
   button.disabled = true;
   try {
-    const plan = rewardDeliveryPlan();
-    await assignRewardDelivery(plan.member, plan.coupons);
+    if (typeof OwnerDeliveryPreview !== 'undefined') {
+      if (!rewardDeliveryPreview) throw new Error('Elige el premio y revisa la vista previa antes de confirmar.');
+      await assignRewardDelivery(rewardDeliveryPreview.member, rewardDeliveryPreview.coupons, { preview: rewardDeliveryPreview });
+    } else {
+      const plan = rewardDeliveryPlan();
+      await assignRewardDelivery(plan.member, plan.coupons);
+    }
   } catch (error) { $("[data-delivery-status]").textContent = error.message; }
   finally { renderRewardDelivery(); }
 });
@@ -444,7 +477,12 @@ document.addEventListener("click", async (event) => {
       const member = rewardAdminState.members.find((entry) => entry.active && entry.id === memberId);
       if (!member) throw new Error("Elige quien recibira el cupon en Entregar a.");
       const selected = new Set(selectedRewardCoupons("available"));
-      await assignRewardDelivery(member, rewardAdminState.coupons.filter((coupon) => selected.has(coupon.id)));
+      await assignRewardDelivery(member, rewardAdminState.coupons.filter((coupon) => selected.has(coupon.id)), {
+        source: 'inventory', valid: () => $("[data-reward-member]").value === member.id && (() => {
+          const current = $$("[data-coupon-table] [data-coupon-id]:checked").map(input => input.dataset.couponId);
+          return current.length === selected.size && current.every(id => selected.has(id));
+        })(),
+      });
     } else if (button.hasAttribute("data-unassign-coupon")) {
       const coupon = rewardAdminState.coupons.find((entry) => entry.id === button.dataset.unassignCoupon);
       if (!coupon || coupon.status !== "assigned" || !coupon.assigned_member_id || coupon.event_id) throw new Error("Solo puedes quitar un premio personal pendiente de reclamar.");
@@ -474,6 +512,8 @@ document.addEventListener("click", async (event) => {
   finally { button.disabled = false; }
 });
 $("[data-logout]").addEventListener("click", () => {
+  rewardDeliveryPreview = null;
+  if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancel();
   rewardAdminRevision++;
   rewardAdminState = { members: [], coupons: [], events: [] };
   clearRewardCredential();
