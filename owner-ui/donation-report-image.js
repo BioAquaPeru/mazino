@@ -18,22 +18,10 @@
    ctx.fillStyle='#b5bbc9';ctx.font='15px Arial';ctx.fillText('Donado en el periodo consultado. Las marcas son decisiones manuales; no cambian el circulo.',28,canvas.height-18);pages.push(canvas);
   }return pages;
  }
- // PNG is already compressed; ZIP stores each original image without recompressing it.
- function zipPages(images,prefix){
+ function downloadPages(images,prefix){
   if(!images.length)throw Error('Genera la vista previa antes de descargar.');
-  const parts=[],central=[];let offset=0,centralSize=0;
-  const crcTable=Uint32Array.from({length:256},(_,n)=>{for(let j=0;j<8;j++)n=(n&1)?0xedb88320^(n>>>1):n>>>1;return n>>>0;});
-  images.forEach((url,i)=>{
-   if(!url.startsWith('data:image/png;base64,'))throw Error('La imagen del reporte no es valida.');
-   const binary=atob(url.slice(url.indexOf(',')+1)),data=Uint8Array.from(binary,c=>c.charCodeAt(0));
-   let crc=0xffffffff;for(const byte of data)crc=crcTable[(crc^byte)&255]^(crc>>>8);crc=(crc^0xffffffff)>>>0;
-   const name=Uint8Array.from(`${prefix}-${String(i+1).padStart(2,'0')}.png`,c=>c.charCodeAt(0));
-   const local=new Uint8Array(30+name.length),l=new DataView(local.buffer);l.setUint32(0,0x04034b50,true);l.setUint16(4,20,true);l.setUint16(12,33,true);l.setUint32(14,crc,true);l.setUint32(18,data.length,true);l.setUint32(22,data.length,true);l.setUint16(26,name.length,true);local.set(name,30);
-   const record=new Uint8Array(46+name.length),r=new DataView(record.buffer);r.setUint32(0,0x02014b50,true);r.setUint16(4,20,true);r.setUint16(6,20,true);r.setUint16(14,33,true);r.setUint32(16,crc,true);r.setUint32(20,data.length,true);r.setUint32(24,data.length,true);r.setUint16(28,name.length,true);r.setUint32(42,offset,true);record.set(name,46);
-   parts.push(local,data);central.push(record);offset+=local.length+data.length;centralSize+=record.length;
-  });
-  const end=new Uint8Array(22),e=new DataView(end.buffer);e.setUint32(0,0x06054b50,true);e.setUint16(8,images.length,true);e.setUint16(10,images.length,true);e.setUint32(12,centralSize,true);e.setUint32(16,offset,true);
-  return new Blob([...parts,...central,end],{type:'application/zip'});
+  if(images.some(url=>!url.startsWith('data:image/png;base64,')))throw Error('La imagen del reporte no es valida.');
+  images.forEach((url,i)=>{const a=document.createElement('a');a.href=url;a.download=`${prefix}-${String(i+1).padStart(2,'0')}.png`;document.body.append(a);a.click();a.remove();});
  }
  function open({report,title='MAZINO',canEdit=true,save,isCurrent=()=>true}){
   if(!report?.entries?.length)throw Error('No hay integrantes en el resultado filtrado.');
@@ -81,11 +69,11 @@
   layout.onchange=()=>{customLabel.hidden=layout.value!=='custom';invalidate();if(view==='preview')generate();};custom.onchange=()=>{invalidate();if(view==='preview')generate();};
   previous.onclick=()=>{if(page>0){page--;showPage();body.scrollTop=0;}};next.onclick=()=>{if(page<images.length-1){page++;showPage();body.scrollTop=0;}};
   download.onclick=()=>{if(!isCurrent()){status.textContent='Vuelve a abrir el reporte de esta sesion.';return;}if(!images[page])return;const a=el('a');a.href=images[page];a.download=`donaciones-${report.start}-${report.end}-${page+1}.png`;a.click();};
-  downloadAll.onclick=()=>{try{if(!isCurrent())throw Error('Vuelve a abrir el reporte de esta sesion.');if(busy||!images.length)return;const prefix=`donaciones-${report.start}-${report.end}`,zip=zipPages(images,prefix),url=URL.createObjectURL(zip),a=el('a');a.href=url;a.download=prefix+'-todas-las-hojas.zip';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);status.textContent=`Descarga preparada: ${images.length} ${images.length===1?'hoja':'hojas'} PNG dentro del archivo ZIP.`;}catch(e){status.textContent=e.message;}};
+  downloadAll.onclick=()=>{try{if(!isCurrent())throw Error('Vuelve a abrir el reporte de esta sesion.');if(busy||!images.length)return;downloadPages(images,`donaciones-${report.start}-${report.end}`);status.textContent=`Se solicitaron ${images.length} descargas PNG. Si falta alguna hoja, permite varias descargas en tu navegador y vuelve a pulsar el boton.`;}catch(e){status.textContent=e.message;}};
   saveButton.onclick=async()=>{if(busy)return;if(!dirty.size){status.textContent='No hay cambios pendientes.';return;}busy=true;saveButton.disabled=previewButton.disabled=editTab.disabled=previewTab.disabled=filter.disabled=layout.disabled=custom.disabled=true;download.disabled=downloadAll.disabled=true;list.querySelectorAll('input,select').forEach(n=>n.disabled=true);try{if(!isCurrent())throw Error('La sesion o el circulo cambio. Vuelve a abrir el reporte.');await save([...dirty].map(memberId=>({memberId,...notes[memberId]})));if(!isCurrent())return;dirty.clear();status.textContent='Observaciones guardadas. El historial y los totales se conservan.';}catch(e){status.textContent=e.message;}finally{busy=false;saveButton.disabled=previewButton.disabled=editTab.disabled=previewTab.disabled=filter.disabled=layout.disabled=custom.disabled=false;list.querySelectorAll('input,select').forEach(n=>n.disabled=!canEdit);showPage();}};
   const requestClose=()=>{if(busy){status.textContent='Espera a que termine de guardar.';return;}if(dirty.size&&!root.confirm('Hay observaciones sin guardar. ¿Cerrar y descartar estos cambios?'))return;dialog.close();};
   close.onclick=requestClose;dialog.oncancel=e=>{e.preventDefault();requestClose();};dialog.onclose=()=>dialog.remove();document.body.append(dialog);render();showPage();changeView('edit');dialog.showModal();return()=>dialog.close();
  }
 
- root.MazinoDonationReport={open,canvases,pageSize,zipPages,result,marks};
+ root.MazinoDonationReport={open,canvases,pageSize,downloadPages,result,marks};
 })(typeof window==='undefined'?globalThis:window);
