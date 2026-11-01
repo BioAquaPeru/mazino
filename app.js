@@ -1,3 +1,4 @@
+function canonicalServiceOrigin(value) {return value === "https://mazino-premios.amused-field-8941.chatgpt.site" ? "https://mazino-premios.tellusengineer.chatgpt.site" : value;}
 const state = {
   settings: null,
   elite: [],
@@ -244,18 +245,18 @@ async function loadPublic() {
     const response = await fetch(endpoint, { cache: 'no-store', signal: AbortSignal.timeout(10000) });
     if (response.ok) saved = publicSnapshot(await response.json());
   } catch { /* A verified browser snapshot also survives failure of the static bootstrap. */ }
-  const service = saved?.settings.rewardsServiceUrl || latest?.settings.rewardsServiceUrl;
+  const service = canonicalServiceOrigin(saved?.settings.rewardsServiceUrl || latest?.settings.rewardsServiceUrl);
   if(service && typeof initializePublicSpaces==='function')await initializePublicSpaces(service);
   if(extraCircle){saved=null;if(latest)show(latest);}
   if (service && /^https:\/\/[a-z0-9.-]+$/i.test(service)) {
     let refreshing = false;
     const accept = data => {
-      if (!data || data.settings.rewardsServiceUrl !== service || snapshotVersion(data) <= 0) return;
+      if (!data || canonicalServiceOrigin(data.settings.rewardsServiceUrl) !== service || snapshotVersion(data) <= 0) return;
       // Another tab may have saved a newer version while this request was in flight.
       const cached = readPublicSnapshot();
-      if (cached?.settings.rewardsServiceUrl === service && snapshotIsNewer(cached,latest)) { latest = cached; show(latest); }
+      if (canonicalServiceOrigin(cached?.settings.rewardsServiceUrl) === service && snapshotIsNewer(cached,latest)) { latest = cached; show(latest); }
       if(latest?.branding&&(!data.branding||latest.branding.revision>data.branding.revision))data={...data,branding:latest.branding};
-      if (latest?.settings.rewardsServiceUrl === service && !snapshotIsNewer(data,latest)) return;
+      if (canonicalServiceOrigin(latest?.settings.rewardsServiceUrl) === service && !snapshotIsNewer(data,latest)) return;
       latest = data; show(data);
       try { localStorage.setItem(PUBLIC_SNAPSHOT_KEY, JSON.stringify(data)); } catch { /* Private mode and full storage must not break the page. */ }
     };
