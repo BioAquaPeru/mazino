@@ -302,7 +302,7 @@
                 <label><span>Ingreso desde (opcional)</span><input name="from" type="date" /></label>
                 <label><span>Ingreso hasta (opcional)</span><input name="to" type="date" /></label>
                 <label><span>Antiguedad minima en dias</span><input name="minDays" type="number" min="0" max="20000" step="1" value="0" /></label>
-                <label><span>Premios anteriores (pendientes y reclamados)</span><select name="rewardRule"><option value="same_item" selected>Excluir quienes ya tienen este premio (recomendado)</option><option value="any_prize">Excluir quienes ya tienen cualquier premio</option><option value="none">No excluir por premios anteriores</option></select></label>
+                <label><span>Premios anteriores (pendientes y reclamados)</span><select name="rewardRule"><option value="same_item" selected>Excluir quienes ya tienen este premio</option><option value="same_category">Excluir quienes ya tienen un premio de esta categoría</option><option value="any_prize">Excluir quienes ya tienen cualquier premio</option><option value="none">No excluir por premios anteriores</option></select></label>
                 <div class="editor-actions"><button class="primary-action small-action" type="submit" data-bulk-preview>Revisar destinatarios</button></div>
               </form>
               <p class="form-status" role="status" data-bulk-status></p>
@@ -312,6 +312,10 @@
                 <div class="rewards-toolbar"><button class="ghost-button" type="button" data-bulk-eligible>Seleccionar segun filtros</button><button class="ghost-button" type="button" data-bulk-none>Quitar seleccion</button><button class="ghost-button" type="button" data-bulk-member-prev>Anterior</button><span data-bulk-member-page></span><button class="ghost-button" type="button" data-bulk-member-next>Siguiente</button></div>
                 <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Incluir</th><th>Integrante</th><th>Ingreso</th><th>Antiguedad</th><th>Acceso de premios</th><th>Observacion</th></tr></thead><tbody data-bulk-members></tbody></table></div>
                 <button class="primary-action small-action" type="button" data-bulk-confirm disabled>Confirmar reparto</button>
+                <details class="admin-subsection" data-bulk-category-history hidden open>
+                  <summary data-bulk-category-summary>Premios anteriores de esta categoría</summary>
+                  <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Premio</th><th>Estado</th></tr></thead><tbody data-bulk-category-recipients></tbody></table></div>
+                </details>
               </div>
               <details class="admin-subsection" data-bulk-history-section><summary>Historial de repartos</summary>
                 <div class="rewards-toolbar"><button class="ghost-button" type="button" data-bulk-prev>Anterior</button><span data-bulk-page></span><button class="ghost-button" type="button" data-bulk-next>Siguiente</button></div>
@@ -953,7 +957,7 @@
     <script src="/owner-ui/admin-access-history.js?v=399edb5ebbd52346" defer></script>
     <script src="/owner-ui/admin-access-notice.js?v=ea16934f74f82e74" defer></script>
     <script src="/owner-ui/admin-event-edit.js?v=61d5cb109f3153e8" defer></script>
-    <script src="/owner-ui/admin-bulk.js?v=61ba485050b9a509" defer></script>
+    <script src="/owner-ui/admin-bulk.js?v=81c645f00d01b679" defer></script>
   <script src="/owner-ui/admin-staff.js?v=e7ababf6465cef9d" defer></script>
     <script src="/owner-ui/admin-transfers.js?v=5581808c12c3784f" defer></script>
     <script src="/owner-ui/admin-pending-actions.js?v=a975aed5ef34496f" defer></script>
