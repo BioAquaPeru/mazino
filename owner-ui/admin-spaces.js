@@ -150,11 +150,14 @@
     const at=space.lastRosterAttemptAt||space.lastRosterSyncAt;
     return at?'Última consulta (Perú): '+rosterTime.format(new Date(at)):'Aún no hay consultas registradas.';
   }
-  async function syncMembers(id){
+  async function syncMembers(id,fromHome=false){
     const space=data?.spaces.find(row=>row.id===id);
-    if(!space||space.deletedAt||space.kind!=='circle'||space.id==='main')return;
+    if(busy||!space||space.deletedAt||space.kind!=='circle'||space.id==='main')return;
+    const button=$('[data-admin-quick-sync]'),status=$('[data-admin-quick-sync-status]');
+    const announce=value=>{if(fromHome)status.textContent=value;else message(value);};
+    if(fromHome){button.disabled=true;status.dataset.manual='1';}
     await run(async()=>{
-      message('Consultando integrantes de '+space.name+' en R2Beat…');
+      announce('Consultando integrantes de '+space.name+' en R2Beat…');
       try{
         const {sync}=await call('sync',{spaceId:id});
         if(!active()||!data?.spaces.includes(space))return;
@@ -163,7 +166,8 @@
           current.sync=sync;current.count=sync.count;
           $('[data-space-detail-count]').textContent=sync.count+' integrantes · '+rosterSummary(space);
         }
-        message(space.name+' actualizado · '+sync.count+' integrantes.');
+        if(id===adminCircleId&&typeof refreshAdminRoster==='function')await refreshAdminRoster();
+        if(active())announce(space.name+' actualizado · '+sync.count+' integrantes.');
       }catch(error){
         if(!active())return;
         const latest=await call('state').catch(()=>null);
@@ -171,9 +175,10 @@
           const status=latest.spaces.find(row=>row.id===id);
           if(status)Object.assign(space,status);
         }
-        if(active())message(error.message);
+        if(active())announce(error.message);
       }
     });
+    if(fromHome){button.disabled=false;delete status.dataset.manual;}
   }
   function renderCards(){
     if(!data)return;
@@ -184,7 +189,7 @@
     $('[data-space-deleted-count]').textContent=data.spaces.filter(space=>space.deletedAt).length;
     $('[data-spaces-result-count]').textContent=shown.length+' de '+all.length+' espacios';
     const syncCard=space=>space.id!=='main'&&space.kind==='circle'&&space.ready&&!space.deletedAt?`<div class="space-actions"><button type="button" class="ghost-button" data-space-sync-card="${space.id}">Actualizar integrantes</button></div><p>${escapeHtml(rosterSummary(space))}</p>${space.rosterError?`<p>${escapeHtml(space.rosterError)}</p>`:''}`:'';
-    const card=space=>`<article class="space-card ${current?.space.id===space.id?'space-card-selected':''}" style="--space-accent:${color(space.tabColor)}"><div class="space-card-head">${space.logoUrl?`<img class="space-card-logo" src="${escapeHtml(space.logoUrl)}" alt="" width="48" height="48" referrerpolicy="no-referrer">`:'<span class="space-card-initial" aria-hidden="true">'+escapeHtml([...space.name][0])+'</span>'}<div><h3>${escapeHtml(space.name)}</h3><p>${space.kind==='group'?'Grupo de invitados':'Circulo de R2Beat'}</p></div></div><p class="space-visibility ${space.enabled?'is-visible':''}">${space.deletedAt?'Eliminado · historial conservado':space.enabled?'Visible en mazino.lat':'Oculto · no aparece en la web'}${space.id==='main'?' · Principal':''}</p>${space.deletedAt?`<button type="button" class="ghost-button" data-space-restore="${space.id}">Restaurar como oculto</button>`:`<div class="space-actions"><button type="button" class="ghost-button" data-space-preview="${space.id}">Vista previa</button><button type="button" class="primary-action small-action" data-space-detail-open="${space.id}">Editar</button>${space.id==='main'?'':`<button type="button" class="ghost-button" data-space-toggle="${space.id}" ${!space.ready&&!space.enabled?'disabled title="El espacio aun no esta preparado"':''}>${space.enabled?'Ocultar':'Mostrar'}</button>`}</div>${syncCard(space)}<details class="space-card-more"><summary>${space.id==='main'?'Administrar':'Administrar y eliminar'}</summary><div class="space-actions"><button type="button" class="ghost-button" data-space-enter="${space.id}">Administrar integrantes y premios</button>${space.sourceUrl?`<a class="ghost-button" href="${escapeHtml(space.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver en R2Beat</a>`:''}${space.id==='main'?'':`<button type="button" class="ghost-button space-danger" data-space-remove="${space.id}">Eliminar</button>`}</div></details>`}</article>`;
+    const card=space=>`<article class="space-card ${current?.space.id===space.id?'space-card-selected':''}" style="--space-accent:${color(space.tabColor)}"><div class="space-card-head">${space.logoUrl?`<img class="space-card-logo" src="${escapeHtml(space.logoUrl)}" alt="" width="48" height="48" referrerpolicy="no-referrer">`:'<span class="space-card-initial" aria-hidden="true">'+escapeHtml([...space.name][0])+'</span>'}<div><h3>${escapeHtml(space.name)}</h3><p>${space.kind==='group'?'Grupo de invitados':'Circulo de R2Beat'}</p></div></div><p class="space-visibility ${space.enabled?'is-visible':''}">${space.deletedAt?'Eliminado · historial conservado':space.enabled?'Visible en mazino.lat':'Oculto · no aparece en la web'}${space.id==='main'?' · Principal':''}</p>${space.deletedAt?`<button type="button" class="ghost-button" data-space-restore="${space.id}">Restaurar como oculto</button>`:`<div class="space-actions">${space.id!=='main'&&space.kind==='circle'&&space.ready?`<button type="button" class="primary-action small-action" data-space-enter="${space.id}">Administrar</button>`:''}<button type="button" class="ghost-button" data-space-preview="${space.id}">Vista previa</button><button type="button" class="primary-action small-action" data-space-detail-open="${space.id}">Editar</button>${space.id==='main'?'':`<button type="button" class="ghost-button" data-space-toggle="${space.id}" ${!space.ready&&!space.enabled?'disabled title="El espacio aun no esta preparado"':''}>${space.enabled?'Ocultar':'Mostrar'}</button>`}</div>${syncCard(space)}<details class="space-card-more"><summary>${space.id==='main'?'Administrar':'Administrar y eliminar'}</summary><div class="space-actions">${space.id==='main'||space.kind!=='circle'?`<button type="button" class="ghost-button" data-space-enter="${space.id}">Administrar integrantes y premios</button>`:''}${space.sourceUrl?`<a class="ghost-button" href="${escapeHtml(space.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver en R2Beat</a>`:''}${space.id==='main'?'':`<button type="button" class="ghost-button space-danger" data-space-remove="${space.id}">Eliminar</button>`}</div></details>`}</article>`;
     list.innerHTML=shown.map(card).join('')||'<p class="empty-state">No hay espacios con estos filtros.</p>';
     const removed=data.spaces.filter(space=>space.deletedAt);trash.innerHTML=removed.map(card).join('')||'<p>No hay espacios eliminados.</p>';
     $('[data-space-trash-count]').textContent=removed.length;
@@ -194,7 +199,10 @@
     try{const result=await call('state');if(!active()||version!==revision)return false;data=result;
       context.innerHTML=data.spaces.filter(s=>!s.deletedAt).map(s=>`<option value="${s.id}">${escapeHtml(s.name)}${s.enabled?'':' · Oculto'}</option>`).join('');
       context.value=data.spaces.some(s=>s.id===adminCircleId&&!s.deletedAt)?adminCircleId:'main';
-      $('[data-admin-circle-label]').textContent=data.spaces.find(s=>s.id===adminCircleId)?.name||'Mazino';renderCards();if(section.open)void refreshApprovals();return true;
+      const circle=data.spaces.find(s=>s.id===adminCircleId&&!s.deletedAt)||null;
+      $('[data-admin-circle-label]').textContent=circle?.name||(adminCircleId==='main'?'Mazino':'Círculo sin confirmar');
+      if(typeof setAdminCircleIdentity==='function')setAdminCircleIdentity(circle);
+      renderCards();if(section.open)void refreshApprovals();return true;
     }catch(error){if(active()&&version===revision)message(error.message);return false;}
   }
   function previewPage(){
@@ -327,9 +335,10 @@
   $('[data-space-delete]').addEventListener('click',()=>{if(current)remove(current.space.id);});
   trash.addEventListener('click',event=>{const id=event.target.closest('[data-space-restore]')?.dataset.spaceRestore,space=data?.spaces.find(s=>s.id===id);if(!space||!discard())return;run(async()=>{await call('restore',{spaceId:id,version:space.version,confirmed:true});await load();await show(id,{force:true});message('Restaurado y oculto. Revisa su vista previa antes de mostrarlo.');});});
   $('[data-space-sync]').addEventListener('click',()=>{if(current)syncMembers(current.space.id);});
+  $('[data-admin-quick-sync]').addEventListener('click',()=>syncMembers(adminCircleId,true));
   grant.addEventListener('submit',event=>{event.preventDefault();if(!current)return;run(async()=>{const id=current.space.id,f=grant.elements;await call('grant',{spaceId:id,memberId:f.memberId.value,enabled:f.enabled.checked,dailyLimit:Number(f.dailyLimit.value),weeklyLimit:Number(f.weeklyLimit.value),...Object.fromEntries(Object.keys(perms).map(key=>[key,f[key].checked]))});const latest=await call('detail',{spaceId:id});if(current?.space.id===id){current.grants=latest.grants;renderGrants();}message('Responsable y permisos guardados. Tus cambios pendientes de la pagina se conservan.');});});
   $('[data-space-grants]').addEventListener('click',event=>{const id=event.target.closest('[data-space-grant-edit]')?.dataset.spaceGrantEdit,g=current?.grants.find(g=>g.id===id);if(!g)return;grant.elements.memberId.value=id.slice('operator_'.length);for(const key of [...Object.keys(perms),'enabled'])grant.elements[key].checked=g[key];grant.elements.dailyLimit.value=g.dailyLimit;grant.elements.weeklyLimit.value=g.weeklyLimit;grant.scrollIntoView({behavior:'smooth',block:'center'});});
   section.addEventListener('toggle',()=>{if(!section.open||!active())return;if(isDirty())void refreshApprovals();else load();});
-  new MutationObserver(()=>{if(active())load();else{revision++;approvalRevision++;approvalList.replaceChildren();approvalCount.textContent=approvalStatus.textContent='';approvalRefresh.disabled=false;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value=coverFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(active())load();else{revision++;approvalRevision++;approvalList.replaceChildren();approvalCount.textContent=approvalStatus.textContent='';approvalRefresh.disabled=false;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value=coverFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');$('[data-admin-quick-results]').replaceChildren();$('[data-admin-quick-search]').value='';$('[data-admin-quick-sync-status]').textContent='';$('[data-admin-circle-quick]').hidden=true;if(typeof setAdminCircleIdentity==='function')setAdminCircleIdentity(null);if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
   if(active())load();
 })();

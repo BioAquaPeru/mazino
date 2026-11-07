@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/owner-ui/styles.css?v=893adfea1828a808" />
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
-    <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=f7b504adeed05399" />
+    <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=aea5fc460dbaf880" />
   <link rel="stylesheet" href="/owner-ui/owner-cloud.css?v=ef67548d58cd87eb" /></head>
   <body class="admin-body owner-cloud-body">
     <main class="admin-shell">
@@ -56,6 +56,7 @@
 
         <div class="admin-layout">
           <nav class="admin-navigation" aria-label="Secciones del administrador">
+            <div class="admin-circle-badge" data-admin-circle-badge><img data-admin-circle-icon alt="" referrerpolicy="no-referrer" hidden><span><small>Administrando</small><strong data-admin-circle-badge-name>Mazino</strong></span></div>
             <label class="admin-mobile-navigation"><span>Seccion</span><select data-admin-nav-select><option value="home">Inicio</option><option value="members">Integrantes</option><option value="visitors">Visitantes y entregas</option><option value="prizes">Premios</option><option value="events">Eventos</option><option value="donations">Donaciones</option><option value="staff">Sublideres</option><option value="spaces">Circulos y grupos</option><option value="settings">Configuracion</option><option value="circle">Nivel y EXP</option></select></label>
             <div class="admin-navigation-links">
               <button type="button" data-admin-nav="home" aria-current="page"><img src="/assets/admin/home.svg" alt="" />Inicio</button>
@@ -79,13 +80,29 @@
           <header class="admin-workspace-head"><h2 data-workspace-title>Inicio</h2><nav class="admin-task-navigation" data-admin-task-navigation aria-label="Tareas de la seccion"></nav></header>
           <section class="admin-home" data-admin-home aria-labelledby="admin-home-title">
             <h2 id="admin-home-title">Estado del circulo</h2>
+            <section class="admin-circle-quick" data-admin-circle-quick hidden aria-labelledby="admin-circle-quick-title">
+              <h3 id="admin-circle-quick-title">Inicio rápido de <span data-admin-quick-name></span></h3>
+              <dl class="admin-overview admin-circle-quick-metrics">
+                <div><dt>Integrantes</dt><dd data-admin-quick-count>—</dd></div>
+                <div><dt>Última consulta a R2Beat (Perú)</dt><dd data-admin-quick-date>—</dd></div>
+                <div><dt>Premios pendientes</dt><dd data-admin-quick-pending>—</dd></div>
+                <div><dt>Próximo evento</dt><dd data-admin-quick-event>—</dd></div>
+              </dl>
+              <div class="editor-actions"><button class="ghost-button" type="button" data-admin-quick-sync>Actualizar integrantes</button><p role="status" data-admin-quick-sync-status></p></div>
+              <div class="admin-circle-search">
+                <label>Buscar integrante por nick<input type="search" maxlength="80" placeholder="Escribe un nick…" data-admin-quick-search></label>
+                <p class="muted" role="status" data-admin-quick-search-status></p>
+                <ul data-admin-quick-results></ul>
+                <button class="ghost-button" type="button" data-admin-open="members">Ver todos los integrantes</button>
+              </div>
+            </section>
             <div class="admin-quick-actions" aria-label="Acciones frecuentes">
               <button type="button" data-admin-open="prizes"><img src="/assets/admin/ticket.svg" alt="" />Entregar premio</button>
               <button type="button" data-admin-open="pending"><img src="/assets/admin/activity.svg" alt="" />Ver pendientes</button>
               <button type="button" data-admin-open="events"><img src="/assets/admin/zap.svg" alt="" />Crear evento</button>
               <button type="button" data-admin-open="donationUpload"><img src="/assets/admin/upload.svg" alt="" />Cargar donaciones</button>
             </div>
-            <dl class="admin-overview"><div><dt>Integrantes en el borrador</dt><dd data-home-members>-</dd></div><div><dt>Ultima sincronizacion local</dt><dd data-home-sync>-</dd></div><div><dt>Publicacion automatica</dt><dd data-home-publishing>-</dd></div></dl>
+            <dl class="admin-overview" data-admin-home-metrics><div><dt>Integrantes en el borrador</dt><dd data-home-members>-</dd></div><div><dt>Ultima sincronizacion local</dt><dd data-home-sync>-</dd></div><div><dt>Publicacion automatica</dt><dd data-home-publishing>-</dd></div></dl>
             <details class="admin-subsection" data-owner-summary open>
               <summary>Resumen del dia</summary>
               <form class="rewards-toolbar" data-daily-form><label><span>Dia (Peru)</span><input type="date" data-daily-date required /></label><button class="ghost-button" type="submit">Actualizar resumen</button><button class="ghost-button" type="button" data-daily-today>Hoy</button></form>
@@ -808,13 +825,13 @@
       </div>
     </dialog>
     <dialog class="exact-delivery-dialog" data-delivery-confirm-dialog aria-labelledby="delivery-confirm-title">
-      <header><h2 id="delivery-confirm-title" data-delivery-confirm-title>Confirmar entrega</h2><p data-delivery-confirm-description>Revisa el destinatario y los lotes exactos antes de asignar.</p></header>
+      <header><h2 id="delivery-confirm-title" data-delivery-confirm-title>Confirmar entrega</h2><p><strong data-admin-modal-circle>Mazino</strong></p><p data-delivery-confirm-description>Revisa el destinatario y los lotes exactos antes de asignar.</p></header>
       <div data-delivery-confirm-content></div>
       <div class="editor-actions"><button class="ghost-button" type="button" data-delivery-confirm-cancel autofocus>Cancelar</button><button class="primary-action small-action" type="button" data-delivery-confirm-accept>Confirmar entrega</button></div>
     </dialog>
     <dialog class="member-profile-dialog" data-profile-dialog aria-labelledby="profile-title">
       <div class="member-profile-body">
-        <header class="member-profile-head"><p class="section-kicker">FICHA DEL INTEGRANTE</p><h2 id="profile-title" data-profile-title>Integrante</h2><button class="icon-button" type="button" data-profile-close aria-label="Cerrar ficha" title="Cerrar ficha"><img src="/assets/guides/icon-close.svg" alt="" width="20" height="20" /></button></header>
+        <header class="member-profile-head"><p class="section-kicker">FICHA DEL INTEGRANTE · <span data-admin-modal-circle>Mazino</span></p><h2 id="profile-title" data-profile-title>Integrante</h2><button class="icon-button" type="button" data-profile-close aria-label="Cerrar ficha" title="Cerrar ficha"><img src="/assets/guides/icon-close.svg" alt="" width="20" height="20" /></button></header>
         <p class="form-status" role="status" data-profile-status></p>
         <div data-profile-content hidden>
           <div class="profile-tabs" role="tablist" aria-label="Datos del integrante">
@@ -865,7 +882,7 @@
     <script src="/owner-ui/admin-image-editor.js?v=0e608d0f11a614d4" defer></script>
     <script src="/owner-ui/admin-batch-images.js?v=3a9777bdc86137d9" defer></script>
     <script src="/owner-ui/admin-delivery-preview.js?v=f495caec76adb5fb" defer></script>
-  <script src="/owner-ui/admin-prizes.js?v=ca88696d889e2645" defer></script>
+  <script src="/owner-ui/admin-prizes.js?v=fb150a57909fbe2f" defer></script>
     <script src="/owner-ui/admin-coupon-labels.js?v=b90c52e9d3ad18eb" defer></script>
     <script src="/owner-ui/admin-access.js?v=8ec95f67eebcf061" defer></script>
     <script src="/owner-ui/admin-access-requests.js?v=7590e4f3c3793c15" defer></script>
@@ -878,8 +895,8 @@
     <script src="/owner-ui/admin-pending-actions.js?v=a975aed5ef34496f" defer></script>
     <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
     <script src="/owner-ui/admin-tracking.js?v=35677e4fec0d4c55" defer></script>
-    <script src="/owner-ui/admin-spaces.js?v=7db9a4f9069400c6" defer></script>
-    <script src="/owner-ui/admin-navigation.js?v=f6d1a3b46e00c3fb" defer></script>
+    <script src="/owner-ui/admin-spaces.js?v=9ce3c57125b24c34" defer></script>
+    <script src="/owner-ui/admin-navigation.js?v=cfb7242c55fe9892" defer></script>
     <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>
     <script src="/owner-ui/exceljs-4.4.0.min.js?v=926cb6a0dab94ac2" defer></script>

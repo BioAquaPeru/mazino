@@ -316,6 +316,7 @@ async function refreshAdminPrizes() {
     if (revision !== rewardAdminRevision) return;
     rewardAdminState = state;
     renderRewardAdmin();
+    if (typeof setAdminQuickAwards === "function") setAdminQuickAwards(state);
     if (typeof refreshTracking === "function" && $("[data-rewards-subsection=\"tracking\"]")?.open) await refreshTracking();
     rewardStatus(rewardAdminState.connection.configured ? "Servicio de premios conectado. Entregas en linea." : "Servicio de premios pendiente de conexion.");
   } catch (error) { rewardStatus(error.message); }
@@ -593,6 +594,7 @@ $("[data-logout]").addEventListener("click", () => {
   if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancel();
   rewardAdminRevision++;
   rewardAdminState = { members: [], coupons: [], events: [] };
+  if (typeof setAdminQuickAwards === "function") setAdminQuickAwards(null);
   clearRewardCredential();
   $("[data-coupon-table]").innerHTML = ""; $("[data-reward-events-table]").innerHTML = "";
   $("[data-coupon-item-filter]").innerHTML = '<option value="">Todos los items</option>';
