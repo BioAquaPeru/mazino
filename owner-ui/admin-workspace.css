@@ -181,3 +181,5 @@
 [data-circle-stock-selection] p { flex-basis:100%; margin:2px 0; }
 [data-circle-stock-confirm-content] { overflow-wrap:anywhere; }
 [data-circle-stock-dialog] { max-width:calc(100vw - 24px); max-height:calc(100dvh - 24px); overflow:auto; }
+.circle-stock-destination { padding:16px; border:1px solid #77525f; border-radius:10px; background:#241820; overflow-wrap:anywhere; }
+.circle-stock-destination p { margin:8px 0 0; line-height:1.5; }
