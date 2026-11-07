@@ -16,7 +16,7 @@
     const welcome=node('[data-field="heroPhrase"]');welcome.textContent=presentation.heroPhrase||'';welcome.hidden=!presentation.heroPhrase?.trim();
     applyCircleTheme(presentation,brand);
     for(const button of document.querySelectorAll('[data-join-open]')){
-      button.hidden=data.space.kind==='group'&&!presentation.whatsappUrl;
+      button.hidden=!presentation.joinEnabled;
       button.disabled=!presentation.joinEnabled;button.querySelector('span').textContent=button.disabled?'WHATSAPP NO CONFIGURADO':presentation.joinButtonText;
     }
     const guest=node('[data-guest-section]');if(guest){guest.hidden=data.space.kind!=='group';for(const button of guest.querySelectorAll('button')){button.disabled=true;button.title='El registro se utiliza en la pagina publicada.';}}
