@@ -539,6 +539,15 @@
  <div class="space-category-heading"><div><h3>Tus circulos y grupos</h3><p>Crea un espacio oculto, personalizalo y revisa su vista previa antes de mostrarlo.</p></div><div class="space-actions"><button type="button" class="primary-action small-action" data-space-create-open>+ Crear circulo o grupo</button><button type="button" class="ghost-button" data-spaces-refresh>Actualizar</button></div></div>
  <div class="space-summary" aria-label="Estado de tus espacios"><span><b data-space-visible-count>0</b> Visibles</span><span><b data-space-hidden-count>0</b> Ocultos</span><span><b data-space-deleted-count>0</b> Eliminados</span></div>
  <p role="status" aria-live="polite" class="form-status" data-spaces-status></p>
+ <section class="admin-subsection" data-space-approval-queue aria-labelledby="space-approval-title">
+   <div class="space-actions">
+     <h3 id="space-approval-title">Aprobar accesos de equipo <span data-space-approval-count></span></h3>
+     <button type="button" class="ghost-button" data-space-approval-refresh>Actualizar solicitudes</button>
+   </div>
+   <p>Si recibiste un código MZ-EQ por mensaje privado en R2Beat, escríbelo en la solicitud de ese nick.</p>
+   <p class="form-status" role="status" data-space-approval-status></p>
+   <div class="access-history-list" data-space-approval-list></div>
+ </section>
  <details class="admin-subsection space-create-box" data-space-create-box><summary>Crear un nuevo espacio</summary><p>Se crea oculto. Solo aparecera en mazino.lat cuando elijas Mostrar.</p><form class="settings-grid" data-space-create><label>Nombre<input name="name" required maxlength="60" placeholder="Ejemplo: Mazino Girls"></label><label>Tipo<select name="kind"><option value="circle">Circulo de R2Beat</option><option value="group">Grupo de invitados</option></select></label><label class="wide">Enlace del circulo en R2Beat<input name="sourceUrl" type="url" required placeholder="https://r2beatlatino.com/circulos/ver/?id=..."></label><div class="space-actions wide"><button type="submit" class="primary-action small-action">Crear oculto y personalizar</button><button type="button" class="ghost-button" data-space-create-cancel>Cancelar</button></div></form></details>
  <div class="space-list-tools"><label>Buscar circulo o grupo<input type="search" placeholder="Nombre..." data-spaces-search></label><label>Mostrar<select data-spaces-filter><option value="all">Todos</option><option value="visible">Visibles</option><option value="hidden">Ocultos</option></select></label><span data-spaces-result-count></span></div>
  <div class="space-card-grid" data-spaces-list></div>
@@ -865,7 +874,7 @@
     <script src="/owner-ui/admin-pending-actions.js?v=a975aed5ef34496f" defer></script>
     <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
     <script src="/owner-ui/admin-tracking.js?v=35677e4fec0d4c55" defer></script>
-    <script src="/owner-ui/admin-spaces.js?v=93c5df08fcd2166e" defer></script>
+    <script src="/owner-ui/admin-spaces.js?v=9c5a3972256371ba" defer></script>
     <script src="/owner-ui/admin-navigation.js?v=f6d1a3b46e00c3fb" defer></script>
     <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>

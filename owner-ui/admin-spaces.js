@@ -4,9 +4,12 @@
   const trash=$('[data-space-trash-list]'),logoFile=$('[data-space-logo-file]'),logoPreview=$('[data-space-logo-preview]'),pageFile=$('[data-space-page-logo-file]'),pageSample=$('[data-space-page-sample]'),pageImage=$('[data-space-page-logo-preview]');
   const viewer=$('[data-space-preview-dialog]'),frame=$('[data-space-preview-frame]');
   const invitations=$('[data-space-invitations]'),inviteForm=$('[data-space-invite-form]'),inviteList=$('[data-space-invite-list]');
+  const approvalList=$('[data-space-approval-list]'),approvalRefresh=$('[data-space-approval-refresh]');
+  const approvalStatus=$('[data-space-approval-status]'),approvalCount=$('[data-space-approval-count]');
   const perms={can_assign:'Asignar premios',can_events:'Crear y editar sus eventos',can_release:'Quitar o traspasar sus pendientes',can_close:'Cerrar sus eventos',can_donations:'Cargar donaciones',can_donation_goals:'Crear metas',can_access:'Verificar en el juego y aprobar accesos'};
   const fields=['name','logoUrl','tabColor','pageLogoUrl','pageColor','pageBackground','welcomeMessage','whatsappUrl','contactMode'];
   let data=null,current=null,revision=0,busy=false,savedSignature='',templatePromise=null,previewReady=false;
+  let approvalRevision=0;
   const active=()=>!$('[data-dashboard]').hidden;
   const message=value=>status.textContent=value;
   const color=value=>/^#[a-f0-9]{6}$/i.test(value||'')?value:'#ff506a';
@@ -15,6 +18,51 @@
   const isDirty=()=>!!current&&JSON.stringify(draft())!==savedSignature;
   const discard=()=>!isDirty()||confirm('Tienes cambios sin guardar en '+current.space.name+'. Quieres descartarlos para continuar?');
   const inviteStatus=value=>{$('[data-space-invite-status]').textContent=value;};
+  async function refreshApprovals({keepMessage=false}={}){
+    if(!active()||!data)return;
+    const version=++approvalRevision;
+    const circles=data.spaces.filter(space=>space.id!=='main'&&space.kind==='circle'&&space.ready&&!space.deletedAt);
+    approvalRefresh.disabled=true;
+    if(!keepMessage)approvalStatus.textContent='Buscando solicitudes de equipo…';
+    try{
+      const results=await Promise.allSettled(circles.map(space=>call('invitation-list',{spaceId:space.id})));
+      if(!active()||version!==approvalRevision)return;
+      const rows=results.flatMap((result,index)=>result.status==='fulfilled'?
+        result.value.invitations.filter(row=>['pending','approved','issued'].includes(row.status)).map(row=>({...row,space:circles[index]})):[]);
+      const pending=rows.filter(row=>row.status==='pending');
+      approvalCount.textContent=pending.length?'('+pending.length+' por aprobar)':'';
+      approvalList.innerHTML=[...pending,...rows.filter(row=>row.status!=='pending')].map(row=>`<article class="prize-item">
+        <h4>${escapeHtml(row.nick)} · ${escapeHtml(row.space.name)}</h4>
+        ${row.status==='pending'?`<form class="settings-grid" data-space-approval-id="${escapeHtml(row.id)}" data-space-approval-circle="${escapeHtml(row.space.id)}">
+          <label>Código recibido en R2Beat<input name="proof" placeholder="MZ-EQ-…" maxlength="14" autocomplete="off" required></label>
+          <label class="switch-row"><input type="checkbox" required name="verified"><span>Este nick me envió el código en el juego</span></label>
+          <div class="wide space-actions"><button class="primary-action small-action">Aprobar acceso</button></div>
+        </form>`:`<p>${row.status==='approved'?'Aprobada · falta crear su clave de equipo':'Esperando que abra la invitación'}</p>`}
+      </article>`).join('');
+      const failed=results.filter(result=>result.status==='rejected').length;
+      if(failed)approvalStatus.textContent=failed===circles.length?'No se pudieron consultar las solicitudes. Pulsa Actualizar solicitudes para reintentar.':'Algunos círculos no se pudieron consultar. Pulsa Actualizar solicitudes para reintentar.';
+      else if(!keepMessage)approvalStatus.textContent=pending.length?'Revisa el código del nick antes de aprobar.':'Por ahora no hay solicitudes por aprobar.';
+    }finally{if(version===approvalRevision)approvalRefresh.disabled=false;}
+  }
+  approvalRefresh.addEventListener('click',()=>refreshApprovals());
+  approvalList.addEventListener('submit',async event=>{
+    const form=event.target.closest('[data-space-approval-id]');
+    if(!form)return;
+    event.preventDefault();
+    const submit=form.querySelector('button[type="submit"], button');
+    if(submit.disabled)return;
+    submit.disabled=true;approvalRefresh.disabled=true;
+    const version=approvalRevision;
+    try{
+      await call('invitation-approve',{spaceId:form.dataset.spaceApprovalCircle,id:form.dataset.spaceApprovalId,
+        proof:form.elements.proof.value.trim().toUpperCase(),verifiedInGame:form.elements.verified.checked});
+      if(!active()||version!==approvalRevision)return;
+      approvalStatus.textContent='Acceso aprobado. Pídele que pulse Consultar aprobación en el panel de equipo.';
+      await refreshApprovals({keepMessage:true});
+      if(invitations.open)await refreshInvites();
+    }catch(error){if(active()&&version===approvalRevision)approvalStatus.textContent=error.message;}
+    finally{submit.disabled=false;if(version===approvalRevision)approvalRefresh.disabled=false;}
+  });
   function clearInvite(){
     inviteForm.reset();inviteList.replaceChildren();inviteStatus('');
     $('[data-space-invite-copy-text]').value='';$('[data-space-invite-message]').hidden=true;
@@ -60,7 +108,7 @@
         const updated=await call('detail',{spaceId:space.id});
         if(active()&&current?.space.id===space.id){current.grants=updated.grants;renderGrants();}
       }
-      await refreshInvites();
+      await Promise.all([refreshInvites(),refreshApprovals()]);
     },inviteStatus);
   });
   $('[data-space-invite-copy]').addEventListener('click',async()=>{
@@ -75,7 +123,7 @@
     const spaceId=current.space.id;
     run(async()=>{
       await call('invitation-approve',{spaceId,id:form.dataset.spaceInviteApprove,proof:form.elements.proof.value.trim().toUpperCase(),verifiedInGame:form.elements.verified.checked});
-      if(active()&&current?.space.id===spaceId){inviteStatus('Aprobada. Ya puede crear su clave de equipo.');await refreshInvites();}
+      if(active()&&current?.space.id===spaceId){inviteStatus('Aprobada. Ya puede crear su clave de equipo.');await Promise.all([refreshInvites(),refreshApprovals()]);}
     },inviteStatus);
   });
   inviteList.addEventListener('click',event=>{
@@ -84,7 +132,7 @@
     const spaceId=current.space.id;
     run(async()=>{
       await call('invitation-cancel',{spaceId,id});
-      if(active()&&current?.space.id===spaceId){clearInvite();inviteStatus('Invitación cancelada.');await refreshInvites();}
+      if(active()&&current?.space.id===spaceId){clearInvite();inviteStatus('Invitación cancelada.');await Promise.all([refreshInvites(),refreshApprovals()]);}
     },inviteStatus);
   });
   function renderGrants(){
@@ -114,7 +162,7 @@
     try{const result=await call('state');if(!active()||version!==revision)return false;data=result;
       context.innerHTML=data.spaces.filter(s=>!s.deletedAt).map(s=>`<option value="${s.id}">${escapeHtml(s.name)}${s.enabled?'':' · Oculto'}</option>`).join('');
       context.value=data.spaces.some(s=>s.id===adminCircleId&&!s.deletedAt)?adminCircleId:'main';
-      $('[data-admin-circle-label]').textContent=data.spaces.find(s=>s.id===adminCircleId)?.name||'Mazino';renderCards();return true;
+      $('[data-admin-circle-label]').textContent=data.spaces.find(s=>s.id===adminCircleId)?.name||'Mazino';renderCards();if(section.open)void refreshApprovals();return true;
     }catch(error){if(active()&&version===revision)message(error.message);return false;}
   }
   function previewPage(){
@@ -243,7 +291,7 @@
   $('[data-space-sync]').addEventListener('click',()=>{if(!current||!discard())return;run(async()=>{const id=current.space.id;await call('sync',{spaceId:id});await show(id,{force:true,scroll:false});message('Integrantes actualizados desde R2Beat.');});});
   grant.addEventListener('submit',event=>{event.preventDefault();if(!current)return;run(async()=>{const id=current.space.id,f=grant.elements;await call('grant',{spaceId:id,memberId:f.memberId.value,enabled:f.enabled.checked,dailyLimit:Number(f.dailyLimit.value),weeklyLimit:Number(f.weeklyLimit.value),...Object.fromEntries(Object.keys(perms).map(key=>[key,f[key].checked]))});const latest=await call('detail',{spaceId:id});if(current?.space.id===id){current.grants=latest.grants;renderGrants();}message('Responsable y permisos guardados. Tus cambios pendientes de la pagina se conservan.');});});
   $('[data-space-grants]').addEventListener('click',event=>{const id=event.target.closest('[data-space-grant-edit]')?.dataset.spaceGrantEdit,g=current?.grants.find(g=>g.id===id);if(!g)return;grant.elements.memberId.value=id.slice('operator_'.length);for(const key of [...Object.keys(perms),'enabled'])grant.elements[key].checked=g[key];grant.elements.dailyLimit.value=g.dailyLimit;grant.elements.weeklyLimit.value=g.weeklyLimit;grant.scrollIntoView({behavior:'smooth',block:'center'});});
-  section.addEventListener('toggle',()=>{if(section.open&&active()&&!isDirty())load();});
-  new MutationObserver(()=>{if(active())load();else{revision++;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
+  section.addEventListener('toggle',()=>{if(!section.open||!active())return;if(isDirty())void refreshApprovals();else load();});
+  new MutationObserver(()=>{if(active())load();else{revision++;approvalRevision++;approvalList.replaceChildren();approvalCount.textContent=approvalStatus.textContent='';approvalRefresh.disabled=false;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
   if(active())load();
 })();
