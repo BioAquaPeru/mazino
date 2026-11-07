@@ -82,7 +82,7 @@ function renderPublic(data) {
   if(typeof applyCircleTheme==='function')applyCircleTheme(data.settings,data.branding);
 
   $$("[data-join-open]").forEach((button) => {
-    button.hidden = window.mazinoSpaceKind === 'group'&&!settings.whatsappUrl;
+    button.hidden = !settings.joinEnabled;
     button.disabled = !settings.joinEnabled;
     button.classList.toggle("disabled", button.disabled);
     if (button.disabled) button.querySelector("span").textContent = settings.whatsappUrl=== ''?'WHATSAPP NO CONFIGURADO':'SOLICITUDES PAUSADAS';
@@ -200,7 +200,7 @@ function publicBranding(value) {
   for(const field of ['logoUrl','pageLogoUrl','coverUrl']){const logo=value[field]||'';if(typeof logo!=='string'||logo.length>(field==='logoUrl'?60000:240000)||(!/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(logo)&&!/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(logo)&&logo!==''))return null;result[field]=logo;}
   if(typeof value.welcomeMessage==='string'&&value.welcomeMessage.length<=500)result.welcomeMessage=value.welcomeMessage;
   if(typeof value.whatsappUrl==='string'&&value.whatsappUrl.length<=1500)result.whatsappUrl=value.whatsappUrl;
-  if(['join','contact'].includes(value.contactMode))result.contactMode=value.contactMode;
+  if(['join','contact','hidden'].includes(value.contactMode))result.contactMode=value.contactMode;
   return result;
 }
 function snapshotIsNewer(next,previous){return snapshotVersion(next)>snapshotVersion(previous)||(snapshotVersion(next)===snapshotVersion(previous)&&(next?.branding?.revision||0)>(previous?.branding?.revision||0));}
