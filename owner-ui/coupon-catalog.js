@@ -124,21 +124,22 @@ export function mountCouponCatalog(container, { mode, request, onChange }) {
     const visibleGroups = matches.slice(page * 20, page * 20 + 20);
     loadPageImages(visibleGroups);
     for (const group of visibleGroups) {
-      const card = element('div', '', { class: 'catalog-line' });
+      const card = element('div', '', { class: 'catalog-line catalog-prize' });
       const title = element('div');
+      const thumbnail = element('div', '', { class: 'catalog-image-slot' });
       title.append(element('strong', group.label),
         element('small', `${audienceNames[group.audience]} · ${group.category || 'Sin categoría'} · ${group.batchName}`),
         element('small', inventory ? `${group.ids.length} cupones en esta fila` : `${group.availableIds.length} disponibles`));
       if (group.hasImage) {
-        const thumbnail = element('div', '', { class: 'catalog-image-slot' });
-        thumbnail.append(element('small', 'Cargando imagen…'));
+        thumbnail.append(element('span', '…', { 'aria-label': 'Cargando imagen' }));
         images.get(group.batchId).then(source => {
           if (!thumbnail.isConnected || disposed) return;
           thumbnail.replaceChildren(source
-            ? element('img', '', { src: source, alt: group.label, class: 'catalog-image', decoding: 'async' })
-            : element('small', 'Imagen no disponible'));
+            ? element('img', '', { src: source, alt: group.label, class: 'catalog-image', decoding: 'async', loading: 'lazy' })
+            : element('span', '—', { 'aria-label': 'Imagen no disponible' }));
         });
-        title.append(thumbnail);
+      } else {
+        thumbnail.append(element('span', '—', { 'aria-label': 'Sin imagen' }));
       }
       const input = element('input', '', inventory ? { type: 'checkbox' } : {
         type: 'number', min: '0', max: String(Math.min(limit, group.availableIds.length)), step: '1', inputmode: 'numeric',
@@ -160,7 +161,7 @@ export function mountCouponCatalog(container, { mode, request, onChange }) {
           renderSelection();
         });
       }
-      card.append(title, control(inventory ? 'Marcar' : 'Cantidad', input));
+      card.append(thumbnail, title, control(inventory ? 'Marcar' : 'Cantidad', input));
       list.append(card);
     }
     if (!matches.length) list.append(element('p', 'No hay premios con estos filtros.'));
