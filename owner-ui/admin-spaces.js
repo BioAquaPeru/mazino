@@ -4,6 +4,7 @@
   const trash=$('[data-space-trash-list]'),logoFile=$('[data-space-logo-file]'),logoPreview=$('[data-space-logo-preview]'),pageFile=$('[data-space-page-logo-file]'),pageSample=$('[data-space-page-sample]'),pageImage=$('[data-space-page-logo-preview]');
   const viewer=$('[data-space-preview-dialog]'),frame=$('[data-space-preview-frame]');
   const coverFile=$('[data-space-cover-file]'),coverFromLogo=$('[data-space-cover-from-logo]');
+  const coverSample=$('[data-space-cover-sample]');
   const invitations=$('[data-space-invitations]'),inviteForm=$('[data-space-invite-form]'),inviteList=$('[data-space-invite-list]');
   const approvalList=$('[data-space-approval-list]'),approvalRefresh=$('[data-space-approval-refresh]');
   const approvalStatus=$('[data-space-approval-status]'),approvalCount=$('[data-space-approval-count]');
@@ -214,11 +215,16 @@
     $('[data-space-page-name]').textContent=edit.elements.name.value||'Tu circulo';
     const action=$('[data-space-page-action]'),rgb=accent.slice(1).match(/../g).map(v=>parseInt(v,16));action.style.background=accent;action.style.color=rgb[0]*.299+rgb[1]*.587+rgb[2]*.114>155?'#17111a':'#fff';
     action.textContent=edit.elements.contactMode.value==='contact'?'Contactar al lider':'Unirse al circulo';
-    const source=edit.elements.pageLogoUrl.value||edit.elements.logoUrl.value;pageImage.hidden=!source;if(source)pageImage.src=source;else pageImage.removeAttribute('src');
+    pageSample.classList.toggle('has-cover',!!cover);
+    coverSample.hidden=!cover;
+    if(cover)coverSample.src=cover;else coverSample.removeAttribute('src');
+    const source=edit.elements.pageLogoUrl.value||edit.elements.logoUrl.value;pageImage.hidden=!!cover||!source;if(source)pageImage.src=source;else pageImage.removeAttribute('src');
     logoPreview.hidden=!edit.elements.logoUrl.value;if(edit.elements.logoUrl.value)logoPreview.src=edit.elements.logoUrl.value;else logoPreview.removeAttribute('src');
     $('[data-space-logo-label]').textContent=edit.elements.logoUrl.value?'Logo de este menu':'Sin logo personalizado';
-    $('[data-space-welcome-preview]').textContent=edit.elements.welcomeMessage.value||'Sin mensaje de bienvenida';
-    $('[data-space-contact-preview]').textContent=edit.elements.whatsappUrl.value.trim()?'WhatsApp propio configurado para este espacio.':'Sin WhatsApp: el boton quedara desactivado.';
+    const welcome=$('[data-space-welcome-preview]'),contact=edit.elements.whatsappUrl.value.trim();
+    welcome.textContent=edit.elements.welcomeMessage.value;welcome.hidden=!welcome.textContent.trim();
+    action.setAttribute('aria-disabled',String(!contact));action.style.opacity=contact?'1':'.55';
+    $('[data-space-contact-preview]').textContent=contact?'WhatsApp preparado. Comprueba el destino en la vista previa.':'Sin WhatsApp: el botón de contacto estará desactivado.';
     updateDraftState();
   }
   async function show(id,{force=false,scroll=true}={}){
@@ -240,7 +246,10 @@
       grant.elements.memberId.innerHTML='<option value="">Elige un sublider existente</option>'+data.staff.filter(s=>s.enabled).map(s=>`<option value="${s.id}">${escapeHtml(s.nick)}</option>`).join('');
       renderGrants();
       previewPage();renderCards();message(result.space.enabled?'Puedes revisar su vista previa o editar su configuracion.':'Este espacio esta oculto. Personalizalo, revisa la vista previa y luego elige Guardar y mostrar.');
-      if(scroll){detail.scrollIntoView({behavior:'smooth',block:'start'});for(const fold of detail.querySelectorAll('.space-editor-fold'))fold.open=false;detail.querySelector('.space-editor-fold').open=true;}
+      if(scroll){detail.scrollIntoView({behavior:'smooth',block:'start'});for(const fold of detail.querySelectorAll('.space-editor-fold'))fold.open=false;
+        const opening=id==='main'?detail.querySelector('.space-editor-fold'):detail.querySelector('[data-space-presentation]');
+        opening.open=true;
+      }
       return true;
     }catch(error){if(active()&&version===revision)message(error.message);return false;}
   }
@@ -339,6 +348,6 @@
   grant.addEventListener('submit',event=>{event.preventDefault();if(!current)return;run(async()=>{const id=current.space.id,f=grant.elements;await call('grant',{spaceId:id,memberId:f.memberId.value,enabled:f.enabled.checked,dailyLimit:Number(f.dailyLimit.value),weeklyLimit:Number(f.weeklyLimit.value),...Object.fromEntries(Object.keys(perms).map(key=>[key,f[key].checked]))});const latest=await call('detail',{spaceId:id});if(current?.space.id===id){current.grants=latest.grants;renderGrants();}message('Responsable y permisos guardados. Tus cambios pendientes de la pagina se conservan.');});});
   $('[data-space-grants]').addEventListener('click',event=>{const id=event.target.closest('[data-space-grant-edit]')?.dataset.spaceGrantEdit,g=current?.grants.find(g=>g.id===id);if(!g)return;grant.elements.memberId.value=id.slice('operator_'.length);for(const key of [...Object.keys(perms),'enabled'])grant.elements[key].checked=g[key];grant.elements.dailyLimit.value=g.dailyLimit;grant.elements.weeklyLimit.value=g.weeklyLimit;grant.scrollIntoView({behavior:'smooth',block:'center'});});
   section.addEventListener('toggle',()=>{if(!section.open||!active())return;if(isDirty())void refreshApprovals();else load();});
-  new MutationObserver(()=>{if(active())load();else{revision++;approvalRevision++;approvalList.replaceChildren();approvalCount.textContent=approvalStatus.textContent='';approvalRefresh.disabled=false;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value=coverFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');$('[data-admin-quick-results]').replaceChildren();$('[data-admin-quick-search]').value='';$('[data-admin-quick-sync-status]').textContent='';$('[data-admin-circle-quick]').hidden=true;if(typeof setAdminCircleIdentity==='function')setAdminCircleIdentity(null);if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(active())load();else{revision++;approvalRevision++;approvalList.replaceChildren();approvalCount.textContent=approvalStatus.textContent='';approvalRefresh.disabled=false;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value=coverFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');coverSample.removeAttribute('src');$('[data-admin-quick-results]').replaceChildren();$('[data-admin-quick-search]').value='';$('[data-admin-quick-sync-status]').textContent='';$('[data-admin-circle-quick]').hidden=true;if(typeof setAdminCircleIdentity==='function')setAdminCircleIdentity(null);if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
   if(active())load();
 })();

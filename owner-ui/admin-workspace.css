@@ -160,3 +160,19 @@
   .admin-layout:has(.admin-circle-badge) .admin-workspace-head,
   .admin-layout:has(.admin-circle-badge) .admin-content :is(.admin-panel,[data-rewards-subsection],.admin-home) { scroll-margin-top:125px; }
 }
+.space-presentation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; margin:16px 0; }
+.space-presentation-fields { display:grid; align-content:start; gap:14px; }
+.space-presentation-fields label { display:grid; gap:7px; }
+.space-presentation-fields :is(input,textarea,select) { width:100%; min-width:0; }
+.space-presentation-fields textarea { resize:vertical; }
+.space-presentation-preview { padding:16px; border:1px solid #59434f; border-radius:10px; background:#140e12; }
+.space-presentation-preview .space-page-sample { position:relative; overflow:hidden; min-height:230px; isolation:isolate; }
+.space-presentation-preview .space-cover-sample-image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
+.space-presentation-preview .has-cover::before { content:""; position:absolute; inset:0; background:linear-gradient(180deg,#0002,#000d); z-index:-1; }
+.space-presentation-sample-content { display:grid; justify-items:center; align-content:end; gap:14px; min-width:0; min-height:180px; width:100%; }
+.space-presentation-preview .space-welcome-sample { border:0; padding:0; background:none; }
+.space-presentation-preview .has-cover :is(strong,p) { color:#fff; text-shadow:0 2px 10px #000; }
+.space-presentation-preview [data-space-page-action] { display:inline-block; }
+.space-presentation-advanced { margin-top:16px; }
+.space-presentation-advanced summary { cursor:pointer; padding:12px 0; }
+@media(max-width:750px) { .space-presentation-grid { grid-template-columns:minmax(0,1fr); } .space-presentation-preview { padding:12px; } }
