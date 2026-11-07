@@ -94,14 +94,15 @@
       const row = data.groups.find(item => item.itemId === group.itemId);
       const line = element("li", "");
       line.className = "admin-subsection wide";
-      line.append(element("strong", `${row.label || group.name || "Premio"} · ID ${group.itemId}`));
-      const destination = row.batchId ? `${row.batchName} · ${classification(row)}` :
-        row.pending ? `${row.pending} sin lote de destino` : "Todos los códigos ya están registrados";
+      line.append(element("strong", `${group.name || row.label || "Premio"} · ID ${group.itemId}`));
+      const destination = row.batchId ? `Lote: ${row.batchName} · ${classification(row)}` :
+        row.pending ? "Elige un lote para todos los códigos nuevos de este ID." : "Todos los códigos ya están registrados";
       line.append(element("div", destination));
-      line.append(element("div", `${row.added || 0} para agregar · ${omissions(row, group.repeated)}`));
+      const quantity = row.pending ? `${row.pending} pendientes de destino` : `${row.added || 0} para agregar`;
+      line.append(element("div", `${quantity} · ${omissions(row, group.repeated)}`));
       if (row.selectable?.length) {
         const detail = document.createElement("details");
-        detail.append(element("summary", `Seleccionar códigos sin registrar (${row.selectable.length})`));
+        detail.append(element("summary", `Marcar como canjeados fuera de la web (${row.selectable.length} revisables)`));
         for (const index of row.selectable) {
           const code = group.codes[index];
           const label = element("label", "");
@@ -126,7 +127,7 @@
         line.append(detail);
       }
       if (row.pending) {
-        const label = element("label", "Lote de destino");
+        const label = element("label", "Lote para todos los códigos nuevos de este ID");
         const select = document.createElement("select");
         select.append(new Option("Elige un lote existente", ""));
         for (const lot of data.choices) select.append(new Option(`${lot.label} · ${lot.batchName} · ${classification(lot)}`, lot.batchId));
