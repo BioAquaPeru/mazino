@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/owner-ui/styles.css?v=893adfea1828a808" />
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
-    <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=1d431b2eb861ba9a" />
+    <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=2f839b37855adf07" />
   <link rel="stylesheet" href="/owner-ui/owner-cloud.css?v=ef67548d58cd87eb" /></head>
   <body class="admin-body owner-cloud-body">
     <main class="admin-shell">
@@ -503,16 +503,16 @@
               <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Sublider</th><th>Acceso</th><th>Hoy</th><th>Semana</th><th>Cupones libres de su cupo</th><th></th></tr></thead><tbody data-staff-accounts></tbody></table></div>
             </details>
             <details class="admin-subsection" data-staff-group="pool">
-              <summary>Enviar cupos a círculos</summary>
+              <summary>Enviar cupones a líderes y sublíderes</summary>
               <section data-circle-stock>
-                <p>Carga tus lotes una vez en el inventario central de Mazino y reparte cupos a los responsables de cada círculo.</p>
+                <p>Desde este panel envías cupones del inventario central de Mazino al cupo de cualquier líder o sublíder. No necesitas cambiar de círculo ni entrar con su cuenta.</p>
                 <div class="editor-actions"><button type="button" class="ghost-button" data-circle-stock-load>Cargar cupones al inventario central</button><button type="button" class="ghost-button" data-circle-stock-refresh>Actualizar inventario y responsables</button></div>
                 <form class="settings-grid" data-circle-stock-form>
-                  <label>Círculo de destino<select name="spaceId" required data-circle-stock-space><option value="">Elige un círculo</option></select></label>
-                  <label>Responsable<select name="staffId" required data-circle-stock-staff><option value="">Elige un responsable</option></select></label>
-                  <label>Lote y premio<select name="batch" required data-circle-stock-batch><option value="">Elige un lote del inventario central</option></select></label>
+                  <label>1. Elige el círculo<select name="spaceId" required data-circle-stock-space><option value="">Elige un círculo</option></select></label>
+                  <label>2. Elige líder o sublíder<select name="staffId" required data-circle-stock-staff><option value="">Elige un responsable</option></select></label>
+                  <label>3. Elige lote y premio<select name="batch" required data-circle-stock-batch><option value="">Elige un lote del inventario central</option></select></label>
                   <label>Cantidad<input name="quantity" type="number" min="1" max="300" value="1" step="1" required></label>
-                  <div class="wide" data-circle-stock-selection></div>
+                  <div class="wide" data-circle-stock-selection></div><div class="wide circle-stock-destination" data-circle-stock-destination role="status" aria-live="polite">Elige círculo, responsable, premio y cantidad.</div>
                   <div class="editor-actions wide"><button type="submit" class="primary-action small-action" data-circle-stock-review>Revisar envío</button></div>
                 </form>
                 <p role="status" class="form-status" data-circle-stock-status></p>
@@ -937,7 +937,7 @@
     <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
     <script src="/owner-ui/admin-tracking.js?v=35677e4fec0d4c55" defer></script>
     <script src="/owner-ui/admin-spaces.js?v=06a04d525f7b0963" defer></script>
-    <script src="/owner-ui/admin-circle-stock.js?v=cdb3755b14768911" defer></script>
+    <script src="/owner-ui/admin-circle-stock.js?v=4383b3f50ddccb30" defer></script>
     <script src="/owner-ui/admin-navigation.js?v=921186233ddbba00" defer></script>
     <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>
