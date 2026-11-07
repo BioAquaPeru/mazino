@@ -101,6 +101,16 @@ export function mountCouponCatalog(container, { mode, request, onChange }) {
     apply.disabled = busy || !member.value || !total || total > limit || invalid;
   }
 
+  function loadPageImages(groups) {
+    const batchIds = [...new Set(groups.filter(group => group.hasImage && !images.has(group.batchId)).map(group => group.batchId))];
+    if (!batchIds.length) return;
+    const response = Promise.resolve().then(() => request('images', { batchIds })).then(result => new Map(
+      result.images.filter(row => /^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(row.imageData || ''))
+        .map(row => [row.batchId, row.imageData]),
+    )).catch(() => new Map());
+    for (const batchId of batchIds) images.set(batchId, response.then(rows => rows.get(batchId)));
+  }
+
   function render() {
     if (!data) return;
     const term = search.value.trim().toLocaleLowerCase('es');
@@ -111,29 +121,24 @@ export function mountCouponCatalog(container, { mode, request, onChange }) {
       `${group.label} ${group.category} ${group.batchName}`.toLocaleLowerCase('es').includes(term));
     page = Math.min(page, Math.max(0, Math.ceil(matches.length / 20) - 1));
     list.replaceChildren();
-    for (const group of matches.slice(page * 20, page * 20 + 20)) {
+    const visibleGroups = matches.slice(page * 20, page * 20 + 20);
+    loadPageImages(visibleGroups);
+    for (const group of visibleGroups) {
       const card = element('div', '', { class: 'catalog-line' });
       const title = element('div');
       title.append(element('strong', group.label),
         element('small', `${audienceNames[group.audience]} · ${group.category || 'Sin categoría'} · ${group.batchName}`),
         element('small', inventory ? `${group.ids.length} cupones en esta fila` : `${group.availableIds.length} disponibles`));
       if (group.hasImage) {
-        const view = button('Ver imagen', 'catalog-secondary');
-        view.addEventListener('click', async () => {
-          view.disabled = true;
-          try {
-            if (!images.has(group.batchId)) {
-              const result = await request('images', { batchIds: [group.batchId] });
-              const source = result.images[0]?.imageData;
-              if (!/^data:image\/(?:png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(source || '')) throw new Error('La imagen ya no está disponible.');
-              images.set(group.batchId, source);
-            }
-            if (view.isConnected) view.replaceWith(element('img', '', { src: images.get(group.batchId), alt: group.label, class: 'catalog-image' }));
-          } catch (error) {
-            if (view.isConnected) { view.disabled = false; status.textContent = error.message; }
-          }
+        const thumbnail = element('div', '', { class: 'catalog-image-slot' });
+        thumbnail.append(element('small', 'Cargando imagen…'));
+        images.get(group.batchId).then(source => {
+          if (!thumbnail.isConnected || disposed) return;
+          thumbnail.replaceChildren(source
+            ? element('img', '', { src: source, alt: group.label, class: 'catalog-image', decoding: 'async' })
+            : element('small', 'Imagen no disponible'));
         });
-        title.append(view);
+        title.append(thumbnail);
       }
       const input = element('input', '', inventory ? { type: 'checkbox' } : {
         type: 'number', min: '0', max: String(Math.min(limit, group.availableIds.length)), step: '1', inputmode: 'numeric',
@@ -186,6 +191,7 @@ export function mountCouponCatalog(container, { mode, request, onChange }) {
       const result = await request('state', {});
       if (disposed) return;
       data = result;
+      images.clear();
       const categories = [...new Set(data.groups.map(group => group.category).filter(Boolean))].sort();
       options(category, 'Todas', categories.map(name => [name, name]));
       suggestions.replaceChildren(...[...new Set([...defaultCategories, ...categories])].map(name => element('option', '', { value: name })));
