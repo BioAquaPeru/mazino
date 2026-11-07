@@ -67,6 +67,11 @@
   const request = (action, body) => api(`/api/admin/rewards/restock-${action}`, { method: "POST", body: JSON.stringify(body) });
   const element = (tag, text) => Object.assign(document.createElement(tag), { textContent: text });
   const classification = row => [({ hombre: "Hombre", mujer: "Mujer", unisex: "Unisex" })[row.audience] || "Sin grupo", row.category || "Sin categoría"].join(" · ");
+  function omissions(row, repeated) {
+    const external = row.externallyRedeemed || 0;
+    const duplicates = row.registered - external + repeated;
+    return `${duplicates} duplicados${external ? ` · ${external} canjeados fuera de la web` : ""}`;
+  }
 
   function clear() {
     revision++;
@@ -89,7 +94,7 @@
       const destination = row.batchId ? `${row.batchName} · ${classification(row)}` :
         row.pending ? `${row.pending} sin lote de destino` : "Todos los códigos ya están registrados";
       line.append(element("div", destination));
-      line.append(element("div", `${row.added || 0} para agregar · ${row.registered + group.repeated} duplicados`));
+      line.append(element("div", `${row.added || 0} para agregar · ${omissions(row, group.repeated)}`));
       if (row.pending) {
         const label = element("label", "Lote de destino");
         const select = document.createElement("select");
@@ -113,7 +118,7 @@
     confirm.textContent = `Confirmar carga de ${data.added} cupones`;
     updateDestinations(data);
     const repeated = groups.reduce((sum, group) => sum + group.repeated, 0);
-    status.textContent = `${data.added} listos para agregar · ${data.registered + repeated} duplicados que se omiten.`;
+    status.textContent = `${data.added} listos para agregar. Se omiten ${omissions(data, repeated)}.`;
     if (!data.fingerprint) status.textContent += " Elige el lote de cada ID pendiente y vuelve a revisar. Si el premio es nuevo, crea su lote desde la carga manual con un cupón nuevo y clasifícalo en Inventario.";
   }
 
@@ -146,10 +151,10 @@
         result = data;
         render(data);
       } else {
-        const omitted = data.registered + groups.reduce((sum, group) => sum + group.repeated, 0);
+        const repeated = groups.reduce((sum, group) => sum + group.repeated, 0);
         clear();
         file.value = "";
-        status.textContent = `${data.added} cupones cargados en Mazino · ${omitted} duplicados omitidos.`;
+        status.textContent = `${data.added} cupones cargados en Mazino. Se omitieron ${omissions(data, repeated)}.`;
         void refreshAdminPrizes();
         if (typeof refreshOwnerOverview === "function") void refreshOwnerOverview();
       }
