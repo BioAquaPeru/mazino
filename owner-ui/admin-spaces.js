@@ -3,6 +3,7 @@
   const create=$('[data-space-create]'),createBox=$('[data-space-create-box]'),edit=$('[data-space-edit]'),grant=$('[data-space-grant]'),context=$('[data-admin-circle-select]');
   const trash=$('[data-space-trash-list]'),logoFile=$('[data-space-logo-file]'),logoPreview=$('[data-space-logo-preview]'),pageFile=$('[data-space-page-logo-file]'),pageSample=$('[data-space-page-sample]'),pageImage=$('[data-space-page-logo-preview]');
   const viewer=$('[data-space-preview-dialog]'),frame=$('[data-space-preview-frame]');
+  const invitations=$('[data-space-invitations]'),inviteForm=$('[data-space-invite-form]'),inviteList=$('[data-space-invite-list]');
   const perms={can_assign:'Asignar premios',can_events:'Crear y editar sus eventos',can_release:'Quitar o traspasar sus pendientes',can_close:'Cerrar sus eventos',can_donations:'Cargar donaciones',can_donation_goals:'Crear metas',can_access:'Verificar en el juego y aprobar accesos'};
   const fields=['name','logoUrl','tabColor','pageLogoUrl','pageColor','pageBackground','welcomeMessage','whatsappUrl','contactMode'];
   let data=null,current=null,revision=0,busy=false,savedSignature='',templatePromise=null,previewReady=false;
@@ -13,6 +14,79 @@
   const draft=()=>({...Object.fromEntries(fields.map(key=>[key,edit.elements[key].value])),enabled:edit.elements.enabled.checked});
   const isDirty=()=>!!current&&JSON.stringify(draft())!==savedSignature;
   const discard=()=>!isDirty()||confirm('Tienes cambios sin guardar en '+current.space.name+'. Quieres descartarlos para continuar?');
+  const inviteStatus=value=>{$('[data-space-invite-status]').textContent=value;};
+  function clearInvite(){
+    inviteForm.reset();inviteList.replaceChildren();inviteStatus('');
+    $('[data-space-invite-copy-text]').value='';$('[data-space-invite-message]').hidden=true;
+  }
+  async function refreshInvites(){
+    if(!current||invitations.hidden)return;
+    const id=current.space.id,version=revision;
+    try{
+      const result=await call('invitation-list',{spaceId:id});
+      if(!active()||current?.space.id!==id||version!==revision)return;
+      const labels={issued:'Esperando que abra la invitación',pending:'Falta verificar en el juego',approved:'Aprobada · falta crear la clave',active:'Cargos asignados',cancelled:'Cancelada',expired:'Vencida'};
+      inviteList.innerHTML=result.invitations.map(row=>`<article class="prize-item"><h4>${escapeHtml(row.nick)}</h4>
+        <p>${escapeHtml(labels[row.status])}</p>
+        ${row.status==='pending'?`<form data-space-invite-approve="${escapeHtml(row.id)}"><label>Código recibido en R2Beat<input name="proof" placeholder="MZ-EQ-..." maxlength="14" required></label>
+        <label class="switch-row"><input type="checkbox" required name="verified"><span>Este nick me envió el código en el juego</span></label><button class="primary-action small-action">Aprobar acceso</button></form>`:''}
+        ${['issued','pending','approved'].includes(row.status)?`<button type="button" class="ghost-button" data-space-invite-cancel="${escapeHtml(row.id)}">Cancelar invitación</button>`:''}</article>`).join('')||'<p>Aún no hay invitaciones para este círculo.</p>';
+    }catch(error){if(active()&&version===revision)inviteStatus(error.message);}
+  }
+  for(const role of ['main','delegated']){
+    const fields=document.createElement('div');fields.className='settings-grid';
+    fields.innerHTML=Object.entries(perms).map(([key,label])=>`<label class="switch-row"><input type="checkbox" name="${role}-${key}"><span>${label}</span></label>`).join('')+
+      `<label>Cupo diario<input type="number" name="${role}-dailyLimit" min="0" max="1000" value="0" required></label><label>Cupo semanal<input type="number" name="${role}-weeklyLimit" min="0" max="5000" value="0" required></label>`;
+    inviteForm.querySelector(`[data-space-invite-role="${role}"]`).append(fields);
+  }
+  invitations.addEventListener('toggle',()=>{if(invitations.open)refreshInvites();});
+  $('[data-space-invite-refresh]').addEventListener('click',refreshInvites);
+  inviteForm.addEventListener('submit',event=>{
+    event.preventDefault();if(!current||busy)return;
+    const space=current.space,nick=inviteForm.elements.nick.value.trim();
+    const get=role=>({dailyLimit:inviteForm.elements[role+'-dailyLimit'].valueAsNumber,weeklyLimit:inviteForm.elements[role+'-weeklyLimit'].valueAsNumber,...Object.fromEntries(Object.keys(perms).map(key=>[key,inviteForm.elements[role+'-'+key].checked]))});
+    const main=get('main'),delegated=get('delegated');
+    if(!confirm(`¿Guardar a ${nick} como sublíder en Mazino y líder delegada en ${space.name} con estos permisos y cupos? Si ya tiene cargos, se actualizarán los permisos de estos dos círculos.`))return;
+    run(async()=>{
+      const result=await call('invitation-create',{spaceId:space.id,nick,main,delegated});
+      if(!active()||current?.space.id!==space.id)return;
+      clearInvite();
+      if(result.invitationCode){
+        $('[data-space-invite-copy-text]').value=`Hola ${result.nick}. Entra a https://mazino.lat/equipo/, abre «Tengo una invitación» e ingresa tu nick y este código: ${result.invitationCode}. Envíame por mensaje privado de R2Beat el código que aparezca allí y vuelve al panel para crear tu clave cuando te apruebe.`;
+        $('[data-space-invite-message]').hidden=false;
+        inviteStatus('Invitación creada. Copia y comparte las instrucciones en privado.');
+      }else{
+        inviteStatus('Los dos cargos se asignaron. La persona puede entrar con su clave de equipo habitual.');
+        const updated=await call('detail',{spaceId:space.id});
+        if(active()&&current?.space.id===space.id){current.grants=updated.grants;renderGrants();}
+      }
+      await refreshInvites();
+    },inviteStatus);
+  });
+  $('[data-space-invite-copy]').addEventListener('click',async()=>{
+    const field=$('[data-space-invite-copy-text]');if(!field.value)return;
+    try{await navigator.clipboard.writeText(field.value);inviteStatus('Invitación copiada.');}
+    catch{field.focus();field.select();inviteStatus('Copia el texto seleccionado.');}
+  });
+  inviteList.addEventListener('submit',event=>{
+    const form=event.target.closest('[data-space-invite-approve]');
+    if(!form)return;
+    event.preventDefault();if(!current||busy)return;
+    const spaceId=current.space.id;
+    run(async()=>{
+      await call('invitation-approve',{spaceId,id:form.dataset.spaceInviteApprove,proof:form.elements.proof.value.trim().toUpperCase(),verifiedInGame:form.elements.verified.checked});
+      if(active()&&current?.space.id===spaceId){inviteStatus('Aprobada. Ya puede crear su clave de equipo.');await refreshInvites();}
+    },inviteStatus);
+  });
+  inviteList.addEventListener('click',event=>{
+    const id=event.target.closest('[data-space-invite-cancel]')?.dataset.spaceInviteCancel;
+    if(!id||!current||busy||!confirm('¿Cancelar esta invitación?'))return;
+    const spaceId=current.space.id;
+    run(async()=>{
+      await call('invitation-cancel',{spaceId,id});
+      if(active()&&current?.space.id===spaceId){clearInvite();inviteStatus('Invitación cancelada.');await refreshInvites();}
+    },inviteStatus);
+  });
   function renderGrants(){
     $('[data-space-grants]').innerHTML=(current?.grants||[]).map(g=>`<article class="prize-item"><h4>${escapeHtml(g.nick)}</h4><p>${g.enabled?'Delegacion activa':'Delegacion pausada'} · ${g.dailyLimit} al dia / ${g.weeklyLimit} a la semana</p><p>${Object.entries(perms).filter(([key])=>g[key]).map(([,label])=>label).join(' · ')||'Sin permisos de gestion'}</p><button type="button" class="ghost-button" data-space-grant-edit="${g.id}">Editar permisos</button></article>`).join('');
   }
@@ -69,6 +143,9 @@
       $('[data-space-detail-name]').textContent=result.space.name;$('[data-space-detail-source]').textContent=result.space.sourceUrl||'Grupo de invitados con registro verificado en el juego.';
       $('[data-space-detail-count]').textContent=result.count+' integrantes · '+(result.sync.lastError||'Historial separado de los demas espacios.');
       $('[data-space-delete]').hidden=id==='main';$('[data-space-sync]').hidden=id==='main'||result.space.kind!=='circle';$('[data-space-tools]').hidden=id==='main';$('[data-space-access-section]').hidden=id==='main';grant.hidden=id==='main';grant.reset();
+      clearInvite();invitations.open=false;invitations.hidden=id==='main'||result.space.kind!=='circle'||!result.space.ready;
+      $('[data-space-invite-title]').textContent=result.space.name+' · Líder delegada';
+      $('[data-space-invite-hidden]').hidden=result.space.enabled;
       grant.elements.memberId.innerHTML='<option value="">Elige un sublider existente</option>'+data.staff.filter(s=>s.enabled).map(s=>`<option value="${s.id}">${escapeHtml(s.nick)}</option>`).join('');
       renderGrants();
       previewPage();renderCards();message(result.space.enabled?'Puedes revisar su vista previa o editar su configuracion.':'Este espacio esta oculto. Personalizalo, revisa la vista previa y luego elige Guardar y mostrar.');
@@ -76,8 +153,8 @@
       return true;
     }catch(error){if(active()&&version===revision)message(error.message);return false;}
   }
-  async function run(task){if(busy)return;busy=true;for(const button of section.querySelectorAll('button'))button.disabled=true;
-    try{await task();}catch(error){message(error.message);}finally{busy=false;for(const button of section.querySelectorAll('button'))button.disabled=false;renderCards();updateDraftState();}}
+  async function run(task,onError=message){if(busy)return;busy=true;for(const button of section.querySelectorAll('button'))button.disabled=true;
+    try{await task();}catch(error){onError(error.message);}finally{busy=false;for(const button of section.querySelectorAll('button'))button.disabled=false;renderCards();updateDraftState();}}
   async function save(showPublic=false){
     if(!current||!edit.reportValidity())return;
     await run(async()=>{const id=current.space.id,body=draft();if(showPublic)body.enabled=true;
@@ -167,6 +244,6 @@
   grant.addEventListener('submit',event=>{event.preventDefault();if(!current)return;run(async()=>{const id=current.space.id,f=grant.elements;await call('grant',{spaceId:id,memberId:f.memberId.value,enabled:f.enabled.checked,dailyLimit:Number(f.dailyLimit.value),weeklyLimit:Number(f.weeklyLimit.value),...Object.fromEntries(Object.keys(perms).map(key=>[key,f[key].checked]))});const latest=await call('detail',{spaceId:id});if(current?.space.id===id){current.grants=latest.grants;renderGrants();}message('Responsable y permisos guardados. Tus cambios pendientes de la pagina se conservan.');});});
   $('[data-space-grants]').addEventListener('click',event=>{const id=event.target.closest('[data-space-grant-edit]')?.dataset.spaceGrantEdit,g=current?.grants.find(g=>g.id===id);if(!g)return;grant.elements.memberId.value=id.slice('operator_'.length);for(const key of [...Object.keys(perms),'enabled'])grant.elements[key].checked=g[key];grant.elements.dailyLimit.value=g.dailyLimit;grant.elements.weeklyLimit.value=g.weeklyLimit;grant.scrollIntoView({behavior:'smooth',block:'center'});});
   section.addEventListener('toggle',()=>{if(section.open&&active()&&!isDirty())load();});
-  new MutationObserver(()=>{if(active())load();else{revision++;current=data=null;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(active())load();else{revision++;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
   if(active())load();
 })();

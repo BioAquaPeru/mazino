@@ -1,5 +1,5 @@
 const adminDestinations = {
-  spaces: ["spaces"], home: null, members: ["members"], access: ["rewards", "access"], accessRequests: ["rewards", "access-requests"], departures: ["rewards", "roster-tracking"], tracking: ["rewards", "tracking"],
+  visitors:["visitors"],spaces: ["spaces"], home: null, members: ["members"], access: ["rewards", "access"], accessRequests: ["rewards", "access-requests"], departures: ["rewards", "roster-tracking"], tracking: ["rewards", "tracking"],
   prizes: ["rewards", "delivery"], bulk: ["rewards", "bulk"], pending: ["rewards", "pending"], assignments: ["rewards", "tracking"], inventory: ["rewards", "inventory"], renameBatch: ["rewards", "rename-batch"], import: ["rewards", "import"],
   imageBatches: ['rewards','image-batches'],
   events: ["rewards", "events"], winners: ["rewards", "assignments"], staff: ["staff", "accounts"], pool: ["staff", "pool"], audit: ["staff", "audit"], transfers: ["staff", "transfers"],
@@ -8,6 +8,7 @@ const adminDestinations = {
 };
 const adminWorkflows = [
   { id: "home", title: "Inicio", tasks: [["home", "Resumen del dia"]] },
+  {id:"visitors",title:"Visitantes y entregas",tasks:[["visitors","Resumen y entregas"]]},
   { id: "members", title: "Integrantes", tasks: [["members", "Integrantes"], ["access", "Claves de premios"], ["accessRequests", "Solicitudes de acceso"], ["departures", "Entradas y salidas"]] },
   { id: "prizes", title: "Premios", tasks: [["prizes", "Entregar"], ["bulk", "Repartir por lote"], ["pending", "Pendientes"], ["assignments", "Entregas y seguimiento"], ["inventory", "Inventario"], ['imageBatches','Imagenes de lotes'], ["renameBatch", "Renombrar por lote"], ["import", "Cargar cupones"]] },
   { id: "events", title: "Eventos", tasks: [["events", "Crear y administrar"], ["winners", "Ganadores"]] },
