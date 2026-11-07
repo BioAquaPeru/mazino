@@ -443,6 +443,24 @@
             </details>
             <details class="admin-subsection" data-rewards-subsection="import">
             <summary>Cargar nuevos cupones</summary>
+            <section class="admin-subsection" data-coupon-excel>
+              <h3>Cargar desde Excel</h3>
+              <p class="muted">Repón el inventario central de Mazino. Usa un archivo .xlsx con las columnas Código e ID y un cupón por fila.</p>
+              <p class="muted">Incluye solo códigos sin canjear. El historial detecta los códigos registrados en la web, incluidos los archivados.</p>
+              <form class="settings-grid" data-coupon-excel-form>
+                <label class="wide"><span>Archivo Excel</span><input type="file" name="file" accept=".xlsx" required /></label>
+                <div class="editor-actions"><button class="primary-action small-action" type="submit">Revisar Excel</button></div>
+              </form>
+              <p class="form-status" data-coupon-excel-status role="status"></p>
+              <div class="settings-grid" data-coupon-excel-review hidden>
+                <div class="wide" data-coupon-excel-rows></div>
+                <div class="editor-actions">
+                  <button class="ghost-button" type="button" data-coupon-excel-recheck hidden>Revisar destinos</button>
+                  <button class="primary-action small-action" type="button" data-coupon-excel-confirm hidden>Confirmar carga</button>
+                </div>
+              </div>
+            </section>
+            <h3>Cargar pegando los códigos</h3>
             <form class="settings-grid" data-coupon-import>
               <label><span>Nombre del premio</span><input name="label" maxlength="80" placeholder="Ej. Mascota, traje o monedas" required /></label>
               <label><span>Nombre del lote (opcional)</span><input name="batchName" maxlength="80" placeholder="Ej. Mascotas de octubre" /></label>
@@ -946,6 +964,7 @@
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>
     <script src="/owner-ui/exceljs-4.4.0.min.js?v=926cb6a0dab94ac2" defer></script>
     <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
+    <script src="/owner-ui/admin-coupon-excel.js?v=62b2ad4e5b9d0923" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
     <script src="/owner-ui/donation-report-image.js?v=b2f845ca3c67d7ea" defer></script><script src="/owner-ui/donation-groups.js?v=a8f8337c2b4559fe" defer></script>
     <script src="/owner-ui/admin-donations.js?v=a78ea37993afaa1e" defer></script>
