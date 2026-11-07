@@ -25,6 +25,8 @@ staffActionNames['ranking-exclusion'] = 'Exclusion de tops actualizada';
 staffActionNames.event_auto_closed = 'Evento cerrado automaticamente';
 staffActionNames.event_edited = 'Evento editado';
 staffActionNames.circle_level_saved = 'Requisito de EXP del circulo actualizado';
+staffActionNames.circle_stock_sent = 'Cupo enviado al círculo';
+staffActionNames.circle_stock_received = 'Cupo recibido del inventario central';
 Object.assign(staffDetailNames, { nivel: 'Nivel', expAnterior: 'EXP anterior', expNueva: 'EXP nueva' });
 Object.assign(staffDetailNames, { nombreAnterior: 'Nombre anterior', nombreNuevo: 'Nombre nuevo', terminoAnterior: 'Termino anterior (Peru)', terminoNuevo: 'Termino nuevo (Peru)', estado: 'Estado' });
 Object.assign(staffDetailNames, { donors: 'Excluir de donadores', globalTop: 'Excluir del top global' });

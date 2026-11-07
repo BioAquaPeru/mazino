@@ -176,3 +176,8 @@
 .space-presentation-advanced { margin-top:16px; }
 .space-presentation-advanced summary { cursor:pointer; padding:12px 0; }
 @media(max-width:750px) { .space-presentation-grid { grid-template-columns:minmax(0,1fr); } .space-presentation-preview { padding:12px; } }
+.circle-stock-history-item { margin:12px 0; padding:12px; border:1px solid #4d3741; border-radius:8px; overflow-wrap:anywhere; }
+[data-circle-stock-selection] { display:flex; flex-wrap:wrap; align-items:center; gap:12px; }
+[data-circle-stock-selection] p { flex-basis:100%; margin:2px 0; }
+[data-circle-stock-confirm-content] { overflow-wrap:anywhere; }
+[data-circle-stock-dialog] { max-width:calc(100vw - 24px); max-height:calc(100dvh - 24px); overflow:auto; }

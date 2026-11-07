@@ -13,7 +13,7 @@ const adminWorkflows = [
   { id: "prizes", title: "Premios", tasks: [["prizes", "Entregar"], ["bulk", "Repartir por lote"], ["pending", "Pendientes"], ["assignments", "Entregas y seguimiento"], ["inventory", "Inventario"], ['imageBatches','Imagenes de lotes'], ["renameBatch", "Renombrar por lote"], ["import", "Cargar cupones"]] },
   { id: "events", title: "Eventos", tasks: [["events", "Crear y administrar"], ["winners", "Ganadores"]] },
   { id: "donations", title: "Donaciones", tasks: [["donations", "Resultados"], ["donationMembers", "Integrantes y cambios"], ["donationUpload", "Cargar totales"], ["donationCaptureBlocks", "Cargas por captura"], ["donationGoal", "Grupos y metas"], ["donationGoals", "Metas y responsables"], ["donationHistory", "Historial"], ["donationImports", "Cargas anteriores"], ["donationRankings", "Exclusiones de tops"]] },
-  { id: "staff", title: "Sublideres", tasks: [["staff", "Accesos y permisos"], ["pool", "Entregar cupo"], ["transfers", "Traspasos"], ["audit", "Actividad"]] },
+  { id: "staff", title: "Sublideres", tasks: [["staff", "Accesos y permisos"], ["pool", "Enviar cupos a círculos"], ["transfers", "Traspasos"], ["audit", "Actividad"]] },
   { id: "spaces", title: "Circulos y grupos", tasks: [["spaces", "Agregar y administrar"]] },
   { id: "settings", title: "Configuracion", tasks: [["settings", "Pagina principal"], ["circle", "Nivel y EXP del circulo"], ["sync", "Sincronizacion"], ["github", "Publicacion"], ["security", "Acceso y seguridad"]] },
   { id: "circle", title: "Nivel y EXP del circulo", tasks: [["circle", "Requisitos de EXP"]] },
@@ -125,5 +125,11 @@ $("[data-logout]").addEventListener("click", () => {
   for (const node of $$("[data-home-members],[data-home-sync],[data-home-publishing]")) node.textContent = "-";
   $('[data-admin-quick-search]').value = '';
 });
-selectAdminSection("home");
+let adminEntryTask="home";
+try{
+  const savedTask=sessionStorage.getItem('mazino-admin-next-task');
+  sessionStorage.removeItem('mazino-admin-next-task');
+  if(savedTask==='import'&&adminCircleId==='main')adminEntryTask='import';
+}catch{}
+selectAdminSection(adminEntryTask);
 renderAdminHome();
