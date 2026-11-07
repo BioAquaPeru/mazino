@@ -22,10 +22,11 @@ function circleContactSettings(settings,branding) {
   if(typeof brand?.welcomeMessage==='string')result.heroPhrase=brand.welcomeMessage;
   const legacyPhone=String(settings.whatsappNumber||'').replace(/[^\d]/g,'');
   result.whatsappUrl=circleWhatsAppUrl(typeof brand?.whatsappUrl==='string'?brand.whatsappUrl:legacyPhone?'https://wa.me/'+legacyPhone:'');
-  result.contactMode=['join','contact'].includes(brand?.contactMode)?brand.contactMode:window.mazinoSpaceKind==='group'?'contact':'join';
+  result.contactMode=['join','contact','hidden'].includes(brand?.contactMode)?brand.contactMode:window.mazinoSpaceKind==='group'?'contact':'join';
   result.contactName=brand?.name||settings.siteName||'este circulo';
   if(result.contactMode==='contact'){result.joinButtonText='CONTACTAR AL LIDER';result.joinEnabled=!!result.whatsappUrl;}
   else {result.joinEnabled=!!result.whatsappUrl&&settings.joinEnabled;if(window.mazinoSpaceKind==='group')result.joinButtonText='UNIRME AL GRUPO';}
+  if(result.contactMode==='hidden')result.joinEnabled=false;
   return result;
 }
 function circleWhatsAppLink(settings,nick,help=false) {
