@@ -5,36 +5,37 @@
   async function readCouponExcel(readWorkbook, buffer, checkArchive) {
     checkArchive(buffer);
     const sheets = await readWorkbook(buffer);
-    const detail = sheets.find(sheet => normalize(sheet.sheet) === "cupones (uno por fila)");
-    const candidates = (detail ? [detail] : sheets).map(({ data }) => {
+    const consolidated = sheets.filter(({ sheet }) => ["cupones (uno por fila)", "todos (lista)"].includes(normalize(sheet)));
+    const candidates = (consolidated.length ? consolidated : sheets).map(({ sheet, data }) => {
       const headers = (data[0] || []).map(normalize);
-      return { data, code: headers.indexOf("codigo"), id: headers.indexOf("id"), name: headers.indexOf("nombre") };
+      return { sheet, data, code: headers.indexOf("codigo"), id: headers.indexOf("id"), name: headers.indexOf("nombre") };
     }).filter(columns => columns.code >= 0 && columns.id >= 0);
-    if (candidates.length !== 1) throw new Error("Usa una hoja con las columnas Código e ID en la primera fila. Si hay varias hojas de cupones, nombra la principal «Cupones (uno por fila)».");
-    const { data, code: codeCol, id: idCol, name: nameCol } = candidates[0];
+    if (!candidates.length) throw new Error("El Excel debe tener una hoja con las columnas Código e ID en la primera fila.");
     const groups = new Map(), seen = new Map();
     let total = 0;
-    for (let index = 1; index < data.length; index++) {
-      const row = data[index], number = index + 1;
-      const rawCode = row[codeCol], rawId = row[idCol];
-      if ((rawCode == null || rawCode === "") && (rawId == null || rawId === "")) continue;
-      const code = cellText(rawCode);
-      const itemId = Number.isSafeInteger(rawId) ? String(rawId) : cellText(rawId);
-      if (!/^\d{1,16}$/.test(itemId) || code.length < 3 || code.length > 256 || /[\x00-\x1f]/.test(code)) {
-        throw new Error(`Fila ${number}: revisa el ID y guarda el código como texto.`);
+    for (const { sheet, data, code: codeCol, id: idCol, name: nameCol } of candidates) {
+      for (let index = 1; index < data.length; index++) {
+        const row = data[index], number = index + 1;
+        const rawCode = row[codeCol], rawId = row[idCol];
+        if ((rawCode == null || rawCode === "") && (rawId == null || rawId === "")) continue;
+        const code = cellText(rawCode);
+        const itemId = Number.isSafeInteger(rawId) ? String(rawId) : cellText(rawId);
+        if (!/^\d{1,16}$/.test(itemId) || code.length < 3 || code.length > 256 || /[\x00-\x1f]/.test(code)) {
+          throw new Error(`En «${sheet}», fila ${number}, revisa el ID y guarda el código como texto.`);
+        }
+        if (++total > 1000) throw new Error("El Excel admite hasta 1 000 filas de cupones.");
+        if (!groups.has(itemId)) groups.set(itemId, { itemId, name: "", codes: [], repeated: 0 });
+        if (groups.size > 100) throw new Error("El Excel admite hasta 100 IDs de premio.");
+        const group = groups.get(itemId);
+        if (nameCol >= 0 && !group.name) group.name = cellText(row[nameCol]).slice(0, 100);
+        if (seen.has(code)) {
+          if (seen.get(code) !== itemId) throw new Error(`En «${sheet}», fila ${number}, un código tiene dos IDs de premio. Corrige el Excel y vuelve a revisarlo.`);
+          group.repeated++;
+          continue;
+        }
+        seen.set(code, itemId);
+        group.codes.push(code);
       }
-      if (++total > 1000) throw new Error("El Excel admite hasta 1 000 filas de cupones.");
-      if (!groups.has(itemId)) groups.set(itemId, { itemId, name: "", codes: [], repeated: 0 });
-      if (groups.size > 100) throw new Error("El Excel admite hasta 100 IDs de premio.");
-      const group = groups.get(itemId);
-      if (nameCol >= 0 && !group.name) group.name = cellText(row[nameCol]).slice(0, 100);
-      if (seen.has(code)) {
-        if (seen.get(code) !== itemId) throw new Error(`Fila ${number}: un mismo código aparece con dos IDs de premio. Corrige el Excel y vuelve a revisarlo.`);
-        group.repeated++;
-        continue;
-      }
-      seen.set(code, itemId);
-      group.codes.push(code);
     }
     if (!groups.size) throw new Error("El Excel no contiene cupones.");
     return [...groups.values()];
@@ -212,6 +213,9 @@
     } catch (error) {
       if (version === revision) {
         status.textContent = marked ? `${marked} códigos marcados. Vuelve a revisar el Excel para actualizar la vista previa.` : error.message;
+        if (!marked && /^Ruta no encontrada\.?$/i.test(error.message) && ["127.0.0.1", "localhost"].includes(window.location?.hostname)) {
+          status.textContent = "Reinicia el servidor local con INICIAR-MAZINO.cmd o abre tu panel en mazino.lat. Luego vuelve a revisar el Excel.";
+        }
         if (action !== "preview") {
           result = undefined;
           confirm.hidden = mark.hidden = true;
