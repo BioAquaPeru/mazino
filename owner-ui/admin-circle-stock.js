@@ -23,15 +23,25 @@
   }
   function renderStaff(){
     const space=data?.spaces.find(item=>item.id===circle.value),previous=staff.value;
-    staff.innerHTML='<option value="">Elige un responsable</option>'+(space?.staff||[]).map(person=>`<option value="${escapeHtml(person.id)}">${escapeHtml(person.nick)} · límite ${person.dailyLimit} al día / ${person.weeklyLimit} semanal</option>`).join('');
+    staff.innerHTML='<option value="">Elige líder o sublíder</option>'+(space?.staff||[]).map(person=>`<option value="${escapeHtml(person.id)}">${escapeHtml(person.nick)} · ${escapeHtml(space.name)} · límite ${person.dailyLimit} al día / ${person.weeklyLimit} semanal</option>`).join('');
     staff.value=space?.staff.some(person=>person.id===previous)?previous:'';
     if(space&&!space.staff.length)status.textContent='Este círculo no tiene responsables activos con permiso para repartir. Revisa Responsables y permisos en Círculos y grupos.';
     else if(space&&!space.enabled)status.textContent='El círculo está oculto al público. El cupo se reserva para su responsable.';
     else status.textContent='';
+    renderDestination();
+  }
+  function renderDestination(){
+    const box=$('[data-circle-stock-destination]');if(!box)return;
+    const space=data?.spaces.find(item=>item.id===circle.value),person=space?.staff.find(item=>item.id===staff.value),row=selected();
+    box.replaceChildren();
+    box.append(field('strong',person?`Destino: ${person.nick} en ${space.name}`:space?`Destino: ${space.name} · elige líder o sublíder`:'Primero elige el círculo de destino.'));
+    if(person&&row)box.append(field('p',`${form.elements.quantity.value || '0'} × ${row.label} · Lote: ${row.batchName}`));
+    box.append(field('p','El cupo se guarda solo en el círculo elegido. Si esta persona tiene otro cargo en otro círculo, su otro cupo permanece separado.'));
+    review.disabled=busy||!person||!row||!form.elements.quantity.validity.valid;
   }
   async function renderSelection(){
     const row=selected(),request=++imageRevision,version=revision;
-    selection.replaceChildren();if(batch.value===''||!row)return;
+    selection.replaceChildren();renderDestination();if(batch.value===''||!row)return;
     form.elements.quantity.max=String(Math.min(300,row.available));
     selection.append(field('p',row.batchName+' · '+row.label+' · '+row.available+' disponibles'));
     if(!row.hasImage){selection.append(field('p','Este lote todavía no tiene imagen de referencia.'));return;}
@@ -73,9 +83,11 @@
       if(!data.stock.length)status.textContent='No hay cupones libres en el inventario central. Carga un lote o devuelve un cupo libre de Mazino.';
       else if(!status.textContent||status.textContent==='Consultando inventario central…')status.textContent='Elige círculo, responsable, lote y cantidad. Revisa el envío antes de confirmarlo.';
     }catch(error){if(active()&&version===revision)status.textContent=error.message;}
-    finally{if(version===revision)lock(false);}
+    finally{if(version===revision){lock(false);renderDestination();}}
   }
-  circle.addEventListener('change',renderStaff);
+  circle.addEventListener('change',()=>{staff.value='';renderStaff();});
+  staff.addEventListener('change',renderDestination);
+  form.elements.quantity.addEventListener('input',renderDestination);
   batch.addEventListener('change',renderSelection);
   refresh.addEventListener('click',load);
   form.addEventListener('submit',async event=>{
@@ -88,6 +100,7 @@
       pending=result;trigger=document.activeElement;content.replaceChildren();
       content.append(field('h3',result.circle),field('p','Responsable: '+result.responsible),
         field('p',result.quantity+' × '+result.label),field('p','Lote: '+result.batchName));
+      content.append(field('p','Este envío aumenta únicamente el cupo de esta persona en '+result.circle+'. No entrega premios personales a jugadores.'));
       const image=CouponImages.thumbnail(result.imageData,result.label);
       content.append(image||field('p','Sin imagen de referencia.'));
       content.append(field('p','Este cupo pertenece a '+result.circle+'. Sus límites diario y semanal se conservan.'));
