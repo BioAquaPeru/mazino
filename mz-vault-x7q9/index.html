@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="/owner-ui/admin-overview.css?v=92b60632e9c8600d" />
     <link rel="stylesheet" href="/owner-ui/admin-donations.css?v=4223becbd205901f" />
     <link rel="stylesheet" href="/owner-ui/admin-workspace.css?v=2f839b37855adf07" />
-  <link rel="stylesheet" href="/owner-ui/owner-cloud.css?v=ef67548d58cd87eb" /></head>
+  <link rel="stylesheet" href="/owner-ui/owner-cloud.css?v=ef67548d58cd87eb" /><link rel="stylesheet" href="/owner-ui/coupon-catalog.css?v=1" /></head>
   <body class="admin-body owner-cloud-body">
     <main class="admin-shell">
       <section class="login-view" data-login-view>
@@ -278,6 +278,7 @@
             </details>
             <details class="admin-subsection" data-rewards-subsection="delivery">
             <summary>Entregar un premio</summary>
+              <div data-owner-catalog="delivery"></div>
             <form class="settings-grid" data-personal-delivery>
               <label><span>1. Premio que entregaras</span><select data-delivery-item required><option value="">Elige un item disponible</option></select></label>
               <div class="partner-picker">
@@ -462,6 +463,7 @@
             </details>
             <details class="admin-subsection" data-rewards-subsection="inventory">
             <summary>Inventario de cupones</summary>
+              <div data-owner-catalog="inventory"></div>
             <div class="rewards-toolbar">
               <label><span>Destinatario para los seleccionados</span><select data-inventory-member><option value="">Elige integrante</option></select></label>
               <label><span>Estado de cupones</span><select data-coupon-filter><option value="available">Disponibles</option><option value="assigned">Asignados</option><option value="claimed">Reclamados</option><option value="all">Todos</option></select></label>
@@ -504,6 +506,7 @@
             </details>
             <details class="admin-subsection" data-staff-group="pool">
               <summary>Enviar cupones a líderes y sublíderes</summary>
+              <div data-owner-catalog="transfer"></div>
               <section data-circle-stock>
                 <p>Desde este panel envías cupones del inventario central de Mazino al cupo de cualquier líder o sublíder. No necesitas cambiar de círculo ni entrar con su cuenta.</p>
                 <div class="editor-actions"><button type="button" class="ghost-button" data-circle-stock-load>Cargar cupones al inventario central</button><button type="button" class="ghost-button" data-circle-stock-refresh>Actualizar inventario y responsables</button></div>
@@ -949,5 +952,5 @@
     <script src="/owner-ui/visitor-dashboard.js?v=6ee6ed6ef23d86f1" defer></script><script src="/owner-ui/admin-visitors.js?v=27779f0661153b12" defer></script>
     <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=e40dd7629c28b76a" defer></script>
-  </body>
+  <script type="module" src="/owner-ui/admin-catalog.js?v=1"></script></body>
 </html>
