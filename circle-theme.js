@@ -40,7 +40,8 @@ function circleWhatsAppLink(settings,nick,help=false) {
 function applyCircleTheme(settings,branding) {
   const id=window.mazinoSpaceId||'main',brand=selectedCircleBrand(branding);
   const extra=id!=='main',valid=value=>/^#[a-f0-9]{6}$/i.test(value||'');
-  const custom=!!(brand&&(brand.pageLogoUrl||brand.logoUrl||brand.pageColor||brand.pageBackground||(brand.tabColor&&brand.tabColor!=='#ff506a')));
+  const cover=publicSpaceLogo(brand?.coverUrl,240000);
+  const custom=!!(brand&&(cover||brand.pageLogoUrl||brand.logoUrl||brand.pageColor||brand.pageBackground||(brand.tabColor&&brand.tabColor!=='#ff506a')));
   const active=extra||custom,body=document.body;
   body.classList.toggle('circle-themed',active);
   body.classList.toggle('circle-custom-logo',extra||!!(brand?.pageLogoUrl||brand?.logoUrl));
@@ -54,6 +55,25 @@ function applyCircleTheme(settings,branding) {
   let heading=primary;for(let amount=.1;contrast(heading,background)<4.5&&amount<=1;amount+=.1)heading=mix(primary,foreground,Math.min(amount,1));
   const variables={bg:background,text:foreground,muted:mix(background,foreground,.72),panel:mix(background,foreground,.065),line:mix(background,foreground,.2),accent:primary,rgb:rgb(primary).join(','),heading,'on-accent':light(primary)>.179?'#17111a':'#ffffff'};
   for(const [key,value]of Object.entries(variables))body.style.setProperty('--circle-page-'+key,value);
+  const hero=document.querySelector('.hero');
+  if(hero){
+    let backdrop=hero.querySelector('.circle-cover-image');
+    if(cover){
+      if(!backdrop){
+        backdrop=document.createElement('img');backdrop.className='circle-cover-image';backdrop.alt='';
+        backdrop.setAttribute('aria-hidden','true');hero.prepend(backdrop);
+      }
+      const src=typeof publicAssetUrl==='function'?publicAssetUrl(cover):cover;
+      if(backdrop.getAttribute('src')!==src){
+        body.classList.add('circle-has-cover');
+        backdrop.onerror=()=>{if(backdrop.isConnected&&backdrop.getAttribute('src')===src)body.classList.remove('circle-has-cover');};
+        backdrop.src=src;
+      }
+    }else{
+      backdrop?.remove();
+      body.classList.remove('circle-has-cover');
+    }
+  }
   const image=document.querySelector('[data-logo]'),placeholder=document.querySelector('[data-circle-emblem]');
   if(!image||!placeholder)return;
   const name=brand?.name||settings.siteName||'Circulo';

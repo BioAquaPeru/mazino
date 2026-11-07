@@ -197,7 +197,7 @@ function publicBranding(value) {
   if(!value||value.spaceId!==(window.mazinoSpaceId||'main')||!Number.isSafeInteger(value.revision)||value.revision<1||typeof value.name!=='string'||!value.name||value.name.length>60)return null;
   const result={spaceId:value.spaceId,name:value.name,revision:value.revision};
   for(const field of ['tabColor','pageColor','pageBackground']){const color=value[field]||'';if(typeof color!=='string'||(color&&!/^#[a-f0-9]{6}$/i.test(color)))return null;result[field]=color;}
-  for(const field of ['logoUrl','pageLogoUrl']){const logo=value[field]||'';if(typeof logo!=='string'||logo.length>(field==='logoUrl'?60000:240000)||(!/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(logo)&&!/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(logo)&&logo!==''))return null;result[field]=logo;}
+  for(const field of ['logoUrl','pageLogoUrl','coverUrl']){const logo=value[field]||'';if(typeof logo!=='string'||logo.length>(field==='logoUrl'?60000:240000)||(!/^(https:\/\/[^\s<>"']+|\/assets\/[a-zA-Z0-9_./-]+\.(png|jpe?g|webp|gif))$/.test(logo)&&!/^data:image\/(png|jpeg|webp);base64,[a-zA-Z0-9+/]+={0,2}$/.test(logo)&&logo!==''))return null;result[field]=logo;}
   if(typeof value.welcomeMessage==='string'&&value.welcomeMessage.length<=500)result.welcomeMessage=value.welcomeMessage;
   if(typeof value.whatsappUrl==='string'&&value.whatsappUrl.length<=1500)result.whatsappUrl=value.whatsappUrl;
   if(['join','contact'].includes(value.contactMode))result.contactMode=value.contactMode;

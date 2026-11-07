@@ -562,10 +562,14 @@
                 <input name="logoUrl" type="hidden"><label class="wide">O usar enlace de una imagen<input name="logoLink" placeholder="https://..." maxlength="1500"></label>
                 <div class="space-logo-editor wide"><img data-space-logo-preview alt="Vista previa del logo de la pestaña" width="56" height="56" hidden><span data-space-logo-label>Sin logo personalizado</span><button type="button" class="ghost-button" data-space-logo-clear>Quitar logo</button></div>
                 </div></details>
-   <details class="space-editor-fold wide"><summary>2. Colores y logo de portada</summary><fieldset class="settings-grid wide space-page-editor"><legend>Apariencia de su pagina</legend>
+   <details class="space-editor-fold wide"><summary>2. Imagen de portada y colores</summary><fieldset class="settings-grid wide space-page-editor"><legend>Apariencia de su página</legend>
                   <p class="wide">Se aplica a la portada, titulos, botones y fondo de este circulo. Los colores propios de los integrantes se conservan.</p>
                   <label>Color principal de la pagina<input type="color" name="pageColor" value="#df101f"></label><label>Color de fondo<input type="color" name="pageBackground" value="#000000"></label>
-                  <label class="wide">Subir logo de portada<input type="file" accept="image/png,image/jpeg,image/webp" data-space-page-logo-file><small>PNG, JPG o WebP de hasta 5 MB. Se conserva una copia de mayor calidad para PC y movil.</small></label>
+                  <label class="wide">Subir imagen de portada ancha<input type="file" accept="image/png,image/jpeg,image/webp" data-space-cover-file><small>PNG, JPG o WebP de hasta 5 MB. Usa una foto horizontal y deja lo importante cerca del centro para el recorte en móvil.</small></label>
+                  <input name="coverUrl" type="hidden"><label class="wide">O enlace de la imagen de portada<input name="coverLink" placeholder="https://..." maxlength="1500"></label>
+                  <div class="space-actions wide"><button type="button" class="primary-action small-action" data-space-cover-preview-open>Vista previa PC / móvil</button><button type="button" class="ghost-button" data-space-cover-from-logo hidden>Usar mi imagen anterior como portada</button><button type="button" class="ghost-button" data-space-cover-clear>Quitar imagen de portada</button></div>
+                  <p class="wide" data-space-cover-status>Sin imagen de portada ancha.</p>
+                  <label class="wide">Subir logotipo centrado (opcional)<input type="file" accept="image/png,image/jpeg,image/webp" data-space-page-logo-file><small>Se muestra cuando no hay imagen de portada ancha.</small></label>
                   <input name="pageLogoUrl" type="hidden"><label class="wide">O enlace del logo de portada<input name="pageLogoLink" placeholder="https://..." maxlength="1500"></label>
                   <div class="space-logo-editor wide"><button type="button" class="ghost-button" data-space-page-logo-clear>Usar el logo del menu en la portada</button><small>Si no hay un logo propio, los circulos adicionales muestran su inicial.</small></div>
                   <div class="space-page-sample wide" data-space-page-sample><img data-space-page-logo-preview width="96" height="96" alt="Vista previa de la portada" hidden><strong data-space-page-name></strong><span>Vista previa de su pagina</span><b data-space-page-action>Premios y eventos</b></div>
@@ -874,7 +878,7 @@
     <script src="/owner-ui/admin-pending-actions.js?v=a975aed5ef34496f" defer></script>
     <script src="/owner-ui/admin-overview.js?v=4194a2a9aa7f47b0" defer></script>
     <script src="/owner-ui/admin-tracking.js?v=35677e4fec0d4c55" defer></script>
-    <script src="/owner-ui/admin-spaces.js?v=9c5a3972256371ba" defer></script>
+    <script src="/owner-ui/admin-spaces.js?v=7db9a4f9069400c6" defer></script>
     <script src="/owner-ui/admin-navigation.js?v=f6d1a3b46e00c3fb" defer></script>
     <script src="/owner-ui/admin-circle.js?v=705a9b15691d079c" defer></script>
     <script src="/owner-ui/admin-rankings.js?v=8c3018ed7683af3a" defer></script>

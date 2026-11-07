@@ -3,11 +3,12 @@
   const create=$('[data-space-create]'),createBox=$('[data-space-create-box]'),edit=$('[data-space-edit]'),grant=$('[data-space-grant]'),context=$('[data-admin-circle-select]');
   const trash=$('[data-space-trash-list]'),logoFile=$('[data-space-logo-file]'),logoPreview=$('[data-space-logo-preview]'),pageFile=$('[data-space-page-logo-file]'),pageSample=$('[data-space-page-sample]'),pageImage=$('[data-space-page-logo-preview]');
   const viewer=$('[data-space-preview-dialog]'),frame=$('[data-space-preview-frame]');
+  const coverFile=$('[data-space-cover-file]'),coverFromLogo=$('[data-space-cover-from-logo]');
   const invitations=$('[data-space-invitations]'),inviteForm=$('[data-space-invite-form]'),inviteList=$('[data-space-invite-list]');
   const approvalList=$('[data-space-approval-list]'),approvalRefresh=$('[data-space-approval-refresh]');
   const approvalStatus=$('[data-space-approval-status]'),approvalCount=$('[data-space-approval-count]');
   const perms={can_assign:'Asignar premios',can_events:'Crear y editar sus eventos',can_release:'Quitar o traspasar sus pendientes',can_close:'Cerrar sus eventos',can_donations:'Cargar donaciones',can_donation_goals:'Crear metas',can_access:'Verificar en el juego y aprobar accesos'};
-  const fields=['name','logoUrl','tabColor','pageLogoUrl','pageColor','pageBackground','welcomeMessage','whatsappUrl','contactMode'];
+  const fields=['name','logoUrl','tabColor','pageLogoUrl','coverUrl','pageColor','pageBackground','welcomeMessage','whatsappUrl','contactMode'];
   let data=null,current=null,revision=0,busy=false,savedSignature='',templatePromise=null,previewReady=false;
   let approvalRevision=0;
   const active=()=>!$('[data-dashboard]').hidden;
@@ -144,6 +145,36 @@
     $('[data-space-save-show]').hidden=current.space.id==='main'||current.space.enabled;
     sendPreview();
   }
+  const rosterTime=new Intl.DateTimeFormat('es-PE',{dateStyle:'short',timeStyle:'short',timeZone:'America/Lima'});
+  function rosterSummary(space){
+    const at=space.lastRosterAttemptAt||space.lastRosterSyncAt;
+    return at?'Última consulta (Perú): '+rosterTime.format(new Date(at)):'Aún no hay consultas registradas.';
+  }
+  async function syncMembers(id){
+    const space=data?.spaces.find(row=>row.id===id);
+    if(!space||space.deletedAt||space.kind!=='circle'||space.id==='main')return;
+    await run(async()=>{
+      message('Consultando integrantes de '+space.name+' en R2Beat…');
+      try{
+        const {sync}=await call('sync',{spaceId:id});
+        if(!active()||!data?.spaces.includes(space))return;
+        Object.assign(space,{lastRosterAttemptAt:Date.parse(sync.lastAttemptAt)||null,lastRosterSyncAt:Date.parse(sync.lastSyncAt)||null,rosterError:sync.lastError||''});
+        if(current?.space.id===id){
+          current.sync=sync;current.count=sync.count;
+          $('[data-space-detail-count]').textContent=sync.count+' integrantes · '+rosterSummary(space);
+        }
+        message(space.name+' actualizado · '+sync.count+' integrantes.');
+      }catch(error){
+        if(!active())return;
+        const latest=await call('state').catch(()=>null);
+        if(active()&&latest&&data?.spaces.includes(space)){
+          const status=latest.spaces.find(row=>row.id===id);
+          if(status)Object.assign(space,status);
+        }
+        if(active())message(error.message);
+      }
+    });
+  }
   function renderCards(){
     if(!data)return;
     const all=data.spaces.filter(space=>!space.deletedAt),query=$('[data-spaces-search]').value.trim().toLocaleLowerCase(),filter=$('[data-spaces-filter]').value;
@@ -152,7 +183,8 @@
     $('[data-space-hidden-count]').textContent=all.filter(space=>!space.enabled).length;
     $('[data-space-deleted-count]').textContent=data.spaces.filter(space=>space.deletedAt).length;
     $('[data-spaces-result-count]').textContent=shown.length+' de '+all.length+' espacios';
-    const card=space=>`<article class="space-card ${current?.space.id===space.id?'space-card-selected':''}" style="--space-accent:${color(space.tabColor)}"><div class="space-card-head">${space.logoUrl?`<img class="space-card-logo" src="${escapeHtml(space.logoUrl)}" alt="" width="48" height="48" referrerpolicy="no-referrer">`:'<span class="space-card-initial" aria-hidden="true">'+escapeHtml([...space.name][0])+'</span>'}<div><h3>${escapeHtml(space.name)}</h3><p>${space.kind==='group'?'Grupo de invitados':'Circulo de R2Beat'}</p></div></div><p class="space-visibility ${space.enabled?'is-visible':''}">${space.deletedAt?'Eliminado · historial conservado':space.enabled?'Visible en mazino.lat':'Oculto · no aparece en la web'}${space.id==='main'?' · Principal':''}</p>${space.deletedAt?`<button type="button" class="ghost-button" data-space-restore="${space.id}">Restaurar como oculto</button>`:`<div class="space-actions"><button type="button" class="ghost-button" data-space-preview="${space.id}">Vista previa</button><button type="button" class="primary-action small-action" data-space-detail-open="${space.id}">Editar</button>${space.id==='main'?'':`<button type="button" class="ghost-button" data-space-toggle="${space.id}" ${!space.ready&&!space.enabled?'disabled title="El espacio aun no esta preparado"':''}>${space.enabled?'Ocultar':'Mostrar'}</button>`}</div><details class="space-card-more"><summary>${space.id==='main'?'Administrar':'Administrar y eliminar'}</summary><div class="space-actions"><button type="button" class="ghost-button" data-space-enter="${space.id}">Administrar integrantes y premios</button>${space.sourceUrl?`<a class="ghost-button" href="${escapeHtml(space.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver en R2Beat</a>`:''}${space.id==='main'?'':`<button type="button" class="ghost-button space-danger" data-space-remove="${space.id}">Eliminar</button>`}</div></details>`}</article>`;
+    const syncCard=space=>space.id!=='main'&&space.kind==='circle'&&space.ready&&!space.deletedAt?`<div class="space-actions"><button type="button" class="ghost-button" data-space-sync-card="${space.id}">Actualizar integrantes</button></div><p>${escapeHtml(rosterSummary(space))}</p>${space.rosterError?`<p>${escapeHtml(space.rosterError)}</p>`:''}`:'';
+    const card=space=>`<article class="space-card ${current?.space.id===space.id?'space-card-selected':''}" style="--space-accent:${color(space.tabColor)}"><div class="space-card-head">${space.logoUrl?`<img class="space-card-logo" src="${escapeHtml(space.logoUrl)}" alt="" width="48" height="48" referrerpolicy="no-referrer">`:'<span class="space-card-initial" aria-hidden="true">'+escapeHtml([...space.name][0])+'</span>'}<div><h3>${escapeHtml(space.name)}</h3><p>${space.kind==='group'?'Grupo de invitados':'Circulo de R2Beat'}</p></div></div><p class="space-visibility ${space.enabled?'is-visible':''}">${space.deletedAt?'Eliminado · historial conservado':space.enabled?'Visible en mazino.lat':'Oculto · no aparece en la web'}${space.id==='main'?' · Principal':''}</p>${space.deletedAt?`<button type="button" class="ghost-button" data-space-restore="${space.id}">Restaurar como oculto</button>`:`<div class="space-actions"><button type="button" class="ghost-button" data-space-preview="${space.id}">Vista previa</button><button type="button" class="primary-action small-action" data-space-detail-open="${space.id}">Editar</button>${space.id==='main'?'':`<button type="button" class="ghost-button" data-space-toggle="${space.id}" ${!space.ready&&!space.enabled?'disabled title="El espacio aun no esta preparado"':''}>${space.enabled?'Ocultar':'Mostrar'}</button>`}</div>${syncCard(space)}<details class="space-card-more"><summary>${space.id==='main'?'Administrar':'Administrar y eliminar'}</summary><div class="space-actions"><button type="button" class="ghost-button" data-space-enter="${space.id}">Administrar integrantes y premios</button>${space.sourceUrl?`<a class="ghost-button" href="${escapeHtml(space.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ver en R2Beat</a>`:''}${space.id==='main'?'':`<button type="button" class="ghost-button space-danger" data-space-remove="${space.id}">Eliminar</button>`}</div></details>`}</article>`;
     list.innerHTML=shown.map(card).join('')||'<p class="empty-state">No hay espacios con estos filtros.</p>';
     const removed=data.spaces.filter(space=>space.deletedAt);trash.innerHTML=removed.map(card).join('')||'<p>No hay espacios eliminados.</p>';
     $('[data-space-trash-count]').textContent=removed.length;
@@ -166,6 +198,9 @@
     }catch(error){if(active()&&version===revision)message(error.message);return false;}
   }
   function previewPage(){
+    const cover=edit.elements.coverUrl.value;
+    $('[data-space-cover-status]').textContent=cover?'Portada preparada. Revisa el recorte en la vista previa.':'Sin imagen de portada ancha.';
+    coverFromLogo.hidden=!edit.elements.pageLogoUrl.value&&!edit.elements.logoUrl.value;
     const accent=color(edit.elements.pageColor.value),background=color(edit.elements.pageBackground.value),parts=background.slice(1).match(/../g).map(v=>parseInt(v,16));
     pageSample.style.background=background;pageSample.style.color=parts[0]*.299+parts[1]*.587+parts[2]*.114>155?'#17111a':'#fff6f3';
     $('[data-space-page-name]').textContent=edit.elements.name.value||'Tu circulo';
@@ -182,11 +217,11 @@
     if(!force&&current?.space.id!==id&&!discard())return false;
     const version=++revision;message('Consultando espacio...');
     try{const result=await call('detail',{spaceId:id});if(!active()||version!==revision)return false;current=result;detail.hidden=false;
-      for(const field of ['name','logoUrl','pageLogoUrl','welcomeMessage','whatsappUrl'])edit.elements[field].value=result.space[field]||'';
+      for(const field of ['name','logoUrl','pageLogoUrl','coverUrl','welcomeMessage','whatsappUrl'])edit.elements[field].value=result.space[field]||'';
       edit.elements.tabColor.value=color(result.space.tabColor);edit.elements.pageColor.value=result.space.pageColor||(id==='main'?'#df101f':color(result.space.tabColor));edit.elements.pageBackground.value=result.space.pageBackground||'#000000';
       edit.elements.contactMode.value=result.space.contactMode||(result.space.kind==='group'?'contact':'join');
-      for(const [link,value]of [['logoLink',result.space.logoUrl],['pageLogoLink',result.space.pageLogoUrl]])edit.elements[link].value=value?.startsWith('data:')?'':value||'';
-      logoFile.value=pageFile.value='';edit.elements.enabled.checked=result.space.enabled;edit.elements.enabled.disabled=id==='main';edit.elements.name.readOnly=id==='main';
+      for(const [link,value]of [['logoLink',result.space.logoUrl],['pageLogoLink',result.space.pageLogoUrl],['coverLink',result.space.coverUrl]])edit.elements[link].value=value?.startsWith('data:')?'':value||'';
+      logoFile.value=pageFile.value=coverFile.value='';edit.elements.enabled.checked=result.space.enabled;edit.elements.enabled.disabled=id==='main';edit.elements.name.readOnly=id==='main';
       savedSignature=JSON.stringify(draft());
       $('[data-space-detail-name]').textContent=result.space.name;$('[data-space-detail-source]').textContent=result.space.sourceUrl||'Grupo de invitados con registro verificado en el juego.';
       $('[data-space-detail-count]').textContent=result.count+' integrantes · '+(result.sync.lastError||'Historial separado de los demas espacios.');
@@ -216,7 +251,7 @@
   function sendPreview(){
     if(!viewer.open||!previewReady||!current||!active())return;
     const edited=isDirty(),source=edited?{...current.space,...draft()}:current.space;
-    const keys=['id','name','kind','enabled','version','logoUrl','tabColor','pageLogoUrl','pageColor','pageBackground','welcomeMessage','whatsappUrl','contactMode'];
+    const keys=['id','name','kind','enabled','version','logoUrl','tabColor','pageLogoUrl','coverUrl','pageColor','pageBackground','welcomeMessage','whatsappUrl','contactMode'];
     const space=Object.fromEntries(keys.map(key=>[key,source[key]]));
     const settings={siteName:space.name,heroPhrase:space.welcomeMessage||'',joinButtonText:space.kind==='group'?'SOLICITAR PARTICIPACION':'UNIRME AL CIRCULO',joinEnabled:true,logoUrl:'',...current.previewSettings};
     $('[data-space-preview-title]').textContent='Vista previa de '+space.name;
@@ -259,7 +294,7 @@
   for(const button of viewer.querySelectorAll('[data-space-preview-size]'))button.addEventListener('click',()=>setPreviewSize(button.dataset.spacePreviewSize));
   $('[data-space-preview-editor]').addEventListener('click',()=>{if(current)openPreview(current.space.id);});
   grant.querySelector('[data-space-permissions]').innerHTML=Object.entries(perms).map(([key,label])=>`<label class="switch-row"><input type="checkbox" name="${key}"><span>${label}</span></label>`).join('');
-  list.addEventListener('click',event=>{const button=event.target.closest('button');if(!button||busy)return;const d=button.dataset;if(d.spaceDetailOpen)show(d.spaceDetailOpen);else if(d.spacePreview)openPreview(d.spacePreview);else if(d.spaceToggle)toggle(d.spaceToggle);else if(d.spaceRemove)remove(d.spaceRemove);else if(d.spaceEnter)enter(d.spaceEnter);});
+  list.addEventListener('click',event=>{const button=event.target.closest('button');if(!button||busy)return;const d=button.dataset;if(d.spaceSyncCard)syncMembers(d.spaceSyncCard);else if(d.spaceDetailOpen)show(d.spaceDetailOpen);else if(d.spacePreview)openPreview(d.spacePreview);else if(d.spaceToggle)toggle(d.spaceToggle);else if(d.spaceRemove)remove(d.spaceRemove);else if(d.spaceEnter)enter(d.spaceEnter);});
   for(const control of [$('[data-spaces-search]'),$('[data-spaces-filter]')])control.addEventListener(control.tagName==='SELECT'?'change':'input',renderCards);
   context.addEventListener('change',()=>{enter(context.value);context.value=adminCircleId;});
   $('[data-spaces-refresh]').addEventListener('click',()=>{if(!discard())return;run(async()=>{const id=current?.space.id;await load();if(id)await show(id,{force:true,scroll:false});message('Lista actualizada.');});});
@@ -271,27 +306,30 @@
   $('[data-space-save-show]').addEventListener('click',()=>save(true));
   $('[data-space-edit-close]').addEventListener('click',()=>{if(!discard())return;revision++;current=null;savedSignature='';detail.hidden=true;renderCards();list.scrollIntoView({behavior:'smooth',block:'start'});});
   edit.addEventListener('input',previewPage);edit.addEventListener('change',previewPage);
-  for(const [link,field]of [['logoLink','logoUrl'],['pageLogoLink','pageLogoUrl']])edit.elements[link].addEventListener('input',()=>{edit.elements[field].value=edit.elements[link].value.trim();previewPage();});
+  for(const [link,field]of [['logoLink','logoUrl'],['pageLogoLink','pageLogoUrl'],['coverLink','coverUrl']])edit.elements[link].addEventListener('input',()=>{edit.elements[field].value=edit.elements[link].value.trim();previewPage();});
   $('[data-space-logo-clear]').addEventListener('click',()=>{edit.elements.logoUrl.value=edit.elements.logoLink.value=logoFile.value='';previewPage();});
   $('[data-space-page-logo-clear]').addEventListener('click',()=>{edit.elements.pageLogoUrl.value=edit.elements.pageLogoLink.value=pageFile.value='';previewPage();});
-  function prepareLogo(input,isPage){const file=input.files?.[0];if(!file)return;const version=revision;run(async()=>{
+  $('[data-space-cover-preview-open]').addEventListener('click',()=>{if(current)openPreview(current.space.id);});
+  $('[data-space-cover-clear]').addEventListener('click',()=>{edit.elements.coverUrl.value=edit.elements.coverLink.value=coverFile.value='';previewPage();});
+  coverFromLogo.addEventListener('click',()=>{const source=edit.elements.pageLogoUrl.value||edit.elements.logoUrl.value;edit.elements.coverUrl.value=source;edit.elements.coverLink.value=source.startsWith('data:')?'':source;coverFile.value='';previewPage();});
+  function prepareImage(input,field,link){const isPage=field!=='logoUrl',isCover=field==='coverUrl';const file=input.files?.[0];if(!file)return;const version=revision;run(async()=>{
     if(!['image/png','image/jpeg','image/webp'].includes(file.type)||file.size>5*1024*1024)throw Error('Elige un PNG, JPG o WebP de hasta 5 MB.');
     const objectUrl=URL.createObjectURL(file);
     try{const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(Error('No se pudo abrir la imagen.'));image.src=objectUrl;});
-      const canvas=document.createElement('canvas'),scale=isPage?Math.min(1,1280/image.naturalWidth,800/image.naturalHeight):Math.min(160/image.naturalWidth,160/image.naturalHeight);
+      const canvas=document.createElement('canvas'),scale=isPage?Math.min(1,(isCover?1600:1280)/image.naturalWidth,(isCover?1000:800)/image.naturalHeight):Math.min(160/image.naturalWidth,160/image.naturalHeight);
       canvas.width=isPage?Math.max(1,Math.round(image.naturalWidth*scale)):160;canvas.height=isPage?Math.max(1,Math.round(image.naturalHeight*scale)):160;
       const w=image.naturalWidth*scale,h=image.naturalHeight*scale;canvas.getContext('2d').drawImage(image,(canvas.width-w)/2,(canvas.height-h)/2,w,h);
-      let url=canvas.toDataURL('image/webp',.82),limit=isPage?240000:60000;if(url.length>limit)url=canvas.toDataURL('image/webp',.6);if(url.length>limit)throw Error('La imagen es demasiado compleja. Elige una mas pequeña.');
-      if(!active()||version!==revision)return;edit.elements[isPage?'pageLogoUrl':'logoUrl'].value=url;edit.elements[isPage?'pageLogoLink':'logoLink'].value='';previewPage();message('Logo preparado. Puedes revisarlo en Vista previa antes de guardar.');
+      let url=canvas.toDataURL('image/webp',.82),limit=isPage?240000:60000;if(url.length>limit)url=canvas.toDataURL('image/webp',.6);if(url.length>limit&&isCover)url=canvas.toDataURL('image/webp',.42);if(url.length>limit)throw Error('La imagen es demasiado compleja. Elige una mas pequeña.');
+      if(!active()||version!==revision)return;edit.elements[field].value=url;edit.elements[link].value='';previewPage();message(isCover?'Portada preparada. Revisa la vista previa antes de guardar.':'Logo preparado. Puedes revisarlo en Vista previa antes de guardar.');
     }finally{URL.revokeObjectURL(objectUrl);}
   });}
-  logoFile.addEventListener('change',()=>prepareLogo(logoFile,false));pageFile.addEventListener('change',()=>prepareLogo(pageFile,true));
+  logoFile.addEventListener('change',()=>prepareImage(logoFile,'logoUrl','logoLink'));pageFile.addEventListener('change',()=>prepareImage(pageFile,'pageLogoUrl','pageLogoLink'));coverFile.addEventListener('change',()=>prepareImage(coverFile,'coverUrl','coverLink'));
   $('[data-space-delete]').addEventListener('click',()=>{if(current)remove(current.space.id);});
   trash.addEventListener('click',event=>{const id=event.target.closest('[data-space-restore]')?.dataset.spaceRestore,space=data?.spaces.find(s=>s.id===id);if(!space||!discard())return;run(async()=>{await call('restore',{spaceId:id,version:space.version,confirmed:true});await load();await show(id,{force:true});message('Restaurado y oculto. Revisa su vista previa antes de mostrarlo.');});});
-  $('[data-space-sync]').addEventListener('click',()=>{if(!current||!discard())return;run(async()=>{const id=current.space.id;await call('sync',{spaceId:id});await show(id,{force:true,scroll:false});message('Integrantes actualizados desde R2Beat.');});});
+  $('[data-space-sync]').addEventListener('click',()=>{if(current)syncMembers(current.space.id);});
   grant.addEventListener('submit',event=>{event.preventDefault();if(!current)return;run(async()=>{const id=current.space.id,f=grant.elements;await call('grant',{spaceId:id,memberId:f.memberId.value,enabled:f.enabled.checked,dailyLimit:Number(f.dailyLimit.value),weeklyLimit:Number(f.weeklyLimit.value),...Object.fromEntries(Object.keys(perms).map(key=>[key,f[key].checked]))});const latest=await call('detail',{spaceId:id});if(current?.space.id===id){current.grants=latest.grants;renderGrants();}message('Responsable y permisos guardados. Tus cambios pendientes de la pagina se conservan.');});});
   $('[data-space-grants]').addEventListener('click',event=>{const id=event.target.closest('[data-space-grant-edit]')?.dataset.spaceGrantEdit,g=current?.grants.find(g=>g.id===id);if(!g)return;grant.elements.memberId.value=id.slice('operator_'.length);for(const key of [...Object.keys(perms),'enabled'])grant.elements[key].checked=g[key];grant.elements.dailyLimit.value=g.dailyLimit;grant.elements.weeklyLimit.value=g.weeklyLimit;grant.scrollIntoView({behavior:'smooth',block:'center'});});
   section.addEventListener('toggle',()=>{if(!section.open||!active())return;if(isDirty())void refreshApprovals();else load();});
-  new MutationObserver(()=>{if(active())load();else{revision++;approvalRevision++;approvalList.replaceChildren();approvalCount.textContent=approvalStatus.textContent='';approvalRefresh.disabled=false;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
+  new MutationObserver(()=>{if(active())load();else{revision++;approvalRevision++;approvalList.replaceChildren();approvalCount.textContent=approvalStatus.textContent='';approvalRefresh.disabled=false;current=data=null;clearInvite();invitations.open=false;savedSignature='';list.innerHTML=trash.innerHTML=context.innerHTML='';detail.hidden=true;logoFile.value=pageFile.value=coverFile.value='';logoPreview.removeAttribute('src');pageImage.removeAttribute('src');if(viewer.open)viewer.close();message('');}}).observe($('[data-dashboard]'),{attributes:true,attributeFilter:['hidden']});
   if(active())load();
 })();
