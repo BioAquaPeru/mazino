@@ -1,4 +1,4 @@
-import { mountCouponCatalog } from './coupon-catalog.js?v=2';
+import { mountCouponCatalog } from './coupon-catalog.js?v=3';
 
 const dashboard = document.querySelector('[data-dashboard]');
 for (const slot of document.querySelectorAll('[data-owner-catalog]')) {
