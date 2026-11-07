@@ -14,4 +14,5 @@
 .catalog-dialog { max-width:min(560px,calc(100vw - 24px)); max-height:calc(100dvh - 30px); padding:20px; overflow:auto; border:1px solid #785765; border-radius:12px; color:#fff4f5; background:#1b1117; }
 .catalog-dialog::backdrop { background:#000b; }
 .catalog-dialog p { margin:10px 0; }
-.catalog-image { display:block; width:min(130px,100%); max-height:130px; object-fit:contain; margin-top:8px; border-radius:7px; }
+.catalog-image-slot { display:grid; align-items:center; min-height:108px; margin-top:8px; }
+.catalog-image { display:block; width:min(130px,100%); height:108px; object-fit:contain; border-radius:7px; }
