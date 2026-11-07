@@ -14,5 +14,12 @@
 .catalog-dialog { max-width:min(560px,calc(100vw - 24px)); max-height:calc(100dvh - 30px); padding:20px; overflow:auto; border:1px solid #785765; border-radius:12px; color:#fff4f5; background:#1b1117; }
 .catalog-dialog::backdrop { background:#000b; }
 .catalog-dialog p { margin:10px 0; }
-.catalog-image-slot { display:grid; align-items:center; min-height:108px; margin-top:8px; }
-.catalog-image { display:block; width:min(130px,100%); height:108px; object-fit:contain; border-radius:7px; }
+.catalog-prize { --catalog-thumb:56px; grid-template-columns:var(--catalog-thumb) minmax(0,1fr) 76px; }
+.catalog-image-slot { display:grid; place-items:center; width:var(--catalog-thumb); height:var(--catalog-thumb); color:#e0c1cd; background:#251923; border-radius:7px; }
+.catalog-image { display:block; width:100%; height:100%; object-fit:contain; border-radius:inherit; }
+.catalog-prize > label { min-width:0; font-size:.82em; }
+.coupon-catalog .catalog-prize input[type=number] { box-sizing:border-box; min-height:44px; }
+@media (max-width:480px) {
+  .coupon-catalog { padding:10px; }
+  .catalog-prize { --catalog-thumb:44px; grid-template-columns:var(--catalog-thumb) minmax(0,1fr) 60px; gap:7px; }
+}
