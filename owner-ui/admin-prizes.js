@@ -23,7 +23,7 @@ function clearRewardCredential() {
 function showRewardCredential(result, memberId, revision) {
   if (revision !== rewardCredentialRevision || $("[data-reward-member]").value !== memberId || $("[data-dashboard]").hidden) return;
   $("[data-reward-secret-nick]").value = result.nick;
-  $("[data-reward-secret]").value = result.password;
+  $("[data-reward-secret]").value = result.message;
   $("[data-reward-credential]").hidden = false;
 }
 
@@ -316,7 +316,6 @@ async function refreshAdminPrizes() {
     if (revision !== rewardAdminRevision) return;
     rewardAdminState = state;
     renderRewardAdmin();
-    if (typeof setAdminQuickAwards === "function") setAdminQuickAwards(state);
     if (typeof refreshTracking === "function" && $("[data-rewards-subsection=\"tracking\"]")?.open) await refreshTracking();
     rewardStatus(rewardAdminState.connection.configured ? "Servicio de premios conectado. Entregas en linea." : "Servicio de premios pendiente de conexion.");
   } catch (error) { rewardStatus(error.message); }
@@ -508,7 +507,7 @@ $("[data-rewards-subsection=\"events\"]").addEventListener("toggle", (event) => 
 $("[data-rewards-subsection=\"access\"]").addEventListener("toggle", (event) => { if (!event.target.open) clearRewardCredential(); });
 
 document.addEventListener("click", async (event) => {
-  const button = event.target.closest("[data-reward-password],[data-reward-view-password],[data-reward-disable],[data-reward-sync],[data-coupon-assign],[data-coupon-release],[data-unassign-coupon],[data-coupon-archive],[data-admin-copy-coupon],[data-close-reward-event],[data-view-event-key],[data-reward-copy-secret],[data-reward-clear-secret],[data-event-winners]");
+  const button = event.target.closest("[data-reward-password],[data-reward-disable],[data-reward-sync],[data-coupon-assign],[data-coupon-release],[data-unassign-coupon],[data-coupon-archive],[data-admin-copy-coupon],[data-close-reward-event],[data-view-event-key],[data-reward-copy-secret],[data-reward-clear-secret],[data-event-winners]");
   if (!button || rewardAdminBusy) return;
   button.disabled = true;
   try {
@@ -518,22 +517,17 @@ document.addEventListener("click", async (event) => {
       await refreshAdminPrizes();
     } else if (button.hasAttribute("data-reward-password")) {
       if (!memberId) throw new Error("Elige un integrante.");
-      const member = rewardAdminState.members.find((item) => item.id === memberId);
-      if (member.hasPassword && !confirm(`Generar una nueva contrasena para ${member.nick}? La anterior dejara de funcionar.`)) return;
       const revision = clearRewardCredential();
-      const result = await rewardAdminAction("password", { memberId });
+      const result = await rewardAdminAction("access-link", { memberId });
       showRewardCredential(result, memberId, revision);
-      rewardStatus("Acceso generado. Entregalo por privado; puedes volver a consultarlo con Ver contrasena.");
-    } else if (button.hasAttribute("data-reward-view-password")) {
-      if (!memberId) throw new Error("Elige un integrante.");
-      const revision = clearRewardCredential();
-      const result = await rewardAdminAction("reveal-password", { memberId });
-      showRewardCredential(result, memberId, revision);
-      rewardStatus("Acceso consultado. Solo visible en tu administrador.");
+      if (revision === rewardCredentialRevision) rewardStatus(`Enlace para ${result.nick}. Vence en 30 minutos. Envíalo por privado en R2Beat.`);
     } else if (button.hasAttribute("data-reward-clear-secret")) {
       clearRewardCredential();
     } else if (button.hasAttribute("data-reward-copy-secret")) {
-      await navigator.clipboard.writeText(`Nick: ${$("[data-reward-secret-nick]").value}\nClave del circulo: ${$("[data-reward-secret]").value}\n\nIngresa a https://mazino.lat. Si aparecen varios circulos, elige el tuyo. Busca tu usuario y haz clic en tu nick. Escribe tu nick y tu clave del circulo para consultar y reclamar tus premios.\n\nPara cambiar tu clave: entra con tu clave actual y usa la opcion de cambiar clave. Si la olvidaste, solicita recuperar acceso; el lider o un sublider autorizado verificara tu identidad dentro del juego antes de aprobarlo.\n\nLa clave del circulo es distinta de la clave de los eventos.`); rewardStatus("Acceso copiado.");
+      const field = $("[data-reward-secret]");
+      if (!field.value) return;
+      try { await navigator.clipboard.writeText(field.value); rewardStatus("Enlace e instrucciones copiados."); }
+      catch { field.focus(); field.select(); rewardStatus("Enlace e instrucciones seleccionados. Usa Copiar en tu dispositivo."); }
     } else if (button.hasAttribute("data-admin-copy-coupon")) {
       await navigator.clipboard.writeText(rewardAdminState.coupons.find((coupon) => coupon.id === button.dataset.adminCopyCoupon).code); rewardStatus("Cupon copiado.");
     } else if (button.hasAttribute("data-view-event-key")) {
@@ -594,7 +588,6 @@ $("[data-logout]").addEventListener("click", () => {
   if (typeof OwnerDeliveryPreview !== 'undefined') OwnerDeliveryPreview.cancel();
   rewardAdminRevision++;
   rewardAdminState = { members: [], coupons: [], events: [] };
-  if (typeof setAdminQuickAwards === "function") setAdminQuickAwards(null);
   clearRewardCredential();
   $("[data-coupon-table]").innerHTML = ""; $("[data-reward-events-table]").innerHTML = "";
   $("[data-coupon-item-filter]").innerHTML = '<option value="">Todos los items</option>';

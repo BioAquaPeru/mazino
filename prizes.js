@@ -80,6 +80,7 @@ function configurePrizes(settings) {
     if (saved?.expiresAt > Date.now() && saved.token && saved.member) rewardSession = saved;
   } catch { rewardSession = null; saveRewardSession(); }
   if (!rewardSession) resetPrizeImages();
+  if (typeof openMemberAccessLink === 'function') openMemberAccessLink();
 }
 
 function eventIsFinished(event) {
