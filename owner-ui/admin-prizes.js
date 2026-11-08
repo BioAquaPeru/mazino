@@ -520,7 +520,9 @@ document.addEventListener("click", async (event) => {
       const revision = clearRewardCredential();
       const result = await rewardAdminAction("access-link", { memberId });
       showRewardCredential(result, memberId, revision);
-      if (revision === rewardCredentialRevision) rewardStatus(`Enlace para ${result.nick}. Vence en 30 minutos. Envíalo por privado en R2Beat.`);
+      if (revision === rewardCredentialRevision) rewardStatus(result.code
+        ? `Código para ${result.nick}: ${result.code}. Escríbelo por privado en R2Beat. Vence en 30 minutos.`
+        : `Acceso para ${result.nick}. Vence en 30 minutos.`);
     } else if (button.hasAttribute("data-reward-clear-secret")) {
       clearRewardCredential();
     } else if (button.hasAttribute("data-reward-copy-secret")) {

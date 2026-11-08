@@ -105,75 +105,106 @@ let refreshMemberAccess, openMemberAccessLink;
     const next = new URLSearchParams(location.hash.slice(1));
     if (/^[a-f0-9]{64}$/.test(next.get('acceso') || '')) location.reload();
   });
-  if (!location.hash) return;
   const fragment = new URLSearchParams(location.hash.slice(1));
-  let token = fragment.get('acceso');
-  const circle = fragment.get('circulo') || 'main';
-  if (!/^[a-f0-9]{64}$/.test(token || '') || !/^(main|[a-f0-9]{32})$/.test(circle)) return;
-  fragment.delete('acceso'); fragment.delete('circulo');
-  history.replaceState(null, '', location.pathname + location.search + (fragment.size ? '#' + fragment : ''));
-  const form = dialog.querySelector('form'), status = dialog.querySelector('[data-access-link-status]');
+  const token = fragment.get('acceso');
+  let circle = fragment.get('circulo') || 'main';
+  let credentials = /^[a-f0-9]{64}$/.test(token || '') && /^(main|[a-f0-9]{32})$/.test(circle) ? {token} : null;
+  if (fragment.has('acceso')) {
+    fragment.delete('acceso'); fragment.delete('circulo');
+    history.replaceState(null, '', location.pathname + location.search + (fragment.size ? '#' + fragment : ''));
+  }
+  const form = dialog.querySelector('[data-access-link-password]'), status = dialog.querySelector('[data-access-link-status]');
+  const shortForm = dialog.querySelector('[data-access-short-form]'), heading = dialog.querySelector('h2');
   const retry = dialog.querySelector('[data-access-link-retry]'), close = dialog.querySelector('[data-access-link-close]');
   let busy = false, finished = false;
+  const invalidMessage = () => credentials?.token
+    ? 'Este enlace venció o ya se usó. Pide un acceso nuevo a tu líder.'
+    : 'El código no está disponible. Revisa tu nick, el círculo y el código, o pide uno nuevo.';
   async function request(action, body) {
     const url = new URL(`/api/access/${action}`, rewardApi);
     if (circle !== 'main') url.searchParams.set('circle', circle);
     const response = await fetch(url, { method:'POST', cache:'no-store', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ token,...body }), signal:AbortSignal.timeout(15000) });
+      body:JSON.stringify({ ...credentials,...body }), signal:AbortSignal.timeout(15000) });
     const result = await response.json();
     if (!response.ok) throw Object.assign(new Error(result.error || 'No se pudo comprobar el enlace.'),{status:response.status});
     return result;
   }
   async function check() {
-    if (busy || !token || !rewardApi) return;
-    busy = true; retry.hidden = true; status.textContent = 'Comprobando tu enlace de acceso…';
+    if (busy || !credentials || !rewardApi) return;
+    busy = true; retry.hidden = true;
+    shortForm.querySelector('button').disabled = true;
+    status.textContent = 'Comprobando tu acceso…';
     try {
       const result = await request('status');
       if (result.status !== 'approved') throw Object.assign(new Error('Solicita un enlace nuevo a tu líder.'),{status:409});
-      dialog.querySelector('h2').textContent = `Acceso a Premios de ${result.nick}`;
+      heading.textContent = `Acceso a Premios de ${result.nick}`;
       status.textContent = 'Elige una clave privada de al menos 15 caracteres.';
+      shortForm.reset(); shortForm.hidden = true;
       form.hidden = false;
     } catch (error) {
-      status.textContent = error.status === 409 ? 'Este enlace venció o ya se usó. Pide un enlace nuevo a tu líder.' : error.message;
-      retry.hidden = error.status === 409;
-    } finally { busy = false; }
+      status.textContent = error.status === 409 ? invalidMessage() : error.message;
+      retry.hidden = !credentials.token || error.status === 409;
+    } finally { shortForm.querySelector('button').disabled = false; busy = false; }
   }
-  openMemberAccessLink = () => {
+  if (credentials) openMemberAccessLink = () => {
     if (!rewardApi) return;
     openMemberAccessLink = undefined;
     dialog.showModal();
     void check();
   };
+  for (const button of document.querySelectorAll('[data-access-use-code]')) {
+    button.addEventListener('click',() => {
+      if (busy || !rewardApi || dialog.open) return;
+      const nick = rewardDialog?.open ? rewardDialog.querySelector('[data-prize-login]').elements.nick.value : '';
+      if (rewardDialog?.open) rewardDialog.close();
+      circle = window.mazinoSpaceId || 'main';
+      heading.textContent = 'Acceso a Premios';
+      status.textContent = 'Escribe tu nick de R2Beat y el código que te dio tu líder.';
+      close.textContent = 'Cerrar';
+      shortForm.hidden = false; shortForm.elements.nick.value = nick;
+      dialog.showModal();
+    });
+  }
+  shortForm.addEventListener('submit',event => {
+    event.preventDefault();
+    if (busy) return;
+    credentials = {nick:shortForm.elements.nick.value.trim(),code:shortForm.elements.code.value.trim()};
+    return check();
+  });
   retry.addEventListener('click',check);
   close.addEventListener('click',() => {
     if (busy) return;
     dialog.close();
-    if (!finished || window.mazinoSpaceId === circle) return;
+    if (!finished || (window.mazinoSpaceId || 'main') === circle) return;
     try {
       if (circle === 'main') sessionStorage.removeItem('mazino-selected-circle');
       else sessionStorage.setItem('mazino-selected-circle',circle);
       location.reload();
     } catch { /* The player can select their circle in the menu. */ }
   });
-  dialog.addEventListener('close',() => form.reset());
+  dialog.addEventListener('close',() => {
+    credentials = null; finished = false;
+    form.reset(); form.hidden = true;
+    shortForm.reset(); shortForm.hidden = true; retry.hidden = true;
+  });
   dialog.addEventListener('cancel',event => { if (busy) event.preventDefault(); });
   form.addEventListener('submit',async event => {
     event.preventDefault();
-    if (busy || !token) return;
+    if (busy || !credentials) return;
     const password = form.elements.password.value, confirmPassword = form.elements.confirmPassword.value;
     if (password !== confirmPassword) { status.textContent = 'Las claves no coinciden.'; return; }
     busy = true; form.querySelector('button').disabled = true; status.textContent = 'Guardando tu clave…';
     try {
       const result = await request('finish',{password,confirmPassword});
-      token = ''; finished = true; form.hidden = true;
+      credentials = null; finished = true; form.hidden = true;
       if ((window.mazinoSpaceId || 'main') === circle && rewardSession?.member.nick === result.nick) {
         rewardSession = null; saveRewardSession(); renderRewardIdentity();
       }
       status.textContent = `Clave guardada. Elige tu círculo y pulsa el nick ${result.nick} para entrar a Premios.`;
       close.textContent = 'Ir a Mazino.lat';
     } catch (error) {
-      status.textContent = error.status === 409 ? 'Este enlace venció o ya se usó. Pide un enlace nuevo a tu líder.' : error.message;
-      if (error.status === 409) form.hidden = true;
+      status.textContent = error.status === 409 ? invalidMessage() : error.message;
+      if (error.status === 409) { form.hidden = true; shortForm.hidden = Boolean(credentials.token); }
     } finally { form.reset(); form.querySelector('button').disabled = false; busy = false; }
   });
 })();

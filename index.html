@@ -101,11 +101,13 @@
               <input type="search" data-member-search placeholder="Nick" autocomplete="off" />
             </label>
           </div>
+          <button class="ghost-button" type="button" data-access-use-code>Tengo un código de acceso</button>
           <div class="member-grid" data-members></div>
         </section>
       </main>
       <footer class="site-footer" data-footer hidden>
         <nav class="footer-guides" aria-label="Guias del circulo">
+          <button class="ghost-button guide-trigger" type="button" data-access-use-code>Tengo un código de acceso</button>
           <button class="ghost-button guide-trigger" type="button" data-guide-open="personal"><img src="./assets/guides/icon-book.svg" alt="" width="20" height="20" />C&oacute;mo reclamar mi premio del c&iacute;rculo</button>
           <button class="ghost-button guide-trigger" type="button" data-guide-open="flash"><img src="./assets/guides/icon-zap.svg" alt="" width="20" height="20" />C&oacute;mo participar en eventos rel&aacute;mpago</button>
           <button class="ghost-button guide-trigger" type="button" data-rcoin-open aria-haspopup="dialog" aria-controls="rcoin-guide"><img src="./assets/guides/icon-coins.svg" alt="" width="20" height="20" />C&oacute;mo donar Rcoin al circulo</button>
@@ -148,6 +150,7 @@
         </form>
         <section class="member-access" data-member-access aria-label="Mi acceso al circulo">
           <button class="ghost-button" type="button" data-access-start>Solicitar mi acceso</button>
+          <button class="ghost-button" type="button" data-access-use-code>Tengo un código de acceso</button>
           <button class="ghost-button" type="button" data-access-recover>Olvide mi clave · Recuperar acceso</button>
           <button class="ghost-button" type="button" data-access-change hidden>Cambiar mi clave</button>
           <div data-access-pending hidden>
@@ -219,7 +222,12 @@
       <div class="prize-dialog-body">
       <h2 id="access-link-title">Acceso a Premios</h2>
       <p role="status" aria-live="polite" data-access-link-status></p>
-      <form class="prize-login" hidden>
+      <form class="prize-login" data-access-short-form hidden>
+        <label><span>Tu nick de R2Beat</span><input name="nick" maxlength="40" autocomplete="username" required /></label>
+        <label><span>Código de acceso</span><input name="code" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" required /></label>
+        <button class="primary-action small-action" type="submit">Comprobar código</button>
+      </form>
+      <form class="prize-login" data-access-link-password hidden>
         <label><span>Tu clave privada de Premios</span><input name="password" type="password" autocomplete="new-password" minlength="15" maxlength="100" required /></label>
         <label><span>Repite tu clave</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="15" maxlength="100" required /></label>
         <button class="primary-action small-action" type="submit">Guardar mi clave</button>
@@ -235,7 +243,7 @@
     <script src="./event-board.js?v=2" defer></script>
     <script src="./coupon-images.js?v=1" defer></script>
     <script src="./prizes.js?v=47" defer></script>
-    <script src="./member-access.js?v=5" defer></script>
+    <script src="./member-access.js?v=6" defer></script>
     <script src="./circle-progress.js?v=3" defer></script>
     <script src="./app.js?v=51" defer></script>
   </body>
