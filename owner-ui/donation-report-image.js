@@ -46,11 +46,11 @@
   let busy=false,images=[],page=0,view='edit';
   const header=el('header'),close=button('Cerrar ✕');header.append(el('h2','Reporte de donaciones'),close);dialog.append(header);
   const body=el('div');body.className='donation-export-body';dialog.append(body);
-  body.append(el('p',`${title} · ${report.start} al ${report.end} · ${report.entries.length} integrantes. Amarillo: en observacion. Rojo: lo retire. Las marcas no expulsan a nadie.`));
+  body.append(el('p',`${title} · ${report.start} al ${report.end} · ${report.entries.length} integrantes. Marca «Omitir del reporte» para excluir a un integrante de este PNG.`));
   const tabs=el('div');tabs.className='donation-export-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Secciones del reporte');
   const editTab=button('Editar observaciones'),previewTab=button('Vista previa');for(const n of [editTab,previewTab])n.setAttribute('role','tab');tabs.append(editTab,previewTab);body.append(tabs);
   const toolbar=el('div');toolbar.className='donation-export-toolbar';
-  const filter=select('Ver marcas en este reporte',[['all','Todos'],['yellow','Amarillo: en observacion'],['red','Rojo: lo retire'],['','Sin marca']]);
+  const filter=select('Ver marcas en este reporte',[['all','Todos'],['omitted','Omitidos del reporte'],['yellow','Amarillo: en observacion'],['red','Rojo: lo retire'],['','Sin marca']]);
   const layout=select('Distribucion del reporte',[['1','1 hoja'],['2','2 hojas'],['custom','Personalizado']]);layout.value='2';
   const custom=el('input');custom.type='number';custom.min='1';custom.max='200';custom.step='1';custom.value='22';custom.setAttribute('aria-label','Integrantes por hoja');
   const customLabel=labeled('Integrantes por hoja',custom);customLabel.hidden=true;
@@ -58,12 +58,32 @@
   const list=el('div'),preview=el('div');preview.className='donation-export-preview';body.append(list,preview);
   const navigation=el('div');navigation.className='donation-export-navigation';const previous=button('Anterior'),next=button('Siguiente'),pageLabel=el('span');pageLabel.setAttribute('aria-live','polite');navigation.append(previous,pageLabel,next);const image=el('img'),empty=el('p','Elige la distribucion y pulsa Generar vista previa.');preview.append(navigation,image,empty);
   const actions=el('footer');actions.className='donation-export-actions';const status=el('p');status.className='donation-export-status';status.setAttribute('role','status');const saveButton=button('Guardar observaciones'),previewButton=button('Generar vista previa'),download=button('Descargar hoja'),downloadAll=button('Descargar todas las hojas');saveButton.hidden=!canEdit;actions.append(status,saveButton,previewButton,download,downloadAll);dialog.append(actions);
-  const selected=()=>report.entries.filter(r=>filter.value==='all'||(notes[r.memberId]?.mark||'')===filter.value);
+  const selected=()=>report.entries.filter(r=>filter.value==='all'||(filter.value==='omitted'
+   ? notes[r.memberId]?.omitted : (notes[r.memberId]?.mark||'')===filter.value));
   function showPage(){const ready=!!images.length;navigation.hidden=image.hidden=!ready;empty.hidden=ready;download.disabled=downloadAll.disabled=!ready||busy;previous.disabled=page===0;next.disabled=page===images.length-1;if(ready){image.src=images[page];image.alt=`Reporte de donaciones, pagina ${page+1}`;pageLabel.textContent=`Hoja ${page+1} de ${images.length}`;download.textContent=`Descargar hoja ${page+1} de ${images.length}`;}}
   function changeView(value){view=value;list.hidden=view!=='edit';preview.hidden=view!=='preview';editTab.setAttribute('aria-selected',String(view==='edit'));previewTab.setAttribute('aria-selected',String(view==='preview'));body.scrollTop=0;}
   function invalidate(){images=[];page=0;showPage();}
-  function render(){list.replaceChildren();for(const row of selected()){const block=el('section');block.className='donation-export-row';block.dataset.mark=notes[row.memberId]?.mark||'';const label=el('div',row.nick);label.append(el('small',`${number(row.donated)} / ${number(row.target??report.target)} · ${result(row)}`));const mark=select('Marca de '+row.nick,Object.entries(marks));mark.value=notes[row.memberId]?.mark||'';const note=el('input');note.maxLength=300;note.value=notes[row.memberId]?.observation||'';note.setAttribute('aria-label','Observacion de '+row.nick);note.placeholder='Escribe tu observacion';mark.disabled=note.disabled=!canEdit||busy;const change=()=>{notes[row.memberId]={mark:mark.value,observation:note.value};dirty.add(row.memberId);block.dataset.mark=mark.value;status.textContent='Cambios pendientes. Guarda las observaciones para conservarlas.';invalidate();};mark.onchange=note.oninput=change;block.append(label,mark,note);list.append(block);}}
-  function generate(){try{if(!isCurrent())throw Error('Vuelve a abrir el reporte de esta sesion.');const rows=selected();if(!rows.length)throw Error('No hay integrantes con esa marca.');if(dirty.size)throw Error('Guarda tus observaciones antes de generar la imagen.');const options=layout.value==='custom'?{perPage:Number(custom.value)}:{pages:Number(layout.value)};if(layout.value==='custom'&&(!Number.isInteger(options.perPage)||options.perPage<1||options.perPage>200))throw Error('Elige entre 1 y 200 integrantes por hoja.');images=canvases({...report,entries:rows},notes,title,options).map(c=>c.toDataURL('image/png'));page=Math.min(page,images.length-1);showPage();changeView('preview');status.textContent=`${rows.length} integrantes · ${images.length} ${images.length===1?'hoja':'hojas'}. Revisa cada pagina antes de descargar.`;}catch(e){status.textContent=e.message;}}
+  function render(){
+   list.replaceChildren();
+   for(const row of selected()){
+    const saved=notes[row.memberId]||{},block=el('section');block.className='donation-export-row';block.dataset.mark=saved.mark||'';
+    const label=el('div',row.nick);label.append(el('small',`${number(row.donated)} / ${number(row.target??report.target)} · ${result(row)}`));
+    const mark=select('Marca de '+row.nick,Object.entries(marks));mark.value=saved.mark||'';
+    const note=el('input');note.maxLength=300;note.value=saved.observation||'';note.setAttribute('aria-label','Observacion de '+row.nick);note.placeholder='Escribe tu observacion';
+    const omit=el('input');omit.type='checkbox';omit.checked=Boolean(saved.omitted);omit.style.cssText='width:auto;min-height:0;margin-left:8px';
+    omit.setAttribute('aria-label','Omitir del reporte a '+row.nick);
+    const fields=el('div');fields.append(note,labeled('Omitir del reporte',omit));
+    mark.disabled=note.disabled=omit.disabled=!canEdit||busy;
+    const change=()=>{
+     notes[row.memberId]={mark:mark.value,observation:note.value,omitted:omit.checked};
+     dirty.add(row.memberId);block.dataset.mark=mark.value;status.textContent='Cambios pendientes. Pulsa Guardar observaciones.';
+     invalidate();
+    };
+    mark.onchange=note.oninput=omit.onchange=change;
+    block.append(label,mark,fields);list.append(block);
+   }
+  }
+  function generate(){try{if(!isCurrent())throw Error('Vuelve a abrir el reporte de esta sesion.');if(dirty.size)throw Error('Guarda tus observaciones antes de generar la imagen.');const rows=selected().filter(r=>!notes[r.memberId]?.omitted);if(!rows.length)throw Error('No hay integrantes incluidos en el reporte con ese filtro.');const options=layout.value==='custom'?{perPage:Number(custom.value)}:{pages:Number(layout.value)};if(layout.value==='custom'&&(!Number.isInteger(options.perPage)||options.perPage<1||options.perPage>200))throw Error('Elige entre 1 y 200 integrantes por hoja.');images=canvases({...report,entries:rows},notes,title,options).map(c=>c.toDataURL('image/png'));page=Math.min(page,images.length-1);showPage();changeView('preview');status.textContent=`${rows.length} integrantes · ${images.length} ${images.length===1?'hoja':'hojas'}. Revisa cada pagina antes de descargar.`;}catch(e){status.textContent=e.message;}}
   editTab.onclick=()=>changeView('edit');previewTab.onclick=()=>{if(!images.length)generate();else changeView('preview');};previewButton.onclick=generate;
   filter.onchange=()=>{render();invalidate();if(view==='preview')generate();};
   layout.onchange=()=>{customLabel.hidden=layout.value!=='custom';invalidate();if(view==='preview')generate();};custom.onchange=()=>{invalidate();if(view==='preview')generate();};

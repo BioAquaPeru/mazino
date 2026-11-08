@@ -15,6 +15,111 @@
     closeImageReport?.();closeImageReport=MazinoDonationReport.open({report:snapshot,title:typeof adminState!=="undefined"?adminState?.draft?.settings?.siteName||"MAZINO":"MAZINO",isCurrent:()=>version===context&&currentScope===scope()&&visible(),save:async rows=>{const result=await call("report-notes",{start:snapshot.start,end:snapshot.end,target:snapshot.target,goalId:snapshot.goalId,rows});snapshot.notes=result.notes;await report({quiet:true});}});
   });
   const scope = () => typeof adminCircleId === 'string' ? adminCircleId : 'main';
+  const weekly = field('weekly');
+  let resetWeekly = () => {};
+  if (weekly?.tagName === 'DETAILS') {
+    const rule = field('weekly-rule'), participation = field('weekly-pause'), period = field('weekly-period');
+    const feedback = field('weekly-status'), results = field('weekly-rows');
+    let weeklyData = null, pending = false, loadedScope = '';
+    const statuses = {
+      eligible:'Cumple con los datos disponibles', delivered:'Entregado', paused:'Participación pausada',
+      missing:'Falta una lectura o base válida', tenure:'Falta antigüedad', partial:'Semana parcial',
+      shortfall:'No alcanzó la meta', progress:'Aún le falta', stock:'Cumple · Falta stock',
+    };
+    function options(select, entries, empty) {
+      const current = select.value;
+      select.replaceChildren(new Option(empty,''));
+      for (const [id,label] of entries) select.add(new Option(label,id));
+      select.value = entries.some(([id])=>id===current) ? current : '';
+    }
+    function showRule() {
+      const current = weeklyData?.rules.find(item=>item.groupId===rule.elements.group.value);
+      rule.elements.target.value = current?.target ?? '';
+      rule.elements.minDays.value = current?.minDays ?? 0;
+      rule.elements.ageFrom.value = current?.ageFrom ?? '';
+      rule.elements.ageTo.value = current?.ageTo ?? '';
+      rule.elements.prize.value = current ? JSON.stringify([current.batchId,current.label]) : '';
+      rule.elements.enabled.value = current?.enabled===false ? 'no' : 'yes';
+      rule.elements.target.required = rule.elements.prize.required = rule.elements.enabled.value==='yes';
+    }
+    function renderWeekly(result) {
+      weeklyData = result;
+      options(rule.elements.group,result.groups.map(group=>[group.id,group.name]),'Elige un grupo');
+      options(rule.elements.prize,result.lots.map(lot=>[
+        JSON.stringify([lot.batchId,lot.label]),`${lot.label} · ${lot.batchName} (${lot.available} disponibles)`
+      ]),'Elige un premio');
+      options(participation.elements.member,result.members.map(member=>[
+        member.id,member.nick + (member.paused ? ' · Pausado' : '')
+      ]),'Elige un integrante');
+      showRule();
+      results.replaceChildren();
+      for (const row of result.rows) {
+        const tr = results.insertRow();
+        for (const value of [`${row.nick} · ${row.groupName}`,`${number(row.donated)} / ${number(row.target)}`,row.label,statuses[row.status]]) {
+          tr.insertCell().textContent = value;
+        }
+      }
+      return `${result.period.start} al ${result.period.end} · ${result.rows.filter(row=>row.status==='eligible').length} cumplen con stock · ${result.rows.filter(row=>row.status==='delivered').length} entregados.${!result.rows.length?' Sin participantes evaluables con las reglas de esta semana.':''}`;
+    }
+    async function runWeekly(action, body) {
+      if (pending) return;
+      const requestedScope = scope(), revision = context;
+      if (loadedScope !== requestedScope) {
+        weeklyData = null; rule.reset(); participation.reset(); results.replaceChildren();
+      }
+      const stillHere = () => revision===context && requestedScope===scope() && visible();
+      pending = true; feedback.textContent = 'Consultando premios semanales…';
+      const buttons = weekly.querySelectorAll('button');
+      for (const button of buttons) button.disabled = true;
+      try {
+        const saved = action ? await call(action,body) : null;
+        if (!stillHere()) return;
+        if (saved?.effectiveOn) period.value = 'next';
+        const result = await call('weekly-preview',{period:period.value});
+        if (!stillHere()) return;
+        loadedScope = requestedScope;
+        const summary = renderWeekly(result);
+        feedback.textContent = (saved?.effectiveOn ? `Regla guardada desde el ${saved.effectiveOn}. ` : saved ? 'Participación guardada. ' : '') + summary;
+      } catch (error) {
+        if (stillHere()) feedback.textContent = error.message;
+      } finally {
+        pending = false;
+        for (const button of buttons) button.disabled = false;
+      }
+    }
+    rule.elements.group.addEventListener('change',showRule);
+    rule.elements.enabled.addEventListener('change',()=>{
+      rule.elements.target.required = rule.elements.prize.required = rule.elements.enabled.value==='yes';
+    });
+    rule.addEventListener('submit',event=>{
+      event.preventDefault();
+      if (!weeklyData || loadedScope!==scope()) return;
+      const fields = rule.elements, groupId = fields.group.value;
+      const [batchId,label] = JSON.parse(fields.prize.value || '[]');
+      const optionalDays = field => field.value === '' ? null : Number(field.value);
+      void runWeekly('weekly-save',{
+        groupId,batchId,label,revision:weeklyData.rules.find(item=>item.groupId===groupId)?.id || '',
+        target:Number(fields.target.value),minDays:Number(fields.minDays.value),ageFrom:optionalDays(fields.ageFrom),
+        ageTo:optionalDays(fields.ageTo),enabled:fields.enabled.value==='yes',
+      });
+    });
+    participation.elements.member.addEventListener('change',()=>{
+      participation.elements.paused.value = weeklyData?.members.find(m=>m.id===participation.elements.member.value)?.paused ? 'no' : 'yes';
+    });
+    participation.addEventListener('submit',event=>{
+      event.preventDefault();
+      if (!weeklyData || loadedScope!==scope()) return;
+      const fields = participation.elements;
+      void runWeekly('weekly-pause',{memberId:fields.member.value,paused:fields.paused.value==='yes',note:fields.note.value});
+    });
+    field('weekly-preview').addEventListener('click',()=>void runWeekly());
+    weekly.addEventListener('toggle',()=>{if (weekly.open && visible()) void runWeekly();});
+    resetWeekly = () => {
+      weekly.open = false; weeklyData = null; loadedScope = ''; period.value = 'current';
+      rule.reset(); participation.reset(); feedback.textContent = ''; results.replaceChildren();
+      for (const select of [rule.elements.group,rule.elements.prize,participation.elements.member]) select.replaceChildren();
+    };
+  }
   function automaticStatus(automatic) {
     const message = `${automatic?.enabled ? 'R2Beat: consulta automatica cada hora' : 'Consulta automatica no activada'} | Ultima lectura correcta (Peru): ${automatic?.lastSyncAt ? staffTime(automatic.lastSyncAt) : 'Pendiente'}${automatic?.lastError ? ` | ${automatic.lastError}` : ''}`;
     if (field('auto-status') && field('auto-status').textContent !== message) field('auto-status').textContent = message;
@@ -444,7 +549,7 @@
     captureWidget?.destroy(); captureWidget = null; capturePending = null;
     captureRevision++; captureBlocks = null; capturePage = 0; captureOffset = 0; captureSelection = ""; captureLoading = false;
     field("capture-block-status").textContent = "";
-    context++; reportRevision++; historyRevision++; metadataRevision++; data = null; busy = false; clearPreview();
+    context++; reportRevision++; historyRevision++; metadataRevision++; data = null; busy = false; clearPreview(); resetWeekly();
     closeReview(); field('review-message').textContent = field('review-info').textContent = '';
     field("roster-status").textContent = "";
     directoryPage = 0; identityId = ""; field("identity-form").hidden = true;
