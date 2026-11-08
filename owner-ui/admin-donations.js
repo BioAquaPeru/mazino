@@ -34,10 +34,12 @@
     }
     function showRule() {
       const current = weeklyData?.rules.find(item=>item.groupId===rule.elements.group.value);
+      const automatic = weeklyData?.groups.find(group=>group.id===rule.elements.group.value)?.automatic;
       rule.elements.target.value = current?.target ?? '';
       rule.elements.minDays.value = current?.minDays ?? 0;
       rule.elements.ageFrom.value = current?.ageFrom ?? '';
       rule.elements.ageTo.value = current?.ageTo ?? '';
+      for (const input of [rule.elements.ageFrom,rule.elements.ageTo]) input.closest('label').hidden = Boolean(automatic);
       rule.elements.prize.value = current ? JSON.stringify([current.batchId,current.label]) : '';
       rule.elements.enabled.value = current?.enabled===false ? 'no' : 'yes';
       rule.elements.target.required = rule.elements.prize.required = rule.elements.enabled.value==='yes';
@@ -224,7 +226,7 @@
     automaticStatus(result.automatic);
     renderTopDonors(result.topDonors);
     if (options.background && data) {
-      if (JSON.stringify([data.members, data.goals, data.imports,data.groupRevision]) !== JSON.stringify([result.members, result.goals, result.imports,result.groupRevision])) {
+      if (JSON.stringify([data.members, data.goals, data.imports,data.groupRevision,data.tiers]) !== JSON.stringify([result.members, result.goals, result.imports,result.groupRevision,result.tiers])) {
         if (memberSignature(data.members) !== memberSignature(result.members)) clearPreview();
         pendingMetadata = result; field('refresh-notice').hidden = false;
       }
@@ -232,7 +234,14 @@
     }
     if (data && memberSignature(data.members) !== memberSignature(result.members)) clearPreview();
     data = result;
-    const groupOptions={data:result,canEdit:true,save:async body=>{let saved;await operation(async current=>{saved=await call('group-save',body);if(current())await load();},true);return saved;}};
+    if (weekly?.tagName === 'DETAILS') weekly.hidden = result.tiers === null;
+    const saveGroupSetting = async (action, body) => {
+      if (busy) throw Error('Espera a que termine la operación actual.');
+      let saved;
+      await operation(async current=>{saved=await call(action,body);if(current())await load();},true);
+      return saved;
+    };
+    const groupOptions={data:result,canEdit:true,save:body=>saveGroupSetting('group-save',body),saveTiers:body=>saveGroupSetting('tiers-save',body)};
     if(!groupManager)groupManager=MazinoDonationGroups.manager(field('groups-host'),groupOptions);else groupManager.update(result);
     if(!targetPicker)targetPicker=MazinoDonationGroups.picker(field('target-picker'),{data:result,disabled:busy});else targetPicker.update(result,busy);
     const groupSelected=field('group-filter').value;field('group-filter').innerHTML='<option value="all">Todos los grupos</option><option value="none">Sin grupo</option>'+(result.groups||[]).map(g=>`<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join('');field('group-filter').value=groupSelected||'all';

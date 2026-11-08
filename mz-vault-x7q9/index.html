@@ -214,7 +214,7 @@
                   <label><span>Repetición semanal</span><select name="enabled"><option value="yes">Activa</option><option value="no">Pausada desde el próximo lunes</option></select></label>
                   <button class="primary-action small-action" type="submit">Guardar regla semanal</button>
                 </form>
-                <p class="muted">Los grupos manuales tienen prioridad. Los tramos automáticos usan la antigüedad del lunes. Si alguien ingresa a mitad de semana, cuenta desde su ingreso cuando haya una base válida.</p>
+                <p class="muted">Si el grupo tiene ascensos automáticos, la regla usa la categoría del lunes. Si alguien ingresa a mitad de semana, cuenta desde su ingreso cuando haya una base válida.</p>
                 <form class="settings-grid" data-donation-weekly-pause>
                   <label><span>Integrante</span><select name="member" required></select></label>
                   <label><span>Participación en metas automáticas</span><select name="paused"><option value="yes">Pausar</option><option value="no">Reactivar</option></select></label>
@@ -308,9 +308,9 @@
             <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Evento</th><th>Nick</th><th>Apertura (Peru)</th><th>Termino (Peru)</th><th>Entregados</th><th>Estado</th><th>Acciones</th></tr></thead><tbody data-reward-events-table></tbody></table></div>
             </details>
             <details class="admin-subsection" data-rewards-subsection="delivery">
-            <summary>Entregar un premio</summary>
+            <summary>Entregar varios premios</summary>
               <div data-owner-catalog="delivery"></div>
-            <form class="settings-grid" data-personal-delivery>
+            <form class="settings-grid" data-personal-delivery hidden inert>
               <label><span>1. Premio que entregaras</span><select data-delivery-item required><option value="">Elige un item disponible</option></select></label>
               <div class="partner-picker">
                 <label><span>2. Buscar destinatario</span><input type="search" data-reward-member-search placeholder="Nick del integrante" autocomplete="off" /></label>
@@ -1002,8 +1002,8 @@
     <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
     <script src="/owner-ui/admin-coupon-excel.js?v=fd6c83e8cc081b00" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
-    <script src="/owner-ui/donation-report-image.js?v=88fa0efb408dc0b0" defer></script><script src="/owner-ui/donation-groups.js?v=a8f8337c2b4559fe" defer></script>
-    <script src="/owner-ui/admin-donations.js?v=d966081cd711c497" defer></script>
+    <script src="/owner-ui/donation-report-image.js?v=88fa0efb408dc0b0" defer></script><script src="/owner-ui/donation-groups.js?v=df4a8cb180611d8d" defer></script>
+    <script src="/owner-ui/admin-donations.js?v=19ef55954dcbe2a1" defer></script>
     <script src="/owner-ui/visitor-dashboard.js?v=6ee6ed6ef23d86f1" defer></script><script src="/owner-ui/admin-visitors.js?v=27779f0661153b12" defer></script>
     <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=e40dd7629c28b76a" defer></script>
