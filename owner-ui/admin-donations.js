@@ -24,6 +24,13 @@
       if (field('auto-issues').innerHTML !== html) field('auto-issues').innerHTML = html;
     }
   }
+  function renderTopDonors(top) {
+    const panel = field('top-donors'), content = field('top-donors-content');
+    if (!panel || !content) return;
+    panel.hidden = !top;
+    const list = rows => rows.length ? '<ol>' + rows.map(row => `<li>${escapeHtml(row.nick)} · ${number(row.total)} Rcoin</li>`).join('') + '</ol>' : '<p>Sin donaciones registradas en este período.</p>';
+    content.innerHTML = top ? `<p>Semana del ${escapeHtml(top.weekly.start)} al ${escapeHtml(top.weekly.end)} · Perú</p>${list(top.weekly.entries)}<p>Total acumulado</p>${list(top.general)}` : '';
+  }
   const reportFilters = () => ({ goalId: field('goal').value, start: field('start').value, end: field('end').value, target: Number(field('target').value), search: field('search').value, status: field('filter').value, membership: field('membership').value,groupId:field('group-filter').value });
   const memberSignature = members => JSON.stringify(members.map(m => [m.id, m.nick, m.active, m.membership, !!m.needsConfirmation, m.confirmedAt, m.relatedIds]).sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
   let directoryPage = 0, identityId = "", zeroMember = null;
@@ -110,6 +117,7 @@
     const revision = context, currentScope = scope(), request = ++metadataRevision, result = incoming || await call("state", { date: field("date").value || dateNow() });
     if (revision !== context || currentScope !== scope() || request !== metadataRevision || !visible()) return;
     automaticStatus(result.automatic);
+    renderTopDonors(result.topDonors);
     if (options.background && data) {
       if (JSON.stringify([data.members, data.goals, data.imports,data.groupRevision]) !== JSON.stringify([result.members, result.goals, result.imports,result.groupRevision])) {
         if (memberSignature(data.members) !== memberSignature(result.members)) clearPreview();
@@ -431,6 +439,7 @@
     groupManager?.destroy();targetPicker?.destroy();groupManager=targetPicker=null;field("group-filter").innerHTML='<option value="all">Todos los grupos</option><option value="none">Sin grupo</option>';
     closeImageReport?.();closeImageReport=null;imageReport=null;
     clearTimeout(syncTimer); syncBusy = false; pendingMetadata = null;
+    renderTopDonors(null);
     field('sync-now').disabled = false; field('sync-status').textContent = ''; field('auto-status').textContent = ''; field('refresh-notice').hidden = true;
     captureWidget?.destroy(); captureWidget = null; capturePending = null;
     captureRevision++; captureBlocks = null; capturePage = 0; captureOffset = 0; captureSelection = ""; captureLoading = false;

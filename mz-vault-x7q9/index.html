@@ -118,6 +118,10 @@
             <p class="form-status" role="status" aria-live="polite" data-donation-status></p>
             <p class="muted" role="status" data-donation-auto-status></p>
             <div class="editor-actions"><button class="ghost-button" type="button" data-donation-sync-now>Consultar R2Beat ahora</button><span class="muted" role="status" data-donation-sync-status></span></div>
+            <details class="admin-subsection" data-donation-top-donors hidden>
+              <summary>Top donadores del círculo</summary>
+              <div data-donation-top-donors-content></div>
+            </details>
             <p class="muted">Los totales son la ultima lectura verificada, no datos en vivo. La consulta automatica es cada hora; puedes consultar ahora para no esperar al siguiente ciclo. Las lecturas anteriores se conservan.</p>
             <div class="owner-update-notice" data-donation-refresh-notice hidden>Hay nuevos datos de donaciones. Tu consulta se mantiene hasta que decidas actualizar. <button class="ghost-button" type="button" data-donation-apply-refresh>Actualizar esta vista</button></div>
             <p class="muted">Las lecturas anteriores se conservan. Un nuevo ingreso sin historial previo cuenta desde 0 en su fecha de ingreso. Las reincorporaciones mantienen periodos separados.</p>
@@ -973,7 +977,7 @@
     <script src="/owner-ui/admin-coupon-excel.js?v=fd6c83e8cc081b00" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
     <script src="/owner-ui/donation-report-image.js?v=b2f845ca3c67d7ea" defer></script><script src="/owner-ui/donation-groups.js?v=a8f8337c2b4559fe" defer></script>
-    <script src="/owner-ui/admin-donations.js?v=a78ea37993afaa1e" defer></script>
+    <script src="/owner-ui/admin-donations.js?v=4efe08c9e47f78fb" defer></script>
     <script src="/owner-ui/visitor-dashboard.js?v=6ee6ed6ef23d86f1" defer></script><script src="/owner-ui/admin-visitors.js?v=27779f0661153b12" defer></script>
     <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=e40dd7629c28b76a" defer></script>
