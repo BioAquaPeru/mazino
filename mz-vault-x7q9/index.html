@@ -193,17 +193,19 @@
               <p class="muted" role="status" data-donation-report-status></p><button type="button" class="ghost-button" data-donation-image-report>Preparar reporte con observaciones / PNG</button>
               <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Total inicial</th><th>Ultimo total</th><th>Donado en el plazo</th><th>Meta aplicable / le falta</th><th>Resultado</th><th>Ultima revision</th><th></th></tr></thead><tbody data-donation-report-rows></tbody></table></div>
             </details>
-              <details class="admin-subsection" data-donation-task="goal-create"><summary>Crear una meta</summary><div data-donation-groups-host></div><form class="settings-grid" data-donation-goal-form><div data-donation-target-picker></div>
-                <label><span>Nombre</span><input maxlength="80" required data-donation-goal-title placeholder="Ej.: Donaciones de la semana" /></label>
-                <label><span>Inicio</span><input type="date" required data-donation-goal-start /></label>
-                <label><span>Duracion</span><select data-donation-duration><option value="7">7 dias</option><option value="custom">Entre fechas</option></select></label>
-                <label><span>Final</span><input type="date" required data-donation-goal-end /></label>
-                <label><span>Meta por integrante</span><input type="number" min="1" max="1000000000000" step="1" value="50000" required data-donation-goal-target /></label>
-                <div class="editor-actions"><button class="primary-action small-action" type="submit">Crear meta</button></div>
-              </form>
-              <details data-donation-weekly>
-                <summary>Premios automáticos de los sábados</summary>
-                <p>Configura una meta y un premio por grupo. Los cambios rigen desde el lunes siguiente. El sábado el sistema revisa las donaciones con la lectura de cierre a partir de las 23:00 de Perú.</p>
+              <details class="admin-subsection" data-donation-task="goal-create"><summary>Grupos y metas</summary>
+              <details data-donation-weekly open>
+                <summary>Premios del sábado</summary>
+                <p>Elige el premio de cada categoría. Las reglas empiezan el lunes siguiente.</p>
+                <div data-donation-weekly-cards></div>
+                <div class="editor-actions">
+                  <label><span>Semana</span><select data-donation-weekly-period><option value="current">Esta semana</option><option value="next">Próxima semana</option><option value="closed">Último cierre</option></select></label>
+                  <button class="ghost-button" type="button" data-donation-weekly-preview>Ver quién recibiría</button>
+                </div>
+                <p class="muted" role="status" data-donation-weekly-status></p>
+                <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante y grupo</th><th>Donado / meta</th><th>Premio</th><th>Resultado</th></tr></thead><tbody data-donation-weekly-rows></tbody></table></div>
+                <details data-donation-weekly-manual>
+                <summary>Reglas de grupos manuales</summary>
                 <form class="settings-grid" data-donation-weekly-rule>
                   <label><span>Grupo de donaciones</span><select name="group" required></select></label>
                   <label><span>Meta semanal por miembro (Rcoin)</span><input name="target" type="number" min="1" max="1000000000000" step="1" required /></label>
@@ -213,21 +215,27 @@
                   <label><span>Tramo automático hasta (opcional)</span><input name="ageTo" type="number" min="0" max="36500" placeholder="Sin límite" /></label>
                   <label><span>Repetición semanal</span><select name="enabled"><option value="yes">Activa</option><option value="no">Pausada desde el próximo lunes</option></select></label>
                   <button class="primary-action small-action" type="submit">Guardar regla semanal</button>
-                </form>
-                <p class="muted">Si el grupo tiene ascensos automáticos, la regla usa la categoría del lunes. Si alguien ingresa a mitad de semana, cuenta desde su ingreso cuando haya una base válida.</p>
+                </form></details>
+                <details><summary>Pausar o reactivar a un integrante</summary>
                 <form class="settings-grid" data-donation-weekly-pause>
                   <label><span>Integrante</span><select name="member" required></select></label>
                   <label><span>Participación en metas automáticas</span><select name="paused"><option value="yes">Pausar</option><option value="no">Reactivar</option></select></label>
                   <label><span>Motivo (opcional)</span><input name="note" maxlength="200" placeholder="Ej.: dona por otro medio" /></label>
                   <button class="ghost-button" type="submit">Guardar participación</button>
+                </form></details>
+              </details>
+              <details><summary>Ajustes de ascensos y grupos manuales</summary><div data-donation-groups-host></div></details>
+              <details><summary>Crear una meta entre fechas</summary>
+                <form class="settings-grid" data-donation-goal-form><div data-donation-target-picker></div>
+                  <label><span>Nombre</span><input maxlength="80" required data-donation-goal-title placeholder="Ej.: Donaciones de la semana" /></label>
+                  <label><span>Inicio</span><input type="date" required data-donation-goal-start /></label>
+                  <label><span>Duracion</span><select data-donation-duration><option value="7">7 dias</option><option value="custom">Entre fechas</option></select></label>
+                  <label><span>Final</span><input type="date" required data-donation-goal-end /></label>
+                  <label><span>Meta por integrante</span><input type="number" min="1" max="1000000000000" step="1" value="50000" required data-donation-goal-target /></label>
+                  <div class="editor-actions"><button class="primary-action small-action" type="submit">Crear meta</button></div>
                 </form>
-                <div class="editor-actions">
-                  <label><span>Semana de la vista previa</span><select data-donation-weekly-period><option value="current">Esta semana</option><option value="next">Próxima semana</option><option value="closed">Último cierre</option></select></label>
-                  <button class="ghost-button" type="button" data-donation-weekly-preview>Ver quién recibiría</button>
-                </div>
-                <p class="muted" role="status" data-donation-weekly-status></p>
-                <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante y grupo</th><th>Donado / meta</th><th>Premio</th><th>Resultado</th></tr></thead><tbody data-donation-weekly-rows></tbody></table></div>
-              </details></details>
+              </details>
+              </details>
               <details class="admin-subsection" data-donation-task="goals"><summary>Metas creadas y responsables</summary>
                 <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Meta</th><th>Inicio</th><th>Final</th><th>Objetivo por integrante</th><th>Creada por</th><th>Creacion (Peru)</th><th></th></tr></thead><tbody data-donation-goal-rows></tbody></table></div>
               </details>
@@ -1002,8 +1010,8 @@
     <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
     <script src="/owner-ui/admin-coupon-excel.js?v=fd6c83e8cc081b00" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
-    <script src="/owner-ui/donation-report-image.js?v=88fa0efb408dc0b0" defer></script><script src="/owner-ui/donation-groups.js?v=df4a8cb180611d8d" defer></script>
-    <script src="/owner-ui/admin-donations.js?v=19ef55954dcbe2a1" defer></script>
+    <script src="/owner-ui/donation-report-image.js?v=88fa0efb408dc0b0" defer></script><script src="/owner-ui/donation-groups.js?v=b5a183a9c84c8254" defer></script>
+    <script src="/owner-ui/admin-donations.js?v=8b3cc6cc8185fdf1" defer></script>
     <script src="/owner-ui/visitor-dashboard.js?v=6ee6ed6ef23d86f1" defer></script><script src="/owner-ui/admin-visitors.js?v=27779f0661153b12" defer></script>
     <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=e40dd7629c28b76a" defer></script>

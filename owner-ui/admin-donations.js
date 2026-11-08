@@ -1,7 +1,12 @@
 (() => {
   const panel = $('[data-admin-section="donations"]');
   const field = name => $(`[data-donation-${name}]`);
-  const call = (action, body = {}) => api(`/api/admin/rewards/donations-${action}`, { method: "POST", body: JSON.stringify(body) });
+  const call = (action, body = {}) => {
+    const settings = ['tiers-save','weekly-preview','weekly-save','weekly-pause'].includes(action);
+    return api(`/api/admin/rewards/donations-${settings?'state':action}`, {
+      method:'POST',body:JSON.stringify(settings?{...body,settingsAction:action}:body),
+    });
+  };
   const number = value => value == null ? "Sin registro" : Number(value).toLocaleString("es-PE");
   const dateNow = () => new Date(Date.now() - 5 * 3600000).toISOString().slice(0, 10);
   const addDays = (date, days) => new Date(Date.parse(`${date}T12:00:00Z`) + days * 86400000).toISOString().slice(0, 10);
@@ -18,13 +23,16 @@
   const weekly = field('weekly');
   let resetWeekly = () => {};
   if (weekly?.tagName === 'DETAILS') {
+    const goalSection = weekly.closest('[data-donation-task]');
+    const cards = field('weekly-cards'), manual = field('weekly-manual');
     const rule = field('weekly-rule'), participation = field('weekly-pause'), period = field('weekly-period');
     const feedback = field('weekly-status'), results = field('weekly-rows');
-    let weeklyData = null, pending = false, loadedScope = '';
+    let weeklyData = null, pending = false, loadedScope = '', cardSignature = '';
     const statuses = {
       eligible:'Cumple con los datos disponibles', delivered:'Entregado', paused:'Participación pausada',
       missing:'Falta una lectura o base válida', tenure:'Falta antigüedad', partial:'Semana parcial',
       shortfall:'No alcanzó la meta', progress:'Aún le falta', stock:'Cumple · Falta stock',
+      quota:'Cumple · Límite de entrega agotado',authorization:'Requiere revisión del responsable',
     };
     function options(select, entries, empty) {
       const current = select.value;
@@ -34,22 +42,84 @@
     }
     function showRule() {
       const current = weeklyData?.rules.find(item=>item.groupId===rule.elements.group.value);
-      const automatic = weeklyData?.groups.find(group=>group.id===rule.elements.group.value)?.automatic;
       rule.elements.target.value = current?.target ?? '';
       rule.elements.minDays.value = current?.minDays ?? 0;
       rule.elements.ageFrom.value = current?.ageFrom ?? '';
       rule.elements.ageTo.value = current?.ageTo ?? '';
-      for (const input of [rule.elements.ageFrom,rule.elements.ageTo]) input.closest('label').hidden = Boolean(automatic);
       rule.elements.prize.value = current ? JSON.stringify([current.batchId,current.label]) : '';
       rule.elements.enabled.value = current?.enabled===false ? 'no' : 'yes';
       rule.elements.target.required = rule.elements.prize.required = rule.elements.enabled.value==='yes';
     }
+    const node = (tag,text) => {
+      const element = document.createElement(tag);
+      if (text) element.textContent = text;
+      return element;
+    };
+    function label(text,input) {
+      const element = node('label');
+      element.append(node('span',text),input);
+      return element;
+    }
+    function renderCards(result,prizes) {
+      const groups = result.groups.filter(group=>group.automatic);
+      const signature = JSON.stringify([groups,result.rosters,prizes,result.rules]);
+      if (signature===cardSignature) return;
+      cardSignature = signature;
+      cards.replaceChildren();
+      if (!groups.length) {
+        cards.append(node('p','Activa las categorías en Ajustes de ascensos y grupos manuales.'));
+        return;
+      }
+      for (const group of groups) {
+        const saved = result.rules.find(item=>item.groupId===group.id);
+        const members = result.rosters?.[group.id] || [];
+        const card = node('fieldset'); card.className = 'settings-grid';
+        card.append(node('legend',group.name));
+        const roster = node('details');
+        roster.append(node('summary',`Ver integrantes (${members.length})`),node('p',members.join(', ')||'Sin integrantes'));
+        const prize = node('select');
+        options(prize,prizes,'Elige un premio');
+        prize.value = saved?.batchId && !saved.usesTeamStock ? JSON.stringify([saved.batchId,saved.label]) : '';
+        const target = node('input');
+        Object.assign(target,{type:'number',min:'1',max:'1000000000000',step:'1',required:true,value:saved?.target ?? ''});
+        const goal = node('details');
+        goal.open = !saved?.target;
+        goal.append(node('summary',saved?.target ? `Meta · ${number(saved.target)} Rcoin` : 'Falta definir la meta en Rcoin'),label('Meta semanal por integrante',target));
+        const action = node('button',saved?.batchId && !saved.enabled ? 'Reactivar con este premio' : 'Guardar premio');
+        action.type = 'button'; action.className = 'primary-action small-action';
+        const setAction = () => {
+          action.textContent = prize.value ? (saved?.batchId && !saved.enabled ? 'Reactivar con este premio' : 'Guardar premio') : 'Guardar solo la meta';
+          action.disabled = Boolean(!prize.value && saved?.batchId);
+        };
+        prize.addEventListener('change',setAction); setAction();
+        action.addEventListener('click',()=>{
+          if (!target.checkValidity()) { goal.open = true; target.reportValidity(); return; }
+          const [batchId,prizeLabel] = JSON.parse(prize.value || '[]');
+          void runWeekly('weekly-save',{
+            groupId:group.id,revision:saved?.id || '',target:Number(target.value),minDays:saved?.minDays || 0,
+            batchId,label:prizeLabel,enabled:Boolean(prize.value),draft:!prize.value,
+          });
+        });
+        if (saved?.enabled) {
+          const pause = node('button','Pausar entrega del grupo'); pause.type = 'button'; pause.className = 'ghost-button';
+          pause.addEventListener('click',()=>void runWeekly('weekly-save',{groupId:group.id,revision:saved.id,enabled:false}));
+          goal.append(pause);
+        }
+        card.append(roster,label('Premio y lote',prize),goal,action);
+        if (saved?.usesTeamStock) card.append(node('p',`Premio desde el cupo del equipo · ${saved.label}`));
+        cards.append(card);
+      }
+    }
     function renderWeekly(result) {
       weeklyData = result;
-      options(rule.elements.group,result.groups.map(group=>[group.id,group.name]),'Elige un grupo');
-      options(rule.elements.prize,result.lots.map(lot=>[
+      const manualGroups = result.groups.filter(group=>!group.automatic);
+      const prizes = result.lots.map(lot=>[
         JSON.stringify([lot.batchId,lot.label]),`${lot.label} · ${lot.batchName} (${lot.available} disponibles)`
-      ]),'Elige un premio');
+      ]);
+      manual.hidden = !manualGroups.length;
+      options(rule.elements.group,manualGroups.map(group=>[group.id,group.name]),'Elige un grupo');
+      options(rule.elements.prize,prizes,'Elige un premio');
+      renderCards(result,prizes);
       options(participation.elements.member,result.members.map(member=>[
         member.id,member.nick + (member.paused ? ' · Pausado' : '')
       ]),'Elige un integrante');
@@ -67,11 +137,12 @@
       if (pending) return;
       const requestedScope = scope(), revision = context;
       if (loadedScope !== requestedScope) {
-        weeklyData = null; rule.reset(); participation.reset(); results.replaceChildren();
+        weeklyData = null; cardSignature = ''; cards.replaceChildren(); rule.reset(); participation.reset(); results.replaceChildren();
       }
       const stillHere = () => revision===context && requestedScope===scope() && visible();
       pending = true; feedback.textContent = 'Consultando premios semanales…';
       const buttons = weekly.querySelectorAll('button');
+      const previous = [...buttons].map(button=>button.disabled);
       for (const button of buttons) button.disabled = true;
       try {
         const saved = action ? await call(action,body) : null;
@@ -86,7 +157,7 @@
         if (stillHere()) feedback.textContent = error.message;
       } finally {
         pending = false;
-        for (const button of buttons) button.disabled = false;
+        buttons.forEach((button,index)=>{button.disabled = previous[index];});
       }
     }
     rule.elements.group.addEventListener('change',showRule);
@@ -115,9 +186,13 @@
       void runWeekly('weekly-pause',{memberId:fields.member.value,paused:fields.paused.value==='yes',note:fields.note.value});
     });
     field('weekly-preview').addEventListener('click',()=>void runWeekly());
-    weekly.addEventListener('toggle',()=>{if (weekly.open && visible()) void runWeekly();});
+    const openWeekly = event => {
+      if (event.target===event.currentTarget && goalSection.open && weekly.open && !weekly.hidden && visible()) void runWeekly();
+    };
+    weekly.addEventListener('toggle',openWeekly);
+    goalSection.addEventListener('toggle',openWeekly);
     resetWeekly = () => {
-      weekly.open = false; weeklyData = null; loadedScope = ''; period.value = 'current';
+      weeklyData = null; loadedScope = ''; period.value = 'current'; cardSignature = ''; cards.replaceChildren();
       rule.reset(); participation.reset(); feedback.textContent = ''; results.replaceChildren();
       for (const select of [rule.elements.group,rule.elements.prize,participation.elements.member]) select.replaceChildren();
     };
@@ -241,7 +316,7 @@
       await operation(async current=>{saved=await call(action,body);if(current())await load();},true);
       return saved;
     };
-    const groupOptions={data:result,canEdit:true,save:body=>saveGroupSetting('group-save',body),saveTiers:body=>saveGroupSetting('tiers-save',body)};
+    const groupOptions={data:result,canEdit:true,hideTierMembers:true,save:body=>saveGroupSetting('group-save',body),saveTiers:body=>saveGroupSetting('tiers-save',body)};
     if(!groupManager)groupManager=MazinoDonationGroups.manager(field('groups-host'),groupOptions);else groupManager.update(result);
     if(!targetPicker)targetPicker=MazinoDonationGroups.picker(field('target-picker'),{data:result,disabled:busy});else targetPicker.update(result,busy);
     const groupSelected=field('group-filter').value;field('group-filter').innerHTML='<option value="all">Todos los grupos</option><option value="none">Sin grupo</option>'+(result.groups||[]).map(g=>`<option value="${escapeHtml(g.id)}">${escapeHtml(g.name)}</option>`).join('');field('group-filter').value=groupSelected||'all';

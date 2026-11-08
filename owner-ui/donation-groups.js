@@ -4,7 +4,7 @@
  const select=(label,items)=>{const n=el('select');n.setAttribute('aria-label',label);for(const [id,text] of items){const o=el('option',text);o.value=id;n.append(o);}return n;};
  const labeled=(text,node)=>{const l=el('label',text);l.append(node);return l;};
  function styles(host){host.classList.add('donation-groups');if(document.querySelector('[data-donation-groups-style]'))return;const s=el('style');s.dataset.donationGroupsStyle='';s.textContent='.donation-groups{grid-column:1/-1;min-width:0}.donation-groups details{margin:12px 0;border:1px solid #61414e;border-radius:8px;padding:12px}.donation-groups summary{cursor:pointer;font-weight:bold}.donation-groups label{display:block;margin:8px 0}.donation-groups input,.donation-groups select{box-sizing:border-box;max-width:100%;width:100%;padding:9px;background:#211c21;color:#fff;border:1px solid #76515e;border-radius:5px;min-height:40px}.donation-groups button{margin:5px 8px 5px 0;min-height:40px;padding:7px 12px;background:#30232c;color:#fff;border:1px solid #80616e;border-radius:6px}.donation-group-members{max-height:260px;overflow:auto;border:1px solid #61414e;padding:10px}.donation-group-members label{display:flex;align-items:center;gap:8px}.donation-group-members input{width:18px;min-height:18px}.donation-group-pairs{display:flex;gap:12px;flex-wrap:wrap}.donation-group-pairs>label{flex:1;min-width:150px}.donation-group-hint{color:#d8bac6;font-size:13px}.donation-group-items p{padding:8px;border-bottom:1px solid #61414e}';document.head.append(s);}
- function tierManager(host,save){
+ function tierManager(host,save,hideMembers){
   const details=el('details'),fields=el('div'),enabled=select('Ascensos automáticos',[['yes','Activos'],['no','Pausados']]);
   const member=el('input'),veteran=el('input'),summary=el('p'),rosters=el('div'),message=el('p'),apply=button('Guardar ascensos');
   for(const input of [member,veteran]){input.type='number';input.min='1';input.max='36500';input.step='1';input.required=true;}
@@ -39,7 +39,7 @@
    }
    const members=new Map(data.members.map(m=>[m.id,m.nick]));
    rosters.replaceChildren();
-   for(const group of (data.groups||[]).filter(item=>item.automatic)){
+   for(const group of hideMembers?[]:(data.groups||[]).filter(item=>item.automatic)){
     const list=el('details');
     list.append(el('summary',`${group.name} · ${group.memberIds.length} integrantes`),
      el('p',group.memberIds.map(id=>members.get(id)).filter(Boolean).join(', ')||'Sin integrantes'));
@@ -49,7 +49,7 @@
  }
  function manager(host,options){
   styles(host);let data=options.data,busy=false,id='',selected=new Set(),editRevision=data.groupRevision||'';
-  const tiers=options.saveTiers ? tierManager(host,options.saveTiers) : null;
+  const tiers=options.saveTiers ? tierManager(host,options.saveTiers,options.hideTierMembers) : null;
   const manualGroups=()=> (data.groups||[]).filter(g=>!g.automatic);
   const details=el('details'),summary=el('summary','Grupos manuales de donaciones'),intro=el('p','Crea grupos personalizados. Las metas anteriores conservan sus integrantes.');
   const group=select('Grupo a editar',[]),name=el('input');name.maxLength=60;name.placeholder='Ej.: Fundadores';const search=el('input');search.type='search';search.placeholder='Buscar nick para agregar al grupo';search.setAttribute('aria-label','Buscar integrantes del grupo');
