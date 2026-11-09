@@ -97,7 +97,14 @@ if (prizeAlertsHost?.tagName === 'DIV') {
     if (dashboard.hidden || section.hidden || !section.open) {
       unmount?.();unmount=undefined;
     } else if (!unmount) unmount=mountPrizeAlerts(prizeAlertsHost,()=>staffApi('audit',{view:'alerts'}),
-      body=>staffApi('audit',{...body,view:'deliver-alert'}));
+      body=>staffApi('audit',{...body,view:'deliver-alert'}),
+      async (id,button,refresh)=>{
+        const profile=$('[data-profile-dialog]');
+        await showMemberProfile(id,button);
+        if (!profile.open || memberProfileId!==id) return;
+        selectProfileTab('assign');
+        profile.addEventListener('close',refresh,{once:true});
+      });
   };
   section.addEventListener('toggle',update);
   const observer=new MutationObserver(update);
