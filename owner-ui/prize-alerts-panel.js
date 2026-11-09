@@ -9,9 +9,10 @@
     return node;
   };
   const format = value => Number(value).toLocaleString('es-PE');
-  root.mountPrizeAlerts = function(host,request) {
-    let report = null, live = true;
+  root.mountPrizeAlerts = function(host,request,deliver) {
+    let report = null, live = true, submitting = false;
     const status = el('p'); status.setAttribute('role','status');
+    const deliveryStatus=el('p'); deliveryStatus.setAttribute('role','status');
     const refresh = el('button','Actualizar alertas'); refresh.type='button'; refresh.className='ghost-button';
     const filter = el('select');
     for (const [value,text] of [['all','Todas'],['assignment','Por asignar o revisar'],['claim','Por reclamar'],['goal','Meta en curso']]) {
@@ -22,10 +23,10 @@
     const wrap=el('div'); wrap.className='admin-table-wrap staff-table-wrap';
     const table=el('table'), head=table.createTHead().insertRow(), rows=table.createTBody();
     table.className='admin-table';
-    for (const title of ['Integrante','Grupo de donación','Premio y categoría','Qué le falta']) {
+    for (const title of ['Integrante','Grupo de donación','Premio y categoría','Qué le falta','Acción']) {
       const th=el('th',title); th.scope='col'; head.append(th);
     }
-    wrap.append(table); host.replaceChildren(tools,status,wrap);
+    wrap.append(table); host.replaceChildren(tools,status,deliveryStatus,wrap);
 
     function render() {
       rows.replaceChildren();
@@ -42,8 +43,30 @@
         for (const value of [row.nick,row.groupName || 'Sin grupo',`${row.quantity>1?`${row.quantity} × `:''}${row.label} · ${row.category || 'Sin categoría'}`,missing]) {
           tr.insertCell().textContent=value;
         }
+        const actions=tr.insertCell();
+        if (row.canDeliver && deliver) {
+          const button=el('button','Entregar obsequio'); button.type='button'; button.className='ghost-button';
+          button.disabled=submitting;
+          button.addEventListener('click',()=>void send(row));
+          actions.append(button);
+        }
       }
       status.textContent=`${report.counts.assignment} por asignar o revisar · ${report.counts.claim} por reclamar${matching.length?'':'. Sin alertas con este filtro.'}`;
+    }
+    async function send(row) {
+      if (submitting || refresh.disabled || !root.confirm(`¿Entregar «${row.label}» a ${row.nick}?`)) return;
+      submitting=true;render();
+      deliveryStatus.textContent='Asignando obsequio…';
+      try {
+        const result=await deliver({memberId:row.memberId,periodEnd:row.periodEnd,label:row.label});
+        if (!live) return;
+        deliveryStatus.textContent=`${result.label} asignado a ${result.nick}. Ya puede reclamarlo.`;
+      } catch(error) {
+        if (live) deliveryStatus.textContent=error.message;
+      } finally {
+        submitting=false;
+        if (live) await load();
+      }
     }
     async function load() {
       if (refresh.disabled) return;
@@ -60,7 +83,7 @@
       }
     }
     filter.addEventListener('change',render);
-    refresh.addEventListener('click',load);
+    refresh.addEventListener('click',()=>{if(!submitting)void load();});
     void load();
     return ()=>{live=false;host.replaceChildren();};
   };

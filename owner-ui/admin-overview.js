@@ -96,7 +96,8 @@ if (prizeAlertsHost?.tagName === 'DIV') {
   const update=()=>{
     if (dashboard.hidden || section.hidden || !section.open) {
       unmount?.();unmount=undefined;
-    } else if (!unmount) unmount=mountPrizeAlerts(prizeAlertsHost,()=>staffApi('audit',{view:'alerts'}));
+    } else if (!unmount) unmount=mountPrizeAlerts(prizeAlertsHost,()=>staffApi('audit',{view:'alerts'}),
+      body=>staffApi('audit',{...body,view:'deliver-alert'}));
   };
   section.addEventListener('toggle',update);
   const observer=new MutationObserver(update);
