@@ -481,6 +481,33 @@
       if (!options.quiet) field("history-panel").scrollIntoView({ block: "nearest", behavior: "smooth" });
     } catch (error) { if (revision === historyRevision && session === context && visible()) field("history-status").textContent = error.message; }
   }
+  let historySummaryRevision = 0;
+  const historyPanel = field('history-panel');
+  if (historyPanel?.tagName === 'DETAILS') {
+    const refresh = field('history-refresh'), message = field('history-summary-status');
+    async function loadHistorySummary() {
+      const request = ++historySummaryRevision, session = context;
+      const current = () => request===historySummaryRevision && session===context && visible() && historyPanel.open;
+      refresh.disabled = true; message.textContent = 'Consultando acumulados…';
+      try {
+        const {rows} = await call('history',{summary:true});
+        if (!current()) return;
+        field('history-summary-rows').innerHTML = rows.map(row=>`<tr>
+          <td><button class="mini-button" type="button" data-donation-member="${escapeHtml(row.memberId)}">${escapeHtml(row.nick)}</button></td>
+          <td>${number(row.trackedTotal)}</td><td>${number(row.lastTotal)}</td><td>${escapeHtml(row.lastOn || '—')}</td>
+        </tr>`).join('');
+        message.textContent = rows.length ? `${rows.length} integrantes actuales · Rcoin` : 'Sin integrantes activos.';
+      } catch(error) {
+        if (current()) message.textContent = error.message;
+      } finally {
+        if (request===historySummaryRevision) refresh.disabled = false;
+      }
+    }
+    historyPanel.addEventListener('toggle',event=>{
+      if (event.target===historyPanel && historyPanel.open && visible()) void loadHistorySummary();
+    });
+    refresh.addEventListener('click',loadHistorySummary);
+  }
   field("template").addEventListener("click", () => operation(async current => {
     if (!field("date").value || !field("date").checkValidity()) throw new Error("Elige la fecha de revision.");
     await load(); if (!current()) return;
@@ -625,6 +652,12 @@
   });
   panel.addEventListener("toggle", () => { if (panel.open && visible() && !busy) operation(async current => { await load(); if (current()) await report(); }); });
   function reset() {
+    historySummaryRevision++;
+    if (historyPanel?.tagName === 'DETAILS') {
+      field('history-refresh').disabled = false;
+      field('history-summary-status').textContent = '';
+      field('history-summary-rows').replaceChildren();
+    }
     groupManager?.destroy();targetPicker?.destroy();groupManager=targetPicker=null;field("group-filter").innerHTML='<option value="all">Todos los grupos</option><option value="none">Sin grupo</option>';
     closeImageReport?.();closeImageReport=null;imageReport=null;
     clearTimeout(syncTimer); syncBusy = false; pendingMetadata = null;

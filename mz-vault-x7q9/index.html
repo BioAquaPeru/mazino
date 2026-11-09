@@ -239,7 +239,13 @@
               <details class="admin-subsection" data-donation-task="goals"><summary>Metas creadas y responsables</summary>
                 <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Meta</th><th>Inicio</th><th>Final</th><th>Objetivo por integrante</th><th>Creada por</th><th>Creacion (Peru)</th><th></th></tr></thead><tbody data-donation-goal-rows></tbody></table></div>
               </details>
-            <details class="admin-subsection" data-donation-history-panel data-donation-task="history"><summary>Historial del integrante</summary>
+            <details class="admin-subsection" data-donation-history-panel data-donation-task="history"><summary>Historial y acumulados</summary>
+              <h3>Acumulado por integrante</h3>
+              <p class="muted">El acumulado suma los cambios verificados desde el inicio del seguimiento. El último total es la lectura más reciente.</p>
+              <button type="button" class="ghost-button" data-donation-history-refresh>Actualizar acumulados</button>
+              <p class="muted" role="status" data-donation-history-summary-status></p>
+              <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Integrante</th><th>Donado desde el seguimiento</th><th>Último total registrado</th><th>Fecha de lectura</th></tr></thead><tbody data-donation-history-summary-rows></tbody></table></div>
+              <h3>Detalle individual</h3>
               <label><span>Integrante</span><select data-donation-history-member><option value="">Elige integrante</option></select></label>
               <h3 data-donation-history-title></h3><p class="muted" data-donation-history-status></p>
               <div data-donation-history-movements></div>
@@ -1010,8 +1016,8 @@
     <script src="/owner-ui/donations-excel.js?v=c1f3da8dc1110dbe" defer></script>
     <script src="/owner-ui/admin-coupon-excel.js?v=fd6c83e8cc081b00" defer></script>
     <script src="/equipo/ocr/loader.js?v=b8b54b07f3b1e067" defer></script>
-    <script src="/owner-ui/donation-report-image.js?v=88fa0efb408dc0b0" defer></script><script src="/owner-ui/donation-groups.js?v=b5a183a9c84c8254" defer></script>
-    <script src="/owner-ui/admin-donations.js?v=8b3cc6cc8185fdf1" defer></script>
+    <script src="/owner-ui/donation-report-image.js?v=b2f845ca3c67d7ea" defer></script><script src="/owner-ui/donation-groups.js?v=b5a183a9c84c8254" defer></script>
+    <script src="/owner-ui/admin-donations.js?v=320f9c9a5a876400" defer></script>
     <script src="/owner-ui/visitor-dashboard.js?v=6ee6ed6ef23d86f1" defer></script><script src="/owner-ui/admin-visitors.js?v=27779f0661153b12" defer></script>
     <script src="/owner-ui/admin-profile.js?v=acb61121c0257617" defer></script>
     <script src="/owner-ui/admin-help.js?v=e40dd7629c28b76a" defer></script>
