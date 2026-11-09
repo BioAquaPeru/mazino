@@ -88,3 +88,18 @@ $("[data-logout]").addEventListener("click", () => {
   $("[data-daily-date]").value = ""; $("[data-pending-search]").value = ""; $("[data-pending-days]").value = ""; $("[data-pending-membership]").value = "all";
 });
 if (!$("[data-dashboard]").hidden) refreshDailySummary();
+
+const prizeAlertsHost = document.querySelector('[data-owner-prize-alerts]');
+if (prizeAlertsHost?.tagName === 'DIV') {
+  const section=prizeAlertsHost.closest('details'), dashboard=$('[data-dashboard]');
+  let unmount;
+  const update=()=>{
+    if (dashboard.hidden || section.hidden || !section.open) {
+      unmount?.();unmount=undefined;
+    } else if (!unmount) unmount=mountPrizeAlerts(prizeAlertsHost,()=>staffApi('audit',{view:'alerts'}));
+  };
+  section.addEventListener('toggle',update);
+  const observer=new MutationObserver(update);
+  for (const target of [dashboard,section]) observer.observe(target,{attributes:true,attributeFilter:['hidden']});
+  update();
+}

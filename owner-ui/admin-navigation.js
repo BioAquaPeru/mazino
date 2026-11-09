@@ -1,6 +1,6 @@
 const adminDestinations = {
   visitors:["visitors"],spaces: ["spaces"], home: null, members: ["members"], access: ["rewards", "access"], accessRequests: ["rewards", "access-requests"], departures: ["rewards", "roster-tracking"], tracking: ["rewards", "tracking"],
-  prizes: ["rewards", "delivery"], bulk: ["rewards", "bulk"], pending: ["rewards", "pending"], assignments: ["rewards", "tracking"], inventory: ["rewards", "inventory"], renameBatch: ["rewards", "rename-batch"], import: ["rewards", "import"],
+  prizes: ["rewards", "delivery"], bulk: ["rewards", "bulk"], pending: ["rewards", "pending"], alerts: ["rewards", "alerts"], assignments: ["rewards", "tracking"], inventory: ["rewards", "inventory"], renameBatch: ["rewards", "rename-batch"], import: ["rewards", "import"],
   imageBatches: ['rewards','image-batches'],
   events: ["rewards", "events"], winners: ["rewards", "assignments"], staff: ["staff", "accounts"], pool: ["staff", "pool"], audit: ["staff", "audit"], transfers: ["staff", "transfers"],
   donations: ["donations", "results"], donationMembers: ["donations", "members"], donationUpload: ["donations", "upload"], donationCaptureBlocks: ["donations", "capture-blocks"], donationGoal: ["donations", "goal-create"], donationGoals: ["donations", "goals"], donationHistory: ["donations", "history"], donationImports: ["donations", "imports"],
@@ -10,7 +10,7 @@ const adminWorkflows = [
   { id: "home", title: "Inicio", tasks: [["home", "Resumen del dia"]] },
   {id:"visitors",title:"Visitantes y entregas",tasks:[["visitors","Resumen y entregas"]]},
   { id: "members", title: "Integrantes", tasks: [["members", "Integrantes"], ["access", "Claves de premios"], ["accessRequests", "Solicitudes de acceso"], ["departures", "Entradas y salidas"]] },
-  { id: "prizes", title: "Premios", tasks: [["prizes", "Entregar"], ["bulk", "Repartir por lote"], ["pending", "Pendientes"], ["assignments", "Entregas y seguimiento"], ["inventory", "Inventario"], ['imageBatches','Imagenes de lotes'], ["renameBatch", "Renombrar por lote"], ["import", "Cargar cupones"]] },
+  { id: "prizes", title: "Premios", tasks: [["prizes", "Entregar"], ["bulk", "Repartir por lote"], ["pending", "Pendientes"], ["alerts", "Alertas"], ["assignments", "Entregas y seguimiento"], ["inventory", "Inventario"], ['imageBatches','Imagenes de lotes'], ["renameBatch", "Renombrar por lote"], ["import", "Cargar cupones"]] },
   { id: "events", title: "Eventos", tasks: [["events", "Crear y administrar"], ["winners", "Ganadores"]] },
   { id: "donations", title: "Donaciones", tasks: [["donations", "Resultados"], ["donationMembers", "Integrantes y cambios"], ["donationUpload", "Cargar totales"], ["donationCaptureBlocks", "Cargas por captura"], ["donationGoal", "Grupos y metas"], ["donationGoals", "Metas y responsables"], ["donationHistory", "Historial"], ["donationImports", "Cargas anteriores"], ["donationRankings", "Exclusiones de tops"]] },
   { id: "staff", title: "Sublideres", tasks: [["staff", "Accesos y permisos"], ["pool", "Enviar cupos a círculos"], ["transfers", "Traspasos"], ["audit", "Actividad"]] },

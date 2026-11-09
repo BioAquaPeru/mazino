@@ -10,8 +10,48 @@ let rewardPublicBusy = false;
 const rewardDialog = document.querySelector("[data-prize-dialog]");
 let rewardImageClient = null;
 let rewardConfiguredImageScope = '';
+let memberPrizeAlert = null, prizeAlertRevision = 0;
 const prizeImageScope = () => `${typeof spaceStorageKey === 'function' ? spaceStorageKey('coupon-images') : 'main'}|${rewardApi}`;
 const prizeImageContext = () => rewardSession ? `${prizeImageScope()}|${rewardSession.token}` : null;
+function renderMemberPrizeAlert() {
+  const own = memberPrizeAlert?.token===rewardSession?.token &&
+    memberPrizeAlert?.scope===prizeImageScope() && rewardSession?.expiresAt>Date.now() ? memberPrizeAlert.memberId : null;
+  for (const card of document.querySelectorAll?.('.member-card[data-member-id], .elite-card') || []) {
+    const trigger=card.querySelector('[data-prize-open]'), badge=card.querySelector('[data-member-prize-alert]');
+    const pending=Boolean(own && trigger?.dataset.prizeOpen===own);
+    card.classList.toggle('has-member-prize-alert',pending);
+    if (!pending) badge?.remove();
+    else if (!badge) {
+      const label=document.createElement('span');
+      label.dataset.memberPrizeAlert='';
+      label.textContent='Premio por reclamar';
+      trigger.after(label);
+    }
+  }
+}
+function setMemberPrizeAlert(pending) {
+  prizeAlertRevision++;
+  memberPrizeAlert=pending && rewardSession ? {
+    token:rewardSession.token,scope:prizeImageScope(),memberId:rewardSession.member.id,
+  } : null;
+  renderMemberPrizeAlert();
+}
+async function refreshMemberPrizeAlert() {
+  if (!rewardSession || rewardSession.expiresAt<=Date.now()) {setMemberPrizeAlert(false);return;}
+  const scope=prizeImageScope(), token=rewardSession.token, revision=++prizeAlertRevision;
+  try {
+    const result=await prizeRequest('me?view=prize-alert');
+    if (revision===prizeAlertRevision && scope===prizeImageScope() && token===rewardSession?.token)
+      setMemberPrizeAlert(result.pending===true);
+  } catch { /* The existing session handler clears the marker when authorization expires. */ }
+}
+if (typeof MutationObserver==='function') {
+  const observer=new MutationObserver(renderMemberPrizeAlert);
+  for (const selector of ['[data-members]','[data-elite]']) {
+    const list=document.querySelector(selector);
+    if (list) observer.observe(list,{childList:true});
+  }
+}
 function resetPrizeImages() { rewardImageClient?.reset(); if (typeof CouponImages !== 'undefined') CouponImages.close(); }
 function prizeImageMarkup(prize) {
   return typeof CouponImages === 'undefined' || prize.hasImage === false ? '' : CouponImages.slot(prize.batchId, prize.imageVersion);
@@ -30,7 +70,7 @@ function saveRewardSession() {
 }
 
 function renderRewardIdentity() {
-  if (!rewardSession) resetPrizeImages();
+  if (!rewardSession) {resetPrizeImages();setMemberPrizeAlert(false);}
   rewardDialog.querySelector("[data-prize-login]").hidden = Boolean(rewardSession);
   rewardDialog.querySelector("[data-prize-logout]").hidden = !rewardSession;
   rewardDialog.querySelector("[data-prize-identity]").textContent = rewardSession ? `Sesion: ${rewardSession.member.nick}` : "";
@@ -65,12 +105,13 @@ async function prizeRequest(path, body) {
 }
 
 function configurePrizes(settings) {
+  const previousToken=rewardSession?.token;
   const configured = String(settings.rewardsServiceUrl || "");
   const value = configured === "https://mazino-premios.amused-field-8941.chatgpt.site" ? "https://mazino-premios.tellusengineer.chatgpt.site" : configured;
   rewardApi = /^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(value) ? value : "";
   const scope = prizeImageScope();
   if (rewardConfiguredImageScope && rewardConfiguredImageScope !== scope) {
-    rewardSession = null; rewardDialogRevision++; rewardPublicRevision++; resetPrizeImages();
+    rewardSession = null; rewardDialogRevision++; rewardPublicRevision++; resetPrizeImages();setMemberPrizeAlert(false);
     rewardDialog.querySelector('[data-personal-prizes]').innerHTML = '';
   }
   rewardConfiguredImageScope = scope;
@@ -80,6 +121,7 @@ function configurePrizes(settings) {
     if (saved?.expiresAt > Date.now() && saved.token && saved.member) rewardSession = saved;
   } catch { rewardSession = null; saveRewardSession(); }
   if (!rewardSession) resetPrizeImages();
+  else if (rewardSession.token!==previousToken) void refreshMemberPrizeAlert();
   if (typeof openMemberAccessLink === 'function') openMemberAccessLink();
 }
 
@@ -123,7 +165,11 @@ function updateEventOpening() {
   }
 }
 if (typeof setInterval === "function") {
-  setInterval(() => { if (rewardDialog.open) updateEventOpening(); }, 1000);
+  setInterval(() => {
+    if (rewardDialog.open) updateEventOpening();
+    if (memberPrizeAlert && (!rewardSession || rewardSession.expiresAt<=Date.now())) setMemberPrizeAlert(false);
+  }, 1000);
+  setInterval(() => { if (!document.hidden && rewardSession && !rewardBusy) void refreshMemberPrizeAlert(); }, 60000);
   setInterval(async () => {
     if (!rewardDialog.open || document.hidden || rewardBusy || rewardPublicBusy) return;
     rewardPublicBusy = true;
@@ -156,6 +202,7 @@ async function refreshPrizeDialog() {
   if (!rewardSession) return;
   const personal = await prizeRequest("me");
   if (!rewardDialog.open || revision !== rewardDialogRevision || session !== rewardSession?.token || imageContext !== prizeImageContext()) return;
+  setMemberPrizeAlert(personal.prizes.some(prize=>prize.status==='assigned' && !prize.eventId));
   renderPersonalDonations(personal.donations, personal.member?.nick || rewardSession.member.nick);
   container.innerHTML = personal.prizes.map((prize) => prize.code ? prizeCodeMarkup(prize, personal.instructions)
     : `<section class="prize-item">${prizeImageMarkup(prize)}<h3>${escapeHtml(prize.label)}</h3><p>Premio personal disponible</p><button class="primary-action small-action" type="button" data-personal-claim="${escapeHtml(prize.id)}">Reclamar cupon</button></section>`).join("")
@@ -249,15 +296,18 @@ rewardDialog.addEventListener("click", async (event) => {
       rewardDialog.querySelector("[data-prize-status]").textContent = "Premio guardado. Ya no aparecera en tu usuario.";
     } else if (button.hasAttribute("data-prize-logout")) {
       resetPrizeImages();
+      const token=rewardSession?.token;
       await prizeRequest("logout", {});
+      if (token===rewardSession?.token) {
+        rewardSession = null; setMemberPrizeAlert(false); resetPrizeImages(); saveRewardSession();
+      }
       if (revision !== rewardDialogRevision || !rewardDialog.open) return;
-      rewardSession = null; resetPrizeImages(); saveRewardSession();
       await refreshPrizeDialog();
     } else {
       const input = button.dataset.flashClaim ? button.closest(".prize-item").querySelector("[data-event-key]") : null;
       if (input && !/^\d{6}$/.test(input.value)) throw new Error("Escribe la clave de 6 numeros de este evento.");
       await prizeRequest("claim", button.dataset.flashClaim ? { eventId: button.dataset.flashClaim, eventKey: input?.value || "" } : { couponId: button.dataset.personalClaim });
-      if (revision !== rewardDialogRevision || !rewardDialog.open) return;
+      if (revision !== rewardDialogRevision || !rewardDialog.open) {void refreshMemberPrizeAlert();return;}
       await refreshPrizeDialog();
       rewardDialog.querySelector("[data-prize-status]").textContent = "Premio entregado. Copia tu codigo y guardalo.";
     }

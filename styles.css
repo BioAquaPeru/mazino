@@ -1398,3 +1398,6 @@ body.circle-themed { --red:var(--circle-page-accent); --muted:var(--circle-page-
 .coupon-image-viewport.is-zoomed img { width:150%; max-width:none; max-height:none; margin:0; }
 @media(max-width:600px) { .coupon-image-dialog { padding:10px; } .coupon-image-dialog header button { min-height:44px; } .batch-image-card { padding:10px; } .coupon-image-thumb { width:64px; height:64px; } }
 @media(max-width:600px) { .circle-custom-logo .logo-frame { width:80%; } .circle-themed .hero::before { background:linear-gradient(180deg,transparent 42%,var(--circle-page-bg) 70%); } }
+
+.member-card.has-member-prize-alert, .elite-card.has-member-prize-alert { border-color: #be6573; }
+[data-member-prize-alert] { display: block; margin-top: 3px; color: #ffb9c1; font-size: 0.75rem; font-weight: 600; }
