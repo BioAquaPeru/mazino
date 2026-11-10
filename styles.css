@@ -538,6 +538,7 @@ h3 {
 .event-board .section-head h2 { font-size: 1.4rem; }
 .event-board .section-head { margin-bottom: 16px; }
 .board-controls { display: flex; flex-shrink: 0; gap: 6px; }
+.board-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 12px; font-size: .85rem; color: var(--muted); }
 .board-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #51303c; background: #171013; border-radius: 4px; cursor: pointer; padding: 6px; }
 .board-icon:disabled { opacity: .4; cursor: default; }
 .board-tabs { display: flex; gap: 20px; border-bottom: 1px solid #41222c; }
@@ -546,6 +547,7 @@ h3 {
 .board-tabs span { font-size: .8rem; color: #f2d686; min-width: 1ch; }
 .board-viewport { max-height: 310px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #805263 #100b0d; border-bottom: 1px solid #41222c; }
 .board-entry { display: grid; grid-template-columns: 20px minmax(0, 1fr) minmax(170px, .6fr) auto; align-items: center; gap: 14px; padding: 18px 8px; border-bottom: 1px solid #2a1b21; min-height: 105px; }
+.board-award { grid-template-columns: 20px minmax(0, 1fr) minmax(160px, .45fr); }
 .board-entry:last-child { border-bottom: 0; }
 .board-entry-icon { opacity: .85; align-self: start; margin-top: 3px; }
 .board-entry-main { min-width: 0; }
@@ -571,6 +573,8 @@ h3 {
   .board-entry-meta { grid-column: 2; }
   .board-participate { grid-column: 2; justify-self: start; }
   .board-viewport { max-height: 310px; }
+  .board-viewport[data-board-mode="awards"] { max-height: 137px; }
+  .board-award { min-height: 136px; }
 }
 .ranking-modes { display: flex; flex-shrink: 0; border: 1px solid #54343f; border-radius: 5px; overflow: hidden; }
 .ranking-modes button { border: 0; border-radius: 0; padding: 8px 14px; background: #130e11; font: 700 .85rem Rajdhani, sans-serif; cursor: pointer; }
