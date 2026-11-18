@@ -20,6 +20,20 @@
     closeImageReport?.();closeImageReport=MazinoDonationReport.open({report:snapshot,title:typeof adminState!=="undefined"?adminState?.draft?.settings?.siteName||"MAZINO":"MAZINO",isCurrent:()=>version===context&&currentScope===scope()&&visible(),save:async rows=>{const result=await call("report-notes",{start:snapshot.start,end:snapshot.end,target:snapshot.target,goalId:snapshot.goalId,rows});snapshot.notes=result.notes;await report({quiet:true});}});
   });
   const scope = () => typeof adminCircleId === 'string' ? adminCircleId : 'main';
+  for (const button of [field('full-report'),field('history-full-report')].filter(Boolean)) button.addEventListener('click', async () => {
+    const version = context, currentScope = scope();
+    const isCurrent = () => version === context && currentScope === scope() && visible();
+    button.disabled = true;
+    status('Consultando todo el historial de donaciones…');
+    try {
+      const { rows } = await call('history', { summary:true, fullHistory:true });
+      if (!isCurrent()) return;
+      closeImageReport?.();
+      closeImageReport = MazinoDonationReport.openHistory({rows,title:typeof adminState !== 'undefined' ? adminState?.draft?.settings?.siteName || 'MAZINO' : 'MAZINO',isCurrent});
+      status(`${rows.length} integrantes con donaciones registradas en todo el historial.`);
+    } catch (error) { if (isCurrent()) status(error.message); }
+    finally { button.disabled = false; }
+  });
   const weekly = field('weekly');
   let resetWeekly = () => {};
   if (weekly?.tagName === 'DETAILS') {

@@ -8,14 +8,17 @@
   const n=Number(options.perPage);return Number.isInteger(n)&&n>=1&&n<=200?n:10;
  }
  function canvases(report,notes,title,options={}){
+  const full = report.fullHistory === true;
   const perPage=pageSize(report.entries.length,options);
   const pages=[];for(let offset=0;offset<report.entries.length;offset+=perPage){
    const rows=report.entries.slice(offset,offset+perPage),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');canvas.width=1200;ctx.font='18px Arial';
-   const prepared=rows.map(r=>{const note=notes[r.memberId]||{};const cells=[r.nick+(r.groupName?'\n'+r.groupName:''),number(r.target??report.target),number(r.donated),result(r),`${marks[note.mark||'']}${note.observation?'\n'+note.observation:''}`];const wrapped=cells.map((v,i)=>lines(ctx,v,[174,120,125,175,442][i]));return{note,wrapped,height:Math.max(44,...wrapped.map(v=>v.length*23+26))};});
-   canvas.height=215+prepared.reduce((n,r)=>n+r.height,0)+50;if(canvas.height>32000)throw Error('La hoja es demasiado larga. Elige mas hojas o menos integrantes por hoja.');ctx.fillStyle='#101116';ctx.fillRect(0,0,1200,canvas.height);ctx.fillStyle='#fff';ctx.font='bold 29px Arial';ctx.fillText(String(title||'MAZINO').slice(0,60),28,46);ctx.font='21px Arial';ctx.fillText('REPORTE DE DONACIONES',28,83);ctx.font='18px Arial';ctx.fillStyle='#c7cbd5';ctx.fillText(`${report.start} al ${report.end}  ·  ${new Set(report.entries.map(r=>r.target??report.target)).size>1?'Metas individuales por integrante':'Meta: '+number(report.entries[0]?.target??report.target)+' Rcoin'}`,28,119);ctx.fillText(`${String(report.goalTitle||'Consulta entre fechas').slice(0,65)}  ·  Pagina ${pages.length+1} de ${Math.ceil(report.entries.length/perPage)}`,28,149);
-   const xs=[28,222,363,513,710];ctx.fillStyle='#292c36';ctx.fillRect(20,171,1160,35);ctx.fillStyle='#fff';ctx.font='bold 17px Arial';['NICK','META','DONADO','RESULTADO','MARCA / OBSERVACION'].forEach((v,i)=>ctx.fillText(v,xs[i],194));let y=210;ctx.font='18px Arial';
+   const prepared=rows.map(r=>{const note=notes[r.memberId]||{};const cells=full
+    ? [r.nick,number(r.donated),number(r.lastTotal),r.lastOn||'Sin registro',r.active?'En el circulo':'Retirado']
+    : [r.nick+(r.groupName?'\n'+r.groupName:''),number(r.target??report.target),number(r.donated),result(r),`${marks[note.mark||'']}${note.observation?'\n'+note.observation:''}`];const wrapped=cells.map((v,i)=>lines(ctx,v,(full?[250,195,195,190,230]:[174,120,125,175,442])[i]));return{note,wrapped,height:Math.max(44,...wrapped.map(v=>v.length*23+26))};});
+   canvas.height=215+prepared.reduce((n,r)=>n+r.height,0)+50;if(canvas.height>32000)throw Error('La hoja es demasiado larga. Elige mas hojas o menos integrantes por hoja.');ctx.fillStyle='#101116';ctx.fillRect(0,0,1200,canvas.height);ctx.fillStyle='#fff';ctx.font='bold 29px Arial';ctx.fillText(String(title||'MAZINO').slice(0,60),28,46);ctx.font='21px Arial';ctx.fillText(full?'REPORTE COMPLETO DE DONACIONES':'REPORTE DE DONACIONES',28,83);ctx.font='18px Arial';ctx.fillStyle='#c7cbd5';ctx.fillText(full?'Todo el historial registrado · '+report.entries.length+' donantes':`${report.start} al ${report.end}  ·  ${new Set(report.entries.map(r=>r.target??report.target)).size>1?'Metas individuales por integrante':'Meta: '+number(report.entries[0]?.target??report.target)+' Rcoin'}`,28,119);ctx.fillText(`${String(full?'Acumulado verificado: '+number(report.entries.reduce((sum,r)=>sum+(r.donated||0),0))+' Rcoin':report.goalTitle||'Consulta entre fechas').slice(0,65)}  ·  Pagina ${pages.length+1} de ${Math.ceil(report.entries.length/perPage)}`,28,149);
+   const xs=full?[28,298,513,728,938]:[28,222,363,513,710];ctx.fillStyle='#292c36';ctx.fillRect(20,171,1160,35);ctx.fillStyle='#fff';ctx.font='bold 17px Arial';(full?['INTEGRANTE','DONADO','TOTAL JUEGO','ULTIMA LECTURA','SITUACION']:['NICK','META','DONADO','RESULTADO','MARCA / OBSERVACION']).forEach((v,i)=>ctx.fillText(v,xs[i],194));let y=210;ctx.font='18px Arial';
    for(const row of prepared){ctx.fillStyle=row.note.mark==='red'?'#43232b':row.note.mark==='yellow'?'#40371c':'#1b1e26';ctx.fillRect(20,y,1160,row.height-3);ctx.fillStyle=row.note.mark==='red'?'#ff7d8c':row.note.mark==='yellow'?'#ffe182':'#eef0f5';ctx.fillRect(20,y,5,row.height-3);row.wrapped.forEach((cell,i)=>cell.forEach((v,j)=>ctx.fillText(v,xs[i],y+27+j*23)));y+=row.height;}
-   ctx.fillStyle='#b5bbc9';ctx.font='15px Arial';ctx.fillText('Donado en el periodo consultado. Las marcas son decisiones manuales; no cambian el circulo.',28,canvas.height-18);pages.push(canvas);
+   ctx.fillStyle='#b5bbc9';ctx.font='15px Arial';ctx.fillText(full?'Donado suma cambios verificados. Total juego incluye el saldo observado al iniciar el seguimiento.':'Donado en el periodo consultado. Las marcas son decisiones manuales; no cambian el circulo.',28,canvas.height-18);pages.push(canvas);
   }return pages;
  }
  function downloadPages(images,prefix){
@@ -24,7 +27,8 @@
   images.forEach((url,i)=>{const a=document.createElement('a');a.href=url;a.download=`${prefix}-${String(i+1).padStart(2,'0')}.png`;document.body.append(a);a.click();a.remove();});
  }
  function open({report,title='MAZINO',canEdit=true,save,isCurrent=()=>true}){
-  if(!report?.entries?.length)throw Error('No hay integrantes en el resultado filtrado.');
+  if(!report?.entries?.length)throw Error(report?.fullHistory?'Aun no hay donaciones registradas.':'No hay integrantes en el resultado filtrado.');
+  const full=report.fullHistory===true;
   const notes=JSON.parse(JSON.stringify(report.notes||{})),dirty=new Set(),dialog=document.createElement('dialog');
   dialog.className='donation-export-dialog';dialog.setAttribute('aria-label','Reporte de donaciones');
   const style=document.createElement('style');style.textContent=`
@@ -46,15 +50,15 @@
   let busy=false,images=[],page=0,view='edit';
   const header=el('header'),close=button('Cerrar ✕');header.append(el('h2','Reporte de donaciones'),close);dialog.append(header);
   const body=el('div');body.className='donation-export-body';dialog.append(body);
-  body.append(el('p',`${title} · ${report.start} al ${report.end} · ${report.entries.length} integrantes. Marca «Omitir del reporte» para excluir a un integrante de este PNG.`));
+  body.append(el('p',full?`${title} · Todo el historial registrado · ${report.entries.length} donantes.`:`${title} · ${report.start} al ${report.end} · ${report.entries.length} integrantes. Marca «Omitir del reporte» para excluir a un integrante de este PNG.`));
   const tabs=el('div');tabs.className='donation-export-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Secciones del reporte');
-  const editTab=button('Editar observaciones'),previewTab=button('Vista previa');for(const n of [editTab,previewTab])n.setAttribute('role','tab');tabs.append(editTab,previewTab);body.append(tabs);
+  const editTab=button(full?'Ver lista':'Editar observaciones'),previewTab=button('Vista previa');for(const n of [editTab,previewTab])n.setAttribute('role','tab');tabs.append(editTab,previewTab);body.append(tabs);
   const toolbar=el('div');toolbar.className='donation-export-toolbar';
   const filter=select('Ver marcas en este reporte',[['all','Todos'],['omitted','Omitidos del reporte'],['yellow','Amarillo: en observacion'],['red','Rojo: lo retire'],['','Sin marca']]);
   const layout=select('Distribucion del reporte',[['1','1 hoja'],['2','2 hojas'],['custom','Personalizado']]);layout.value='2';
   const custom=el('input');custom.type='number';custom.min='1';custom.max='200';custom.step='1';custom.value='22';custom.setAttribute('aria-label','Integrantes por hoja');
   const customLabel=labeled('Integrantes por hoja',custom);customLabel.hidden=true;
-  toolbar.append(labeled('Ver marcas',filter),labeled('Distribucion',layout),customLabel);body.append(toolbar);
+  const markFilter=labeled('Ver marcas',filter);markFilter.hidden=full;toolbar.append(markFilter,labeled('Distribucion',layout),customLabel);body.append(toolbar);
   const list=el('div'),preview=el('div');preview.className='donation-export-preview';body.append(list,preview);
   const navigation=el('div');navigation.className='donation-export-navigation';const previous=button('Anterior'),next=button('Siguiente'),pageLabel=el('span');pageLabel.setAttribute('aria-live','polite');navigation.append(previous,pageLabel,next);const image=el('img'),empty=el('p','Elige la distribucion y pulsa Generar vista previa.');preview.append(navigation,image,empty);
   const actions=el('footer');actions.className='donation-export-actions';const status=el('p');status.className='donation-export-status';status.setAttribute('role','status');const saveButton=button('Guardar observaciones'),previewButton=button('Generar vista previa'),download=button('Descargar hoja'),downloadAll=button('Descargar todas las hojas');saveButton.hidden=!canEdit;actions.append(status,saveButton,previewButton,download,downloadAll);dialog.append(actions);
@@ -67,7 +71,9 @@
    list.replaceChildren();
    for(const row of selected()){
     const saved=notes[row.memberId]||{},block=el('section');block.className='donation-export-row';block.dataset.mark=saved.mark||'';
-    const label=el('div',row.nick);label.append(el('small',`${number(row.donated)} / ${number(row.target??report.target)} · ${result(row)}`));
+    const label=el('div',row.nick);
+    if(full){label.append(el('small','Donado: '+number(row.donated)+' Rcoin'));block.append(label,el('div','Total juego: '+number(row.lastTotal)),el('div',(row.lastOn||'Sin lectura')+' · '+(row.active?'En el circulo':'Retirado')));list.append(block);continue;}
+    label.append(el('small',`${number(row.donated)} / ${number(row.target??report.target)} · ${result(row)}`));
     const mark=select('Marca de '+row.nick,Object.entries(marks));mark.value=saved.mark||'';
     const note=el('input');note.maxLength=300;note.value=saved.observation||'';note.setAttribute('aria-label','Observacion de '+row.nick);note.placeholder='Escribe tu observacion';
     const omit=el('input');omit.type='checkbox';omit.checked=Boolean(saved.omitted);omit.style.cssText='width:auto;min-height:0;margin-left:8px';
@@ -92,8 +98,12 @@
   downloadAll.onclick=()=>{try{if(!isCurrent())throw Error('Vuelve a abrir el reporte de esta sesion.');if(busy||!images.length)return;downloadPages(images,`donaciones-${report.start}-${report.end}`);status.textContent=`Se solicitaron ${images.length} descargas PNG. Si falta alguna hoja, permite varias descargas en tu navegador y vuelve a pulsar el boton.`;}catch(e){status.textContent=e.message;}};
   saveButton.onclick=async()=>{if(busy)return;if(!dirty.size){status.textContent='No hay cambios pendientes.';return;}busy=true;saveButton.disabled=previewButton.disabled=editTab.disabled=previewTab.disabled=filter.disabled=layout.disabled=custom.disabled=true;download.disabled=downloadAll.disabled=true;list.querySelectorAll('input,select').forEach(n=>n.disabled=true);try{if(!isCurrent())throw Error('La sesion o el circulo cambio. Vuelve a abrir el reporte.');await save([...dirty].map(memberId=>({memberId,...notes[memberId]})));if(!isCurrent())return;dirty.clear();status.textContent='Observaciones guardadas. El historial y los totales se conservan.';}catch(e){status.textContent=e.message;}finally{busy=false;saveButton.disabled=previewButton.disabled=editTab.disabled=previewTab.disabled=filter.disabled=layout.disabled=custom.disabled=false;list.querySelectorAll('input,select').forEach(n=>n.disabled=!canEdit);showPage();}};
   const requestClose=()=>{if(busy){status.textContent='Espera a que termine de guardar.';return;}if(dirty.size&&!root.confirm('Hay observaciones sin guardar. ¿Cerrar y descartar estos cambios?'))return;dialog.close();};
-  close.onclick=requestClose;dialog.oncancel=e=>{e.preventDefault();requestClose();};dialog.onclose=()=>dialog.remove();document.body.append(dialog);render();showPage();changeView('edit');dialog.showModal();return()=>dialog.close();
+  close.onclick=requestClose;dialog.oncancel=e=>{e.preventDefault();requestClose();};dialog.onclose=()=>dialog.remove();document.body.append(dialog);render();showPage();changeView('edit');dialog.showModal();if(full)generate();return()=>dialog.close();
  }
 
- root.MazinoDonationReport={open,canvases,pageSize,downloadPages,result,marks};
+ function openHistory({rows,...options}) {
+  const entries=rows.map(row=>({...row,donated:row.trackedTotal}));
+  return open({...options,canEdit:false,report:{fullHistory:true,entries,start:'completo',end:'historial'}});
+ }
+ root.MazinoDonationReport={open,openHistory,canvases,pageSize,downloadPages,result,marks};
 })(typeof window==='undefined'?globalThis:window);
