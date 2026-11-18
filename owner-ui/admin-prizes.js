@@ -81,6 +81,9 @@ function renderRewardDelivery() {
   $("[data-delivery-quantity]").max = String(Math.min(50, items.get(select.value)?.count || 1));
   const member = rewardAdminState.members.find((entry) => entry.active && entry.id === $("[data-reward-member]").value);
   $("[data-reward-access-title]").textContent = member ? `Acceso de premios de ${member.nick}` : "Acceso del integrante elegido";
+  const accessToggle = $("[data-reward-disable]");
+  accessToggle.textContent = member?.hasPassword && !member.loginEnabled ? "Reanudar acceso" : "Pausar acceso";
+  accessToggle.disabled = !member || !member.hasPassword;
   $("[data-coupon-assign]").textContent = member ? `Asignar seleccionados a ${member.nick}` : "Elige destinatario arriba";
   $("[data-coupon-assign]").disabled = !member;
   try {
@@ -542,8 +545,12 @@ document.addEventListener("click", async (event) => {
       const result = await rewardAdminAction("members"); rewardStatus(`${result.count} integrantes actualizados en el servicio.`);
     } else if (button.hasAttribute("data-reward-disable")) {
       if (!memberId) throw new Error("Elige un integrante.");
+      const member = rewardAdminState.members.find(entry => entry.id === memberId);
+      if (!member?.hasPassword) throw new Error("Genera primero el enlace de acceso de este integrante.");
       clearRewardCredential();
-      await rewardAdminAction("disable", { memberId }); rewardStatus("Acceso a premios pausado.");
+      const action = member.loginEnabled ? "disable" : "enable";
+      await rewardAdminAction(action, { memberId });
+      rewardStatus(action === "enable" ? "Acceso a premios reanudado. Ya puede ingresar con su clave actual." : "Acceso a premios pausado.");
     } else if (button.hasAttribute("data-coupon-assign")) {
       const member = rewardAdminState.members.find((entry) => entry.active && entry.id === memberId);
       if (!member) throw new Error("Elige quien recibira el cupon en Entregar a.");
